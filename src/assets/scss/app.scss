@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+$primary-color: #247fff;
+
+.text-primary {
+    color: $primary-color;
+}
