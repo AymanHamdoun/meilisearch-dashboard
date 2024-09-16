@@ -12,7 +12,14 @@ export default [
     }
   },
   {files: ["**/*.{js,mjs,cjs,jsx}"]},
-  {languageOptions: { globals: globals.browser }},
+  {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node, // Include Node.js globals
+      },
+    },
+  },
   pluginJs.configs.recommended,
   pluginReact.configs.flat.recommended,
 ];
