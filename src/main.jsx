@@ -4,9 +4,15 @@ import { createRoot } from 'react-dom/client'
 import './assets/scss/app.scss'
 
 import App from './components/App.jsx'
+import {setupMocks} from "./mocks.js";
+import {AuthProvider} from "./contexts/AuthContext.jsx";
+
+setupMocks()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+        <App />
+    </AuthProvider>
   </StrictMode>,
 )

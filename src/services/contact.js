@@ -20,14 +20,13 @@ const API_URL = process.env.API_HOST + "/api/v1/contact";
  * @returns Promise<ContactFormApiResponse>
  */
 export const send_contact_form_message = (data) => {
-    console.log("sending", API_URL, data);
-
     return fetch(API_URL, {
         method: "POST",
         credentials: "include",
         body: JSON.stringify({
+            name: data.name,
             email: data.email,
-            password: data.password,
+            message: data.message,
         }),
         headers: {
             "Content-Type": "application/json",
