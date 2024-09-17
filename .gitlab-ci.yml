@@ -1,0 +1,19 @@
+stages:
+  - test
+
+# This folder is cached between builds
+# https://docs.gitlab.com/ee/ci/yaml/index.html#cache
+cache:
+  paths:
+    - node_modules/
+
+build_image:
+  # Use a Node.js image to run npm commands
+  image: node:18
+  stage: test
+  only:
+    - merge_request
+  script:
+    - npm install
+    - npm run lint
+    - npm run test
