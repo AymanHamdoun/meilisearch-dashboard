@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "page": {
+    "home": {
+      "title": "Home Page"
+    }
+  }
+}

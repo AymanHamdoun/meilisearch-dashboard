@@ -6,6 +6,7 @@ import './assets/scss/app.scss'
 import App from './components/App.jsx'
 import {setupMocks} from "./mocks.js";
 import {AuthProvider} from "./contexts/AuthContext.jsx";
+import './i18n'; // Import the i18n configuration
 
 setupMocks()
 
