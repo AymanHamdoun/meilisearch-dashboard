@@ -24,7 +24,13 @@ i18n
 
         interpolation: {
             escapeValue: false, // React already safes from XSS
-        }
+        },
+
+        detection: {
+            // Options for language detection
+            order: ['localStorage', 'navigator'],
+            caches: ['localStorage'], // Store the selected language in localStorage
+        },
     });
 
 export default i18n;
