@@ -7,6 +7,8 @@ import AuthContext from "../../../contexts/AuthContext.jsx";
 import { logout } from "../../../services/auth.js";
 import { AuthAction } from "../../../reducers/authReducer.js";
 
+export const PAGE_ID_HOMEPAGE = 'home-page';
+
 const Page = () => {
     const { authState, dispatch } = useContext(AuthContext);
     const { t } = useTranslation();
@@ -20,7 +22,7 @@ const Page = () => {
     };
 
     return (
-        <div id="pageHome" className="p-5 flex flex-col items-center">
+        <div data-testid={PAGE_ID_HOMEPAGE} id="pageHome" className="p-5 flex flex-col items-center">
             <h3 className="font-bold text-4xl text-gray-700">{t('page.home.title')}</h3>
             {(authState.authenticated ?
                 <LoggedInSection t={t} authState={authState} handleLogout={handleLogout}/> :
