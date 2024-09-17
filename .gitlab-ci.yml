@@ -7,7 +7,7 @@ cache:
   paths:
     - node_modules/
 
-build_image:
+lint_and_test:
   # Use a Node.js image to run npm commands
   image: node:18
   stage: test
