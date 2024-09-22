@@ -1,8 +1,8 @@
-import React, {useContext, useState} from "react";
+import React, {useState} from "react";
 import {authenticate} from "../../../services/auth.js";
-import AuthContext from "../../../contexts/AuthContext.jsx";
 import {AuthAction} from "../../../reducers/authReducer.js";
 import {Navigate} from "react-router-dom";
+import {useAuth} from '../../../hooks/useAuth.js'
 
 /**
  * @typedef {Object} LoginFormData
@@ -22,7 +22,7 @@ const LoginForm = () => {
      */
     const [isLoading, setIsLoading] = useState(false);
 
-    const {authState, dispatch} = useContext(AuthContext);
+    const {authState, dispatch} = useAuth();
 
     /**
      * The form data state.
