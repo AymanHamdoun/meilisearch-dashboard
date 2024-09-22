@@ -13,6 +13,9 @@ export default [
   },
   {files: ["**/*.{js,mjs,cjs,jsx}"]},
   {
+    ignores: ["dist/"]
+  },
+  {
     languageOptions: {
       globals: {
         ...globals.browser,
