@@ -2,7 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-$primary-color: #247fff;
+$primary-color: #FF5380;
+
+$content-bg-color: #fffafc;
+
+.bg-content {
+    background-color: $content-bg-color;
+}
 
 .text-primary {
     color: $primary-color;
