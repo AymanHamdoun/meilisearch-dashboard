@@ -8,10 +8,19 @@ const DashboardIcon = <svg className="w-5 h-5 text-gray-500 transition duration-
 
 const IndexIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-server "><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
 
+const DownCaretIcon = <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+</svg>
+
 
 const sideBarLinks = [
-    { label: "Dashboard", link: "/", icon: DashboardIcon },
-    { label: "Index", link: "/", icon: IndexIcon },
+    { key: "s-1", label: "Dashboard", link: "/", icon: DashboardIcon, children: [] },
+    { key: "s-2", label: "Index", link: "/", icon: IndexIcon, children: [] },
+    {
+        key: "s-3", label: "Parent", link: "/", icon: IndexIcon, children: [
+            { key: "s-4", label: "Child", link: "/", icon: IndexIcon, children: [] },
+        ]
+    },
 ]
 
 const SideBar = () => {
@@ -29,28 +38,6 @@ const SideBar = () => {
                     {sideBarLinks.map((sideBarLink) => {
                         return <DynamicSideBarLink sideBarLink={sideBarLink} />
                     })}
-                    <li>
-                        <button type="button" className="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
-                            <svg className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
-                                <path d="M15 12a1 1 0 0 0 .962-.726l2-7A1 1 0 0 0 17 3H3.77L3.175.745A1 1 0 0 0 2.208 0H1a1 1 0 0 0 0 2h.438l.6 2.255v.019l2 7 .746 2.986A3 3 0 1 0 9 17a2.966 2.966 0 0 0-.184-1h2.368c-.118.32-.18.659-.184 1a3 3 0 1 0 3-3H6.78l-.5-2H15Z" />
-                            </svg>
-                            <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">E-commerce</span>
-                            <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                            </svg>
-                        </button>
-                        <ul id="dropdown-example" className="hidden py-2 space-y-2">
-                            <li>
-                                <a href="#" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Products</a>
-                            </li>
-                            <li>
-                                <a href="#" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Billing</a>
-                            </li>
-                            <li>
-                                <a href="#" className="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Invoice</a>
-                            </li>
-                        </ul>
-                    </li>
                 </ul>
             </div>
         </aside>
@@ -60,6 +47,32 @@ const SideBar = () => {
 export default SideBar;
 
 const DynamicSideBarLink = ({ sideBarLink }) => {
+    if (sideBarLink.children.length > 0) {
+        const dropdownID = "sidebar-dropdown-" + sideBarLink.key
+        return <li>
+            <button type="button"
+                className="flex items-center w-full p-2 text-gray-500 hover:text-primary transition duration-75 rounded-lg group"
+                aria-controls={dropdownID}
+                data-collapse-toggle={dropdownID}>
+                {sideBarLink.icon}
+                <span className="flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{sideBarLink.label}</span>
+                {DownCaretIcon}
+            </button>
+            <ul id={dropdownID} className="hidden bg-gray-50 transition duration-75 py-2 space-y-2">
+                {sideBarLink.children.map((childLink) => {
+                    return <li>
+                        <Link to={childLink.link}
+                            className="flex items-center p-2 text-gray-500 hover:text-primary rounded-lg group"
+                        >
+                            {childLink.icon}
+                            <span className="ms-3">{childLink.label}</span>
+                        </Link>
+                    </li>
+                })}
+            </ul>
+        </li>
+    }
+
     return <li>
         <Link to={sideBarLink.link}
             className="flex items-center p-2 text-gray-500 hover:text-primary rounded-lg group"
