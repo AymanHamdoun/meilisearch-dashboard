@@ -28,7 +28,9 @@ const meiliIndexReducer = (state, action) => {
              */
             const meiliIndexState = action.payload;
             localStorage.setItem("indexes", JSON.stringify(meiliIndexState));
-            return meiliIndexState;
+            return {
+                ...action.payload
+            };
         }
         case MeiliIndexAction.Change: {
             /**
@@ -38,7 +40,9 @@ const meiliIndexReducer = (state, action) => {
             const meiliIndexState = state;
             meiliIndexState.selectedIndex = action.payload;
             localStorage.setItem("indexes", JSON.stringify(meiliIndexState));
-            return meiliIndexState;
+            return {
+                ...meiliIndexState
+            };
         }
         default:
             return state;

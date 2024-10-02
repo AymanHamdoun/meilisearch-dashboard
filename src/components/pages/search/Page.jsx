@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { basicSearch } from "../../../services/meilisearch/search"
 import useDebouncedValue from "../../../hooks/useDebounce"
 import Navbar from "../../Navbar"
+import useMeiliMeiliIndex from "../../../hooks/useMeiliIndex";
 
 const Page = () => {
     return <div className="bg-content p-4 sm:ml-64">

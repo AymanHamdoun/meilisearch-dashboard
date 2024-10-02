@@ -103,8 +103,6 @@ const InstanceDropdown = () => {
 const IndexDropdown = () => {
     const { meiliIndexState, dispatch } = useMeiliMeiliIndex()
 
-    useEffect(() => { }, [meiliIndexState.selectedIndex])
-
     return <div className="flex flex-row gap-5 items-center">
         <label className="text-sm text-gray-500" htmlFor="">INDEX</label>
         <select name="deployment"

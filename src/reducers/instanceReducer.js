@@ -27,7 +27,9 @@ const instanceReducer = (state, action) => {
              */
             const instanceState = action.payload;
             localStorage.setItem("instance", JSON.stringify(instanceState));
-            return instanceState;
+            return {
+                ...instanceState
+            };
         }
         default:
             return state;

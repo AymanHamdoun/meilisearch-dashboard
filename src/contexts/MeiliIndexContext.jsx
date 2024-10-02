@@ -64,7 +64,9 @@ export const MeiliIndexProvider = ({ children }) => {
             }
         };
 
-        getIndexes();
+        if (meiliIndexState.availableIndexes.length === 0 || meiliIndexState.selectedIndex === '') {
+            getIndexes();
+        }
     }, []); // Empty dependency array ensures this runs only once on component mount
 
 

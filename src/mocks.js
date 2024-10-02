@@ -27,12 +27,12 @@ export const setupMocks = () => {
         });
     }
 
-    for (const [apiUrl, mockedResponse] of Object.entries(meiliAPIsToMock)) {
-        const fullApiUrl = process.env.MEILI_HOST + apiUrl
+    for (const [meiliApiUrl, meiliMockedResponse] of Object.entries(meiliAPIsToMock)) {
+        const fullApiUrl = process.env.MEILI_HOST + meiliApiUrl
         // Intercept API calls and provide mock responses
         fetchMock.mock(fullApiUrl, {
             status: 200,
-            body: mockedResponse,
+            body: meiliMockedResponse,
         });
     }
 };
