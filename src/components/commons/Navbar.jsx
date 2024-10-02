@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import useMeiliInstance from '../hooks/useMeiliInstance'
-import useMeiliMeiliIndex from '../hooks/useMeiliIndex'
-import { MeiliIndexAction } from "../reducers/meiliIndexReducer";
+import useMeiliInstance from '../../hooks/useMeiliInstance'
+import useMeiliMeiliIndex from '../../hooks/useMeiliIndex'
+import { MeiliIndexAction } from "../../reducers/meiliIndexReducer";
 
 /**
  * Navbar component that renders the logged-in Navbar.

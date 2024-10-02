@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {authenticate} from "../../../services/auth.js";
 import {AuthAction} from "../../../reducers/authReducer.js";
-import {Navigate} from "react-router-dom";
+import {Navigate, useNavigate} from "react-router-dom";
 import {useAuth} from '../../../hooks/useAuth.js'
 
 /**
@@ -22,7 +22,9 @@ const LoginForm = () => {
      */
     const [isLoading, setIsLoading] = useState(false);
 
-    const {authState, dispatch} = useAuth();
+    const {dispatch} = useAuth();
+
+    const navigate = useNavigate()
 
     /**
      * The form data state.
@@ -60,16 +62,13 @@ const LoginForm = () => {
                 return;
             }
             dispatch({type: AuthAction.Login, payload: response.data});
+            navigate("/instance/")
         } catch (error) {
             console.error('Error sending message:', error);
         } finally {
             setIsLoading(false);
         }
     };
-
-    if (authState.authenticated) {
-        return <Navigate to={"/"}/>
-    }
 
     return <form onSubmit={handleSubmit}>
         <div className={"flex flex-col"}>

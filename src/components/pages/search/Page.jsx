@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { basicSearch } from "../../../services/meilisearch/search"
 import useDebouncedValue from "../../../hooks/useDebounce"
-import Navbar from "../../Navbar"
-import useMeiliMeiliIndex from "../../../hooks/useMeiliIndex";
+import useMeiliIndex from "../../../hooks/useMeiliIndex"
 
 const Page = () => {
-    return <div className="bg-content p-4 sm:ml-64">
-        <Navbar />
-        <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
-            <IndexStats />
-            <SearchWidget />
-        </div>
+    return <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
+        <IndexStats />
+        <SearchWidget />
     </div>
 }
 
@@ -35,8 +31,10 @@ const IndexStats = () => {
     </div>
 }
 const SearchWidget = () => {
+    const { meiliIndexState } = useMeiliIndex()
+    const index = meiliIndexState.selectedIndex
+    
     const [query, setQuery] = useState("")
-    const index = "cars_lb"
     const [hits, setHits] = useState([])
 
     const debouncedSearchTerm = useDebouncedValue(query, 100);
@@ -44,6 +42,7 @@ const SearchWidget = () => {
 
     useEffect(() => {
         if (debouncedSearchTerm.length == 0) {
+            setHits([])
             return
         }
 
@@ -75,16 +74,21 @@ const SearchWidget = () => {
 
 const SearchHits = ({ hits }) => {
     return <div className="flex flex-col mb-6">
-        {hits.map((hit) => {
-            return <div className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg">
-                {Object.keys(hit).map((key) => {
-                    return <div className="md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
+        {hits.map((hit, i) => {
+            return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg">
+                {Object.keys(hit).map((key, j) => {
+                    return <div key={j} className="md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
                         <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-bold">{key}</div>
                         <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0">{hit[key]}</div>
                     </div>
                 })}
             </div>
         })}
+        {hits.length === 0 ? 
+            <div className="flex items-center justify-center min-h-96">
+                No Hits
+            </div>
+        : <></>}
     </div>
 }
 
