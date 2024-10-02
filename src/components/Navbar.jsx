@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
+import useMeiliInstance from '../hooks/useMeiliInstance'
+import useMeiliMeiliIndex from '../hooks/useMeiliIndex'
+import { MeiliIndexAction } from "../reducers/meiliIndexReducer";
 
 /**
  * Navbar component that renders the logged-in Navbar.
@@ -10,18 +13,8 @@ const Navbar = () => {
         <div className="px-3 py-3 lg:px-5 lg:pl-3">
             <div className="flex items-center justify-between">
                 <div className="flex flex-row gap-3">
-                    <div className="flex flex-row gap-5 items-center">
-                        <label className="text-sm text-gray-500" htmlFor="">CLUSTER</label>
-                        <select name="deployment" id="" value={"personal"} className={"text-primary"}>
-                            <option value="personal">Personal</option>
-                        </select>
-                    </div>
-                    <div className="flex flex-row gap-5 items-center">
-                        <label className="text-sm text-gray-500" htmlFor="">INDEX</label>
-                        <select name="deployment" id="" value={"personal"} className={"text-primary"}>
-                            <option value="personal">Cars</option>
-                        </select>
-                    </div>
+                    <InstanceDropdown />
+                    <IndexDropdown />
                 </div>
                 <div className="flex items-center justify-start rtl:justify-end">
                     <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar" type="button" className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
@@ -32,7 +25,7 @@ const Navbar = () => {
                     </button>
                 </div>
                 <div className="flex items-center">
-                    <UserMenu/>
+                    <UserMenu />
                 </div>
             </div>
         </div>
@@ -78,5 +71,52 @@ const UserMenu = () => {
                 </li>
             </ul>
         </div>
+    </div>
+}
+
+/**
+ * InstanceDropdown 
+ * @returns {JSX.Element}
+ */
+const InstanceDropdown = () => {
+        /**
+     * The form data state.
+     * @type {InstanceState}
+     */
+    const { instanceState } = useMeiliInstance()
+    return <div className="flex flex-row gap-5 items-center">
+        <label className="text-sm text-gray-500" htmlFor="">CLUSTER</label>
+        <select name="deployment" id="" 
+            value={instanceState.label} 
+            onChange={() => {}}
+            className={"text-primary"}>
+            <option value={instanceState.label}>{instanceState.label}</option>
+            <option value="add">Switch To Instance</option>
+        </select>
+    </div>
+}
+
+/**
+ * IndexDropdown 
+ * @returns {JSX.Element}
+ */
+const IndexDropdown = () => {
+    const { meiliIndexState, dispatch } = useMeiliMeiliIndex()
+
+    useEffect(() => { }, [meiliIndexState.selectedIndex])
+
+    return <div className="flex flex-row gap-5 items-center">
+        <label className="text-sm text-gray-500" htmlFor="">INDEX</label>
+        <select name="deployment"
+            className={"text-primary"}
+            value={meiliIndexState.selectedIndex}
+            onChange={(e) => {
+                dispatch({ type: MeiliIndexAction.Change, payload: e.target.value })
+            }}
+        >
+            {meiliIndexState.availableIndexes.map((indexUID) => {
+                return <option key={indexUID} value={indexUID}>{indexUID}</option>
+            })}
+        </select>
     </div>
 }
