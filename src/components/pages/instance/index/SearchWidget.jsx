@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 
-import { basicSearch } from "../../../services/meilisearch/search"
-import useDebouncedValue from "../../../hooks/useDebounce"
-import useMeiliIndex from "../../../hooks/useMeiliIndex"
+import { basicSearch } from "../../../../services/meilisearch/search"
+import useDebouncedValue from "../../../../hooks/useDebounce"
+import useMeiliIndex from "../../../../hooks/useMeiliIndex"
 
 const SearchWidget = () => {
     const { meiliIndexState } = useMeiliIndex()

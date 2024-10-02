@@ -1,10 +1,13 @@
 import React from 'react'
 import {BrowserRouter, Route, Routes} from 'react-router-dom'
-import DashboardHomePage from './pages/DashboardHomePage.jsx'
-import LoginPage from './pages/login/Page.jsx'
-import IndexPage from './pages/search/Page.jsx'
+
 import DashboardLayout from './layouts/DashboardLayout.jsx'
 import BasicLayout from './layouts/AuthLayout.jsx'
+
+import OverviewPage from './pages/instance/OverviewPage'
+import IndexPage from './pages/instance/index/Page.jsx'
+
+import LoginPage from './pages/login/Page.jsx'
 
 const App = () => {
   return (
@@ -16,7 +19,7 @@ const App = () => {
           </Route>
 
           <Route path="/instance/" element={<DashboardLayout />}>
-            <Route index element={<DashboardHomePage />} /> 
+            <Route index element={<OverviewPage />} /> 
             <Route path="index" element={<IndexPage />} /> 
           </Route>
       </Routes>

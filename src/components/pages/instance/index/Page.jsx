@@ -1,6 +1,6 @@
 import React from "react";
-import IndexTabs from "./IndexTabs";
 
+import IndexTabs from "./IndexTabs";
 
 const Page = () => {
     return <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
