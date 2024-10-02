@@ -20,7 +20,7 @@ const DownCaretIcon = <svg className="w-3 h-3" aria-hidden="true" xmlns="http://
  * @type {Array.<SideBarLink>} sideBarLinks
  */
 const sideBarLinks = [
-    { key: "s-1", label: "Dashboard", link: "/", icon: DashboardIcon, children: [] },
+    { key: "s-1", label: "Dashboard", link: "/instance", icon: DashboardIcon, children: [] },
     { key: "s-2", label: "Index", link: "/instance/index", icon: IndexIcon, children: [] },
     {
         key: "s-3", label: "Parent", link: "/", icon: IndexIcon, children: [
