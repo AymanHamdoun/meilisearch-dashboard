@@ -43,7 +43,7 @@ const SideBar = () => {
         <aside id="default-sidebar"
             className="fixed top-0 left-0 z-40 w-64 pt-5 h-screen transition-transform -translate-x-full sm:translate-x-0 border-r border-r-gray-200" aria-label="Sidebar">
             <div className="h-full px-0 pb-4 overflow-y-auto bg-white">
-                <div className="flex flex-col mb-5 pb-5 border-b border-b-gray-200">
+                <div className="flex flex-col mb-5 pb-5 pl-3 border-b border-b-gray-200">
                     <div className="flex flex-row items-center">
                         <img src="/img/meili-logo.svg" className="h-8 me-3" alt="FlowBite Logo" />
                         <span className="text-primary tracking-widest">SEARCH</span>

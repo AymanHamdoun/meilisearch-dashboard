@@ -49,11 +49,13 @@ const SearchWidget = () => {
 const SearchHits = ({ hits }) => {
     return <div className="flex flex-col mb-6">
         {hits.map((hit, i) => {
-            return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg">
+            return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg relative">
+                <span className="absolute top-4 left-4 text-sm rounded-3xl bg-faint-primary font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{i+1}</span>
+
                 {Object.keys(hit).map((key, j) => {
                     return <div key={j} className="md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
-                        <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-bold">{key}</div>
-                        <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0">{hit[key]}</div>
+                        <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-semibold">{key}</div>
+                        <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500">{hit[key]}</div>
                     </div>
                 })}
             </div>

@@ -11,7 +11,7 @@ const tabs = [
     },
     {
         key: "settings",
-        label: "Settings",
+        label: "Configuration",
         element: <IndexSettingsTabs />
     },
 ];
