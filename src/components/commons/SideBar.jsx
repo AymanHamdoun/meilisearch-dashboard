@@ -22,13 +22,13 @@ const DownCaretIcon = <svg className="w-3 h-3" aria-hidden="true" xmlns="http://
 const sideBarLinks = [
     { key: "s-1", label: "Dashboard", link: "/instance", icon: DashboardIcon, children: [] },
     { key: "s-2", label: "Index", link: "/instance/index", icon: IndexIcon, children: [] },
-    { key: "s-3", label: "Tasks", link: "/instance", icon: IndexIcon, children: [] },
-    { key: "s-4", label: "Snapshots", link: "/instance", icon: IndexIcon, children: [] },
-    { key: "s-5", label: "Dumps", link: "/instance", icon: IndexIcon, children: [] },
+    { key: "s-3", label: "Tasks", link: "/instance/tasks", icon: IndexIcon, children: [] },
+    { key: "s-4", label: "Snapshots", link: "/instance/snapshots", icon: IndexIcon, children: [] },
+    { key: "s-5", label: "Dumps", link: "/instance/dumps", icon: IndexIcon, children: [] },
     {
-        key: "s-6", label: "Settings", link: "/instance", icon: IndexIcon, children: [
-            { key: "s-7", label: "API Keys", link: "/instance", icon: IndexIcon, children: [] },
-            { key: "s-8", label: "Experimental Features", link: "/instance", icon: IndexIcon, children: [] },
+        key: "s-6", label: "Settings", link: "#", icon: IndexIcon, children: [
+            { key: "s-7", label: "API Keys", link: "/instance/keys", icon: IndexIcon, children: [] },
+            { key: "s-8", label: "Experimental Features", link: "/instance/experimental", icon: IndexIcon, children: [] },
         ]
     },
 ]

@@ -6,6 +6,7 @@ import BasicLayout from './layouts/AuthLayout.jsx'
 
 import OverviewPage from './pages/instance/OverviewPage'
 import IndexPage from './pages/instance/index/Page.jsx'
+import TasksPage from './pages/instance/tasks/Page.tsx'
 
 import LoginPage from './pages/login/Page.jsx'
 
@@ -21,6 +22,7 @@ const App = () => {
           <Route path="/instance/" element={<DashboardLayout />}>
             <Route index element={<OverviewPage />} /> 
             <Route path="index" element={<IndexPage />} /> 
+            <Route path="tasks" element={<TasksPage />} /> 
           </Route>
       </Routes>
     </BrowserRouter>

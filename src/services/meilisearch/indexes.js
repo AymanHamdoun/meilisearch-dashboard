@@ -1,4 +1,4 @@
-const MASTER_KEY = "jbk3h3v32ghjbkrhv423bj4khv3bk2h3v2bjk3h2jv3bkj2"
+const MASTER_KEY = "jbk3h3v32ghjbkrhv423bj4khv3bk2h3v2bjk3h2jv3bkj2" 
 
 const listIndexes = () => {
     const host = process.env.MEILI_HOST

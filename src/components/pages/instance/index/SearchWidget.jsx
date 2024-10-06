@@ -3,9 +3,12 @@ import React, { useEffect, useState } from "react";
 import { basicSearch } from "../../../../services/meilisearch/search"
 import useDebouncedValue from "../../../../hooks/useDebounce"
 import useMeiliIndex from "../../../../hooks/useMeiliIndex"
+import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 
 const SearchWidget = () => {
     const { meiliIndexState } = useMeiliIndex()
+    const { instanceState } = useMeiliInstance()
+
     const index = meiliIndexState.selectedIndex
     
     const [query, setQuery] = useState("")
@@ -20,7 +23,7 @@ const SearchWidget = () => {
             return
         }
 
-        basicSearch(index, debouncedSearchTerm).then(resp => {
+        basicSearch(instanceState.key, index, debouncedSearchTerm).then(resp => {
             if (resp == undefined) {
                 return
             }
