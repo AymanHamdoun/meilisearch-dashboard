@@ -15,6 +15,8 @@ const meiliAPIsToMock = {
 }
 
 export const setupMocks = () => {
+    fetchMock.config.fallbackToNetwork = true;
+
     // Check the environment variable
     if (process.env.MOCK_API === 'true') {
         for (const [apiUrl, mockedResponse] of Object.entries(apisToMock)) {
@@ -46,10 +48,4 @@ export const setupMocks = () => {
             });
         }
     }
-
-    // Catch all unmatched requests
-    fetchMock.catch({
-        status: 404,
-        body: { message: 'Not found', hits: [] }
-    });
 };

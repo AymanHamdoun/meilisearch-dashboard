@@ -13,9 +13,9 @@ import instanceReducer from "../reducers/instanceReducer";
  * @type {InstanceState}
  */
 export const _defaultState = {
-    label: "local",
-    host: "http://localhost:7700",
-    key: ""
+    label: "anghami",
+    host: "https://meilisearch.internal.angha.me",
+    key: "3SsjIXd1CvKfpIU-EV7RqkF8J7wM1gOVo4lC1WwnKy8"
 }
 
 const InstanceContext = createContext({

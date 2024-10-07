@@ -1,5 +1,4 @@
-import { string } from "prop-types"
-
+import { number, string } from "prop-types"
 
 export interface GetTaskResponse {
     results: _api_task_object[]
