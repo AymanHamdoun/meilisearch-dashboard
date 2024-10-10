@@ -1,21 +1,19 @@
 import React, { useEffect } from "react";
 import { initFlowbite } from 'flowbite';
 
-export const TaskStatusBadge = ({ status, label, colorClassPrefix, rounded }) => {
+export const TaskStatusBadge = ({ status, label, rounded }) => {
     const statusClassMap = {
-        enqueued: "blue-100",
-        processing: "yellow-100",
-        succeeded: "green-100",
-        failed: "red-100",
-        canceled: "orange-100"
+        enqueued: "bg-blue-100",
+        processing: "bg-yellow-100",
+        succeeded: "bg-green-100",
+        failed: "bg-red-100",
+        canceled: "bg-orange-100"
     }
 
-    let bgColorClass = "red-100"
+    let bgColorClass = "bg-red-100"
     if (statusClassMap[status] !== undefined) {
         bgColorClass = statusClassMap[status]
     }
-
-    bgColorClass = `${colorClassPrefix}-${bgColorClass}`;
 
     const roundedClass = rounded ? 'rounded-md' : ''
 
@@ -27,7 +25,9 @@ export const TaskDetails = ({ details }) => {
         {Object.keys(details).map((key, j) => {
             return <div key={j} className="md:flex sm:flex md:flex-row sm:flex-col p-1 border-b border-b-gray-200 last:border-b-0">
                 <div className="md:pr-2 sm:w-full sm:pr-0">{key}</div>
-                <div className="md:pl-2 sm:w-full sm:pl-0 text-gray-500">{details[key]}</div>
+                <div className="md:pl-2 sm:w-full sm:pl-0 text-gray-500">
+                    {typeof details[key] === 'object' ? JSON.stringify(details[key]) : details[key]}
+                </div>
             </div>
         })}
     </div>

@@ -48,14 +48,9 @@ const Page = () => {
         <h1 className="text-3xl font-semibold mb-3">Tasks</h1>
         <div className="flex flex-row justify-between items-end gap-3 mb-3">
             <div>
-            <span className={`border-b border-b-gray-200 px-2 py-1`}>{paginationData.total} Total</span>
+            <span className={`text-gray-600 px-2 py-1`}>{paginationData.total} Total</span>
             {Object.keys(taskStats).map((status) => {
-                return <TaskStatusBadge key={"status-" + status} 
-                status={status} 
-                label={taskStats[status] + ' ' + status}
-                colorClassPrefix={"border-b border-b"}
-                rounded={false}
-                />
+                return <span className={`text-gray-500 px-2 py-1`}>{taskStats[status]} {status}</span>
             })}
             </div>
             <FilterDropdown applyFilters={(selectedFilters) => {

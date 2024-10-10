@@ -23,8 +23,9 @@ export interface _api_task_object {
 }
 
 export interface _api_task_details {
-    receivedDocuments: number
-    indexedDocuments: number
+    receivedDocuments?: number
+    indexedDocuments?: number
+    typoTolerance?: _api_task_details_typo_tolerance 
 }
 
 export interface _api_task_error {
@@ -33,3 +34,16 @@ export interface _api_task_error {
     type: string
     link: string
 }
+
+
+export interface _api_task_details_typo_tolerance {
+    minWordSizeForTypos: _api_task_details_typo_tolerance_thresholds;
+    disableOnWords:      string[];
+    disableOnAttributes: string[];
+}
+
+export interface _api_task_details_typo_tolerance_thresholds {
+    oneTypo:  number;
+    twoTypos: number;
+}
+
