@@ -1,30 +1,31 @@
 import React, { useState } from 'react';
 
-const FilterDropdown = () => {
+
+interface FilterData {
+  types: string[],
+  statuses: string[]
+}
+
+const availableFilters: FilterData = {
+  types: ["indexCreation","indexUpdate","indexDeletion","indexSwap","documentAdditionOrUpdate","documentDeletion","settingsUpdate","dumpCreation","taskCancelation","taskDeletion"],
+  statuses: ["enqueued", "processing", "succeeded", "failed", "canceled"]
+}
+
+const FilterDropdown = ({applyFilters}) => {
   const [open, setOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState({
-    logitech: false,
-    asus: false,
-    canon: false,
+  const [selectedFilters, setSelectedFilters] = useState<FilterData>({
+    statuses: [],
+    types: [],
   });
 
   const toggleDropdown = () => {
     setOpen(!open);
   };
 
-  const handleFilterChange = (e) => {
-    const { name, checked } = e.target;
-    setSelectedFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: checked,
-    }));
-  };
-
   return (
     <div className="relative inline-block">
-      {/* Filter Button */}
       <button
-        className="bg-blue-500 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+        className="bg-primary text-white font-bold py-2 px-4 rounded inline-flex items-center"
         onClick={toggleDropdown}
       >
         <span>Filter</span>
@@ -47,67 +48,15 @@ const FilterDropdown = () => {
       {/* Dropdown Menu */}
       {open && (
         <div className="absolute right-0 mt-2 w-64 z-10 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-          <div className="p-4">
-            <h3 className="text-lg font-medium mb-2">Status</h3>
-            <div className="grid grid-cols-1 gap-2">
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox"
-                  name="logitech"
-                  checked={selectedFilters.logitech}
-                  onChange={handleFilterChange}
-                />
-                <span className="ml-2">EnQueued</span>
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox"
-                  name="asus"
-                  checked={selectedFilters.asus}
-                  onChange={handleFilterChange}
-                />
-                <span className="ml-2">Processing</span>
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox"
-                  name="canon"
-                  checked={selectedFilters.canon}
-                  onChange={handleFilterChange}
-                />
-                <span className="ml-2">Succeeded</span>
-              </label>
-            </div>
-            {/* Add more filters as needed */}
+          <div className='max-h-60 overflow-y-auto'>
+            <StatusSection selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
+            <TypesSection selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
           </div>
-          <div className="p-4">
-            <h3 className="text-lg font-medium mb-2">Type</h3>
-            <div className="grid grid-cols-1 gap-2">
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox"
-                  name="logitech"
-                  checked={selectedFilters.logitech}
-                  onChange={handleFilterChange}
-                />
-                <span className="ml-2">Indexing</span>
-              </label>
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox"
-                  name="asus"
-                  checked={selectedFilters.asus}
-                  onChange={handleFilterChange}
-                />
-                <span className="ml-2">Settings</span>
-              </label>
-            </div>
-            {/* Add more filters as needed */}
+          <div className='p-2'>
+            <button 
+              className='border border-primary text-primary rounded-sm w-full py-1 transition-all ease-in-out hover:bg-primary hover:text-white'
+              onClick={() => {applyFilters(selectedFilters)}}
+              >Apply</button>
           </div>
         </div>
       )}
@@ -116,3 +65,69 @@ const FilterDropdown = () => {
 };
 
 export default FilterDropdown;
+
+const StatusSection = ({selectedFilters, setSelectedFilters}) => {
+  return <div className="p-4">
+    <h3 className="text-lg font-medium mb-2">Status</h3>
+    <div className="grid grid-cols-1 gap-2">
+      {availableFilters.statuses.map((status) => {
+        return <label className="inline-flex items-center">
+          <input
+            type="checkbox"
+            className="form-checkbox"
+            checked={selectedFilters.statuses.includes(status)}
+            name={status}
+            onChange={(e) => {
+              const {name, checked} = e.target
+              setSelectedFilters((prev) => {
+                const newStatuses = checked
+                ? [...prev.statuses, name] // Add the status if checked
+                : prev.statuses.filter(status => status !== name); // Remove the status if not checked
+            
+                return {
+                  ...prev,
+                  statuses: newStatuses
+                }
+              })
+            }}
+          />
+          <span className="ml-2">{status}</span>
+        </label>
+      })}
+    </div>
+    {/* Add more filters as needed */}
+  </div>
+}
+
+const TypesSection = ({selectedFilters, setSelectedFilters}) => {
+  return <div className="p-4">
+    <h3 className="text-lg font-medium mb-2">Types</h3>
+    <div className="grid grid-cols-1 gap-2">
+      {availableFilters.types.map((type) => {
+        return <label className="inline-flex items-center">
+          <input
+            type="checkbox"
+            className="form-checkbox"
+            checked={selectedFilters.types.includes(type)}
+            name={type}
+            onChange={(e) => {
+              const {name, checked} = e.target
+              setSelectedFilters((prev) => {
+                const newTypes = checked
+                ? [...prev.types, name] // Add the status if checked
+                : prev.types.filter(type => type !== name); // Remove the status if not checked
+            
+                return {
+                  ...prev,
+                  types: newTypes
+                }
+              })
+            }}
+          />
+          <span className="ml-2">{type}</span>
+        </label>
+      })}
+    </div>
+    {/* Add more filters as needed */}
+  </div>
+}

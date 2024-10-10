@@ -58,7 +58,10 @@ const Page = () => {
                 />
             })}
             </div>
-            <FilterDropdown/>
+            <FilterDropdown applyFilters={(selectedFilters) => {
+                // @TODO API CALL 
+                console.log(selectedFilters)
+            }}/>
         </div>
         <PagePagination pagination={paginationData} setPaginationData={setPaginationData} />
         {tasks.map((task: _api_task_object) => {
