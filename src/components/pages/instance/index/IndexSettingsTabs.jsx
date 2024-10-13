@@ -1,26 +1,31 @@
-import React, {useEffect} from "react"
+import React, {useEffect, useState} from "react"
 import { initFlowbite } from 'flowbite';
+import {getIndexSettings} from '../../../../services/meilisearch/settings'
+
+import useMeiliIndex from '../../../../hooks/useMeiliIndex.js'
+import useMeiliInstance from '../../../../hooks/useMeiliInstance.js'
+import { SearchableAttrs } from "./settings/SearchableAttrs";
 
 const tabs = [
     {
         key: "searchable-attrs",
         label: "Searchable Attributes",
-        element: <p>searchable attrs</p>
+        element: <SearchableAttrs/>
     },
     {
         key: "ranking",
         label: "Ranking and Sorting",
-        element: <p>Ranking and Sorting</p>
+        element: <SearchableAttrs/>
     },
     {
         key: "typos",
         label: "Typo Tolerance",
-        element: <p>Typo Tolerance</p>
+        element: <SearchableAttrs/>
     },
     {
         key: "synonyms",
         label: "Synonyms",
-        element: <p>Synonyms</p>
+        element: <SearchableAttrs/>
     },
 ]
 
@@ -28,9 +33,18 @@ const tabsID = "meili-index-settings-tabs"
 const tabsContentID = `#${tabsID}-content`
 
 const IndexSettingsTabs = () => {
+    const { meiliIndexState } = useMeiliIndex()
+    const { instanceState } = useMeiliInstance()
+    const index = meiliIndexState.selectedIndex
+
+    const [settings, setSettings] = useState({})
+    
     
     useEffect(() => {
         initFlowbite();
+        getIndexSettings({instanceKey: instanceState.key, indexName: index}).then((res) => {
+            setSettings(res)
+        })
     }, []);
 
     return <div className="md:flex bg-white rounded-md border-2 border-gray-100 shadow-sm w-full">
@@ -61,7 +75,7 @@ const IndexSettingsTabs = () => {
                     id={`${tabsID}-${settingTab.key}`}
                     role="tabpanel"
                     aria-labelledby={settingTab.key}>
-                    {settingTab.element}
+                    {React.cloneElement(settingTab.element, { settings, key: i })}
                 </div>
             })}
         </div>

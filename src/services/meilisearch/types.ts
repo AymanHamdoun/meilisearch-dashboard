@@ -1,10 +1,14 @@
 import { number, string } from "prop-types"
+// --------------------- Custom Types ---------------------
 
 export enum QueryType {
     ByQuery = "query",
     ByObjectID = "object_id"
 }
 
+// --------------------- Meilisearch Response Types ---------------------
+
+// ------ Tasks API ------
 export interface GetTaskResponse {
     results: _api_task_object[]
     total: number
@@ -52,3 +56,52 @@ export interface _api_task_details_typo_tolerance_thresholds {
     twoTypos: number;
 }
 
+// ------ Settings API ------
+
+export interface APISettings {
+    displayedAttributes:  string[];
+    searchableAttributes: string[];
+    filterableAttributes: any[];
+    sortableAttributes:   any[];
+    rankingRules:         string[];
+    stopWords:            any[];
+    nonSeparatorTokens:   any[];
+    separatorTokens:      any[];
+    dictionary:           any[];
+    synonyms:             ApiSettingsSynonyms;
+    distinctAttribute:    null;
+    proximityPrecision:   string;
+    typoTolerance:        ApiSettingsTypoTolerance;
+    faceting:             ApiSettingsFaceting;
+    pagination:           ApiSettingsPagination;
+    searchCutoffMs:       null;
+    localizedAttributes:  null;
+}
+
+export interface ApiSettingsFaceting {
+    maxValuesPerFacet: number;
+    sortFacetValuesBy: SortFacetValuesBy;
+}
+
+export interface SortFacetValuesBy {
+    "*": string;
+}
+
+export interface ApiSettingsPagination {
+    maxTotalHits: number;
+}
+
+export interface ApiSettingsSynonyms {
+}
+
+export interface ApiSettingsTypoTolerance {
+    enabled:             boolean;
+    minWordSizeForTypos: MinWordSizeForTypos;
+    disableOnWords:      any[];
+    disableOnAttributes: any[];
+}
+
+export interface MinWordSizeForTypos {
+    oneTypo:  number;
+    twoTypos: number;
+}
