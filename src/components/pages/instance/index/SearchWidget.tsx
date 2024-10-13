@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 
-import { basicSearch } from "../../../../services/meilisearch/search"
+import { indexSearchWrapper } from "../../../../services/meilisearch/search"
 import useDebouncedValue from "../../../../hooks/useDebounce"
 import useMeiliIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
+import {QueryType} from "../../../../services/meilisearch/types"
 
 const SearchWidget = () => {
     const { meiliIndexState } = useMeiliIndex()
@@ -12,6 +13,8 @@ const SearchWidget = () => {
     const index = meiliIndexState.selectedIndex
     
     const [query, setQuery] = useState("")
+    const [queryType, setQueryType] = useState<QueryType>(QueryType.ByQuery)
+
     const [hits, setHits] = useState([])
 
     const debouncedSearchTerm = useDebouncedValue(query, 100);
@@ -23,20 +26,35 @@ const SearchWidget = () => {
             return
         }
 
-        basicSearch(instanceState.key, index, debouncedSearchTerm).then(resp => {
+        indexSearchWrapper({
+            instanceKey: instanceState.key, 
+            indexName: index, 
+            query: debouncedSearchTerm,
+            queryType: queryType
+        }).then(resp => {
             if (resp == undefined) {
                 return
             }
             setHits(resp.hits)
         })
 
-    }, [debouncedSearchTerm])
+    }, [debouncedSearchTerm, queryType])
 
 
     return <div className="">
-        <div className="mb-6">
+        <div className="mb-6 flex flex-row">
+            <select name="search_type" 
+                    className="text-gray-700 text-sm stl-select-input border border-gray-400 rounded-sm rounded-r-none text-center pl-4 pr-14 appearance-none"
+                    onChange={(e) => {
+                        setQueryType(e.target.value as QueryType)
+                    }}
+                    >
+                <option value={QueryType.ByQuery}>Search</option>
+                <option value={QueryType.ByObjectID}>Object ID</option>
+            </select>
+
             <input type="text"
-                className="bg-white border rounded p-3 border-gray-400 block w-full"
+                className="bg-white border rounded p-3 border-gray-400 block w-full rounded-l-none border-l-0"
                 placeholder="What are you looking for ?" required
                 onChange={(e) => {
                     let newQuery = e.target.value

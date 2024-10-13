@@ -40,8 +40,8 @@ const IndexSettingsTabs = () => {
             data-tabs-active-classes="text-primary border-l-2 border-b-0 hover:text-primary border-primary bg-gray-50"
             data-tabs-inactive-classes="text-gray-500 hover:text-gray-600 border-gray-100 hover:border-gray-300"
             role="tablist">
-            {tabs.map((tab) => {
-                return <li className="w-full" role="presentation">
+            {tabs.map((tab, i) => {
+                return <li key={i} className="w-full" role="presentation">
                     <button className="w-full text-left inline-block py-4 px-4 hover:text-primary hover:bg-gray-50 hover:border-l-2 hover:border-l-primary"
                         id={`${tabsID}-${tab.key}-tab`}
                         data-tabs-target={`#${tabsID}-${tab.key}`}
@@ -55,8 +55,9 @@ const IndexSettingsTabs = () => {
             })}
         </ul>
         <div id={tabsContentID} className="md:w-2/3">
-            {tabs.map((settingTab) => {
+            {tabs.map((settingTab, i) => {
                 return <div className="p-4 w-full h-full"
+                    key={i}
                     id={`${tabsID}-${settingTab.key}`}
                     role="tabpanel"
                     aria-labelledby={settingTab.key}>

@@ -1,5 +1,10 @@
 import { number, string } from "prop-types"
 
+export enum QueryType {
+    ByQuery = "query",
+    ByObjectID = "object_id"
+}
+
 export interface GetTaskResponse {
     results: _api_task_object[]
     total: number
