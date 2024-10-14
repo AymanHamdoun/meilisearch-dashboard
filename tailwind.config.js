@@ -10,7 +10,8 @@ export default {
       },
       colors: {
         'primary': '#FF5380',
-        'faint-primary': '#fffafc',
+        'primary-faint': '#fffafc',
+        'primary-midfaint': '#fff2f7',
       },
     },
   },

@@ -66,12 +66,11 @@ const SearchWidget = () => {
     </div>
 }
 
-
 const SearchHits = ({ hits }) => {
     return <div className="flex flex-col mb-6">
         {hits.map((hit, i) => {
             return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg relative">
-                <span className="absolute top-4 left-4 text-sm rounded-3xl bg-faint-primary font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{i+1}</span>
+                <span className="absolute top-4 left-4 text-sm rounded-3xl bg-primary-faint font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{i+1}</span>
 
                 {Object.keys(hit).map((key, j) => {
                     return <div key={j} className="md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
