@@ -5,6 +5,7 @@ import {getIndexSettings} from '../../../../services/meilisearch/settings'
 import useMeiliIndex from '../../../../hooks/useMeiliIndex.js'
 import useMeiliInstance from '../../../../hooks/useMeiliInstance.js'
 import { SearchableAttrs } from "./settings/SearchableAttrs";
+import TypoTolerance from "./settings/TypoTolerance";
 
 const tabs = [
     {
@@ -20,7 +21,7 @@ const tabs = [
     {
         key: "typos",
         label: "Typo Tolerance",
-        element: <SearchableAttrs/>
+        element: <TypoTolerance/>
     },
     {
         key: "synonyms",
