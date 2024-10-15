@@ -2,6 +2,7 @@ import {_defaultState} from "../contexts/IndexSettingsContext.jsx";
 import { APISettings } from "../services/meilisearch/types.js";
 
 export enum IndexSettingsActions {
+    Set = "set",
     Update = "update",
 }
 
@@ -12,9 +13,9 @@ export type ReducerAction = {
 
 const indexSettingsReducer = (state, action: ReducerAction) => {
     switch (action.type as IndexSettingsActions) {
-        case IndexSettingsActions.Update: {
+        case IndexSettingsActions.Set: {
             return {
-                ...state
+                ...action.payload
             };
         }
         default:

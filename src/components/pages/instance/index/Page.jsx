@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import IndexTabs from "./IndexTabs";
 import { getIndexStats } from "../../../../services/meilisearch/indexes";
 
-import useMeiliMeiliIndex from '../../../../hooks/useMeiliIndex'
+import useIndex from '../../../../hooks/useMeiliIndex'
 
 const Page = () => {
     return <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
@@ -14,7 +14,7 @@ const Page = () => {
 
 
 const IndexStats = () => {
-    const { meiliIndexState, dispatch } = useMeiliMeiliIndex()
+    const { meiliIndexState, dispatch } = useIndex()
 
     const [stats, setStats] = useState({})
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import useMeiliInstance from '../../hooks/useMeiliInstance'
-import useMeiliMeiliIndex from '../../hooks/useMeiliIndex'
+import useIndex from '../../hooks/useMeiliIndex'
 import { MeiliIndexAction } from "../../reducers/meiliIndexReducer";
 
 /**
@@ -85,7 +85,7 @@ const InstanceDropdown = () => {
      */
     const { instanceState } = useMeiliInstance()
     return <div className="flex flex-row gap-5 items-center">
-        <label className="text-sm text-gray-500" htmlFor="">CLUSTER</label>
+        <label className="text-sm text-gray-500" htmlFor="">INSTANCE</label>
         <select name="deployment" id="" 
             value={instanceState.label} 
             onChange={() => {}}
@@ -101,7 +101,7 @@ const InstanceDropdown = () => {
  * @returns {JSX.Element}
  */
 const IndexDropdown = () => {
-    const { meiliIndexState, dispatch } = useMeiliMeiliIndex()
+    const { meiliIndexState, dispatch } = useIndex()
 
     return <div className="flex flex-row gap-5 items-center">
         <label className="text-sm text-gray-500" htmlFor="">INDEX</label>

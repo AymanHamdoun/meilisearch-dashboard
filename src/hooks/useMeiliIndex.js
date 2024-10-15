@@ -1,12 +1,12 @@
 import React from "react";
 import MeiliIndexContext from '../contexts/MeiliIndexContext'
 
-const useMeiliMeiliIndex = () => {
+const useIndex = () => {
     const context = React.useContext(MeiliIndexContext);
     if (!context) {
-        throw new Error('useMeiliMeiliIndex must be used within an MeiliIndexProvider');
+        throw new Error('useIndex must be used within an MeiliIndexProvider');
     }
     return context;
 };
 
-export default useMeiliMeiliIndex;
+export default useIndex;
