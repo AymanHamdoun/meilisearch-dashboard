@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import IndexTabs from "./IndexTabs";
+import { getIndexStats } from "../../../../services/meilisearch/indexes";
+
+import useMeiliMeiliIndex from '../../../../hooks/useMeiliIndex'
 
 const Page = () => {
     return <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
@@ -11,20 +14,23 @@ const Page = () => {
 
 
 const IndexStats = () => {
+    const { meiliIndexState, dispatch } = useMeiliMeiliIndex()
+
+    const [stats, setStats] = useState({})
+
+    useEffect(() => {
+        getIndexStats(meiliIndexState.selectedIndex).then((stats) => {
+            setStats(stats)
+        })
+    }, [])
+
+
     return <div className="mb-8">
         <h3 className="text-3xl font-semibold mb-3">Index</h3>
         <div className="flex flex-row gap-3">
             <div className="flex flex-row gap-3">
-                <div className="text-gray-500"># records</div>
-                <div className="text-black font-semibold">3.2M</div>
-            </div>
-            <div className="flex flex-row gap-3">
-                <div className="text-gray-500">index size</div>
-                <div className="text-black font-semibold">2.3 GB</div>
-            </div>
-            <div className="flex flex-row gap-3">
-                <div className="text-gray-500">data size</div>
-                <div className="text-black font-semibold">1.5 GB</div>
+                <div className="text-gray-500 font-semibold"># records</div>
+                <div className="text-gray-500 font-semibold">{stats.numberOfDocuments !== undefined ? stats.numberOfDocuments.toLocaleString() : '-'}</div>
             </div>
         </div>
     </div>

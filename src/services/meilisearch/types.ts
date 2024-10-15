@@ -80,11 +80,7 @@ export interface APISettings {
 
 export interface ApiSettingsFaceting {
     maxValuesPerFacet: number;
-    sortFacetValuesBy: SortFacetValuesBy;
-}
-
-export interface SortFacetValuesBy {
-    "*": string;
+    sortFacetValuesBy: { [key: string]: string } ;
 }
 
 export interface ApiSettingsPagination {

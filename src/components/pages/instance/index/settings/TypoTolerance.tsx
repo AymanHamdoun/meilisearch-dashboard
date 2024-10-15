@@ -1,8 +1,11 @@
 import React from "react";
 import DocHeader from "./DocHeader"
 import DynamicTextBoxes from "../../../../commons/DynamicTextboxes"
+import useIndexSettings from "../../../../../hooks/useIndexSettings"
 
-const TypoTolerance = ({ settings }) => {
+const TypoTolerance = () => {
+    const { settings } = useIndexSettings()
+    
     return <div className="flex flex-col gap-8">
         <div>
             <DocHeader 

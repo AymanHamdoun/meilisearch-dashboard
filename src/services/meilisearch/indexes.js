@@ -22,6 +22,29 @@ const listIndexes = () => {
         .catch((error) => console.error(error));
 }
 
+const getIndexStats = (indexName) => {
+    const host = process.env.MEILI_HOST
+
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${MASTER_KEY}`
+    });
+
+    const requestOptions = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${host}/indexes/${indexName}/stats`;
+
+
+    return fetch(url, requestOptions)
+        .then((response) => response.json())
+        .catch((error) => console.error(error));
+}
+
 export {
-    listIndexes
+    listIndexes,
+    getIndexStats
 }

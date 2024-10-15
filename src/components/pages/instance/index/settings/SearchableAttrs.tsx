@@ -2,8 +2,11 @@ import React from "react"
 import DynamicTextBoxes from "../../../../commons/DynamicTextboxes"
 import DocHeader from "./DocHeader"
 
-export const SearchableAttrs = ({ settings }) => {
+import useIndexSettings from "../../../../../hooks/useIndexSettings"
 
+export const SearchableAttrs = () => {
+    const { settings } = useIndexSettings()
+    
     return <div>
         <DocHeader 
             title={"Searchable Attributes"}
