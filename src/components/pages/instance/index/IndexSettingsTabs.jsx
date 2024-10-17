@@ -19,7 +19,7 @@ const tabs = [
     {
         key: "ranking",
         label: "Ranking and Sorting",
-        element: <SearchableAttrs />
+        element: <div>Ranking & Sorting ... to be done</div>
     },
     {
         key: "typos",
@@ -29,7 +29,7 @@ const tabs = [
     {
         key: "synonyms",
         label: "Synonyms",
-        element: <SearchableAttrs />
+        element: <div>Synonyms ... to be done</div>
     },
 ]
 

@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DocHeader from "./DocHeader"
 import DynamicTextBoxes from "../../../../commons/DynamicTextboxes"
 import useIndexSettings from "../../../../../hooks/useIndexSettings"
 
 const TypoTolerance = () => {
     const { settings } = useIndexSettings()
+
+    const [typoTolerance, setTypoTolerance] = useState(settings.typoTolerance)
+
+    useEffect(() => {
+        setTypoTolerance(settings.typoTolerance)
+    }, [])
     
     return <div className="flex flex-col gap-8">
         <div>
@@ -14,7 +20,16 @@ const TypoTolerance = () => {
                 description={"Define if and how typo-tolerance is applied. Default value: true"}
                 link={"https://www.meilisearch.com/docs/learn/relevancy/typo_tolerance_settings"}
             />
-            <select name="typoTolerance" className="w-full p-2 stl-select-input">
+            <select name="typoTolerance" 
+                    className="w-full p-2 stl-select-input" 
+                    value={typoTolerance.enabled ? "true" : "false"}
+                    onChange={(e) => {
+                        setTypoTolerance({
+                            ...typoTolerance,
+                            enabled: e.target.value === "true"
+                        })
+                    }}
+                >
                 <option value="true">true</option>
                 <option value="false">false</option>
             </select>
@@ -26,7 +41,18 @@ const TypoTolerance = () => {
                 description={"Minimum number of characters a word in the query string must contain to accept matches with 1 typo. Default value: 4"}
                 link={"https://www.meilisearch.com/docs/learn/relevancy/typo_tolerance_settings#minwordsizefortypos"}
             />
-            <input type="number" className="w-full p-2 border border-gray-300"/>
+            <input  type="number" 
+                    value={typoTolerance.minWordSizeForTypos.oneTypo}
+                    onChange={(e) => {
+                        setTypoTolerance({
+                            ...typoTolerance,
+                            minWordSizeForTypos: {
+                                ...typoTolerance.minWordSizeForTypos,
+                                oneTypo: parseInt(e.target.value)
+                            }
+                        })
+                    }}
+                    className="w-full p-2 border border-gray-300"/>
         </div>
         <div>
             <DocHeader 
@@ -35,7 +61,18 @@ const TypoTolerance = () => {
                 description={"Minimum number of characters a word in the query string must contain to accept matches with 2 typos. Default value: 9"}
                 link={"https://www.meilisearch.com/docs/learn/relevancy/typo_tolerance_settings#minwordsizefortypos"}
             />
-            <input type="number" className="w-full p-2 border border-gray-300"/>
+            <input  type="number" 
+                    value={typoTolerance.minWordSizeForTypos.twoTypos}
+                    onChange={(e) => {
+                        setTypoTolerance({
+                            ...typoTolerance,
+                            minWordSizeForTypos: {
+                                ...typoTolerance.minWordSizeForTypos,
+                                twoTypos: parseInt(e.target.value)
+                            }
+                        })
+                    }}
+                    className="w-full p-2 border border-gray-300"/>
         </div>
         <div>
             <DocHeader 
