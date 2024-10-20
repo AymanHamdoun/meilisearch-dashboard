@@ -4,6 +4,7 @@ import IndexTabs from "./IndexTabs";
 import { getIndexStats } from "../../../../services/meilisearch/indexes";
 
 import useIndex from '../../../../hooks/useMeiliIndex'
+import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 
 const Page = () => {
     return <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
@@ -15,11 +16,12 @@ const Page = () => {
 
 const IndexStats = () => {
     const { meiliIndexState, dispatch } = useIndex()
+    const {instanceState} = useMeiliInstance()
 
     const [stats, setStats] = useState({})
 
     useEffect(() => {
-        getIndexStats(meiliIndexState.selectedIndex).then((stats) => {
+        getIndexStats(instanceState.host, instanceState.key, meiliIndexState.selectedIndex).then((stats) => {
             setStats(stats)
         })
     }, [])

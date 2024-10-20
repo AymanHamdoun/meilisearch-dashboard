@@ -15,12 +15,12 @@ import instanceReducer from "../reducers/instanceReducer";
 export const _defaultState = {
     label: "anghami",
     host: "https://meilisearch.internal.angha.me",
-    key: "3SsjIXd1CvKfpIU-EV7RqkF8J7wM1gOVo4lC1WwnKy8"
+    key: "jbk3h3v32ghjbkrhv423bj4khv3bk2h3v2bjk3h2jv3bkj2"
 }
 
 const InstanceContext = createContext({
     instanceState: _defaultState,
-    dispatch: () => {}
+    dispatch: (action) => {}
 });
 
 /**
@@ -34,7 +34,7 @@ const InstanceContext = createContext({
 export const InstanceProvider = ({ children }) => {
     const fetchDefaultState = () => {
         try {
-            return localStorage.getItem("instance") ? JSON.parse(sessionStorage.getItem("instance")) : _defaultState;
+            return localStorage.getItem("instance") ? JSON.parse(localStorage.getItem("instance")) : _defaultState;
         } catch (error) {
             console.error('Error parsing instance state from localStorage:', error);
             return _defaultState;

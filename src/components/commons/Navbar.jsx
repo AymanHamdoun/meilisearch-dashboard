@@ -84,15 +84,15 @@ const InstanceDropdown = () => {
      * @type {InstanceState}
      */
     const { instanceState } = useMeiliInstance()
-    return <div className="flex flex-row gap-5 items-center">
+
+    return <div className="flex flex-row gap-3 items-center justify-center">
         <label className="text-sm text-gray-500" htmlFor="">INSTANCE</label>
-        <select name="deployment" id="" 
-            value={instanceState.label} 
-            onChange={() => {}}
-            className={"text-primary"}>
-            <option value={instanceState.label}>{instanceState.label}</option>
-            <option value="add">Switch To Instance</option>
-        </select>
+        <button data-modal-target="instance-modal" 
+                data-modal-toggle="instance-modal" 
+                type="button"
+                className="px-3 py-1 border border-transparent rounded transition-all ease-in-out hover:border-primary text-primary focus:border-primary">
+            {instanceState.label}
+        </button>
     </div>
 }
 
@@ -103,13 +103,17 @@ const InstanceDropdown = () => {
 const IndexDropdown = () => {
     const { meiliIndexState, dispatch } = useIndex()
 
-    return <div className="flex flex-row gap-5 items-center">
+    const changeSelectedIndex = (indexName) => {
+        dispatch({ type: MeiliIndexAction.Change, payload: indexName })
+    }
+
+    return <div className="flex flex-row gap-3 items-center">
         <label className="text-sm text-gray-500" htmlFor="">INDEX</label>
-        <select name="deployment"
+        <select name="meili_index"
             className={"text-primary"}
             value={meiliIndexState.selectedIndex}
             onChange={(e) => {
-                dispatch({ type: MeiliIndexAction.Change, payload: e.target.value })
+                changeSelectedIndex(e.target.value)
             }}
         >
             {meiliIndexState.availableIndexes.map((indexUID) => {

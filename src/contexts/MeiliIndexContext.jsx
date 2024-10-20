@@ -2,6 +2,7 @@ import React, {createContext, useEffect, useReducer} from "react";
 import PropTypes from "prop-types";
 import meiliIndexReducer, { MeiliIndexAction } from "../reducers/meiliIndexReducer";
 import {listIndexes} from "../services/meilisearch/indexes"
+import useMeiliInstance from "../hooks/useMeiliInstance";
 
 /**
  * @typedef {Object} MeiliIndexContextData
@@ -31,6 +32,7 @@ const MeiliIndexContext = createContext({
  * @returns {JSX.Element} The meili index context provider.
  */
 export const MeiliIndexProvider = ({ children }) => {
+    const {instanceState} = useMeiliInstance()
     const fetchDefaultState = () => {
         try {
             return localStorage.getItem("indexes") ? JSON.parse(localStorage.getItem("indexes")) : _defaultState;
@@ -45,7 +47,7 @@ export const MeiliIndexProvider = ({ children }) => {
     useEffect(() => {
         // Call ping() to check if the user is authenticated
         const getIndexes = async () => {
-            const response = await listIndexes();
+            const response = await listIndexes(instanceState.host, instanceState.key);
             
             if (response.results) {
                 const newMeiliIndexState = {

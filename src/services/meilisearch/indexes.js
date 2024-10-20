@@ -1,11 +1,7 @@
-const MASTER_KEY = "3SsjIXd1CvKfpIU-EV7RqkF8J7wM1gOVo4lC1WwnKy8" 
-
-const listIndexes = () => {
-    const host = process.env.MEILI_HOST
-
+const listIndexes = (host, masterKey) => {
     let myHeaders = new Headers({
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${MASTER_KEY}`
+        "Authorization": `Bearer ${masterKey}`
     });
 
     const requestOptions = {
@@ -22,12 +18,10 @@ const listIndexes = () => {
         .catch((error) => console.error(error));
 }
 
-const getIndexStats = (indexName) => {
-    const host = process.env.MEILI_HOST
-
+const getIndexStats = (host, masterKey, indexName) => {
     let myHeaders = new Headers({
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${MASTER_KEY}`
+        "Authorization": `Bearer ${masterKey}`
     });
 
     const requestOptions = {
