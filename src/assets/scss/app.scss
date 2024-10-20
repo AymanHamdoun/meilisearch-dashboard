@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+$primary-60: #FF538060;
+$primary-mid-faint: #fff2f7;
+
 .stl-select-input {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -18,4 +21,12 @@
     border: 1px solid #777aaf;
     box-shadow: 0 1px #23263b0d;
     transition: all .1s ease-in-out;
+}
+
+
+.search-result-hit-detail em {
+    background: $primary-60;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 5px;
 }

@@ -32,7 +32,15 @@ const basicSearch = (options: SearchWrapperOptions) => {
         redirect: "follow"
     };
 
-    const url = `${options.instance.host}/indexes/${options.indexName}/search?q=${options.query}`;
+    const queryParams = new URLSearchParams({
+        q: options.query,
+        showRankingScoreDetails: "true",
+        showRankingScore: "true",
+        attributesToHighlight: "*",
+        showMatchesPosition: "true"
+    })
+
+    const url = `${options.instance.host}/indexes/${options.indexName}/search?${queryParams.toString()}`;
 
 
     return fetch(url, requestOptions)

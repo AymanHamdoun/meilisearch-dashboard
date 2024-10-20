@@ -13,6 +13,7 @@
   "dependencies": {
     "flowbite": "^2.5.2",
     "flowbite-react": "^0.10.1",
+    "html-react-parser": "^5.1.18",
     "i18next": "^23.15.1",
     "i18next-browser-languagedetector": "^8.0.0",
     "i18next-http-backend": "^2.6.1",

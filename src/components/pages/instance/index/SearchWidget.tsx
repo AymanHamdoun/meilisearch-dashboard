@@ -5,6 +5,7 @@ import useDebouncedValue from "../../../../hooks/useDebounce"
 import useMeiliIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 import {QueryType} from "../../../../services/meilisearch/types"
+import parse from 'html-react-parser';
 
 const SearchWidget = () => {
     const { meiliIndexState } = useMeiliIndex()
@@ -72,12 +73,25 @@ const SearchHits = ({ hits }) => {
             return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg relative">
                 <span className="absolute top-4 left-4 text-sm rounded-3xl bg-primary-faint font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{i+1}</span>
 
-                {Object.keys(hit).map((key, j) => {
-                    return <div key={j} className="md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
+                {Object.keys(hit["_formatted"]).map((key, j) => {
+                    if (key.startsWith("_")) {
+                        return
+                    }
+
+                    return <div key={j} className="search-result-hit-detail md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
                         <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-semibold">{key}</div>
-                        <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500">{hit[key]}</div>
+                        <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500">{parse(hit["_formatted"][key])}</div>
                     </div>
                 })}
+
+                <div className="bg-gray-50 text-gray-400 mt-3 flex flex-col md:flex-row gap-3 p-3 rounded justify-evenly">
+                    <div>Ranking Score: {hit["_rankingScore"]}</div>
+                    <div>Words: {hit["_rankingScoreDetails"]["words"]["matchingWords"]}</div>
+                    <div>Exact: {hit["_rankingScoreDetails"]["exactness"]["matchType"]} : {hit["_rankingScoreDetails"]["exactness"]["score"]}</div>
+                    <div>Typos: {hit["_rankingScoreDetails"]["typo"]["typoCount"]}</div>
+                    <div>Proximity: {hit["_rankingScoreDetails"]["proximity"]["score"]}</div>
+                    <div>Attribute: {hit["_rankingScoreDetails"]["attribute"]["attributeRankingOrderScore"]}</div>
+                </div>
             </div>
         })}
         {hits.length === 0 ? 
