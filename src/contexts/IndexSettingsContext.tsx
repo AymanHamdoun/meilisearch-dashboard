@@ -59,6 +59,7 @@ export const IndexSettingsProvider: React.FC<{ children: ReactNode }> = ({ child
     useEffect(() => {
         // Call ping() to check if the user is authenticated
         getIndexSettings({
+            host: instanceState.host,
             instanceKey: instanceState.key,
             indexName: meiliIndexState.selectedIndex
         }).then((response) => {

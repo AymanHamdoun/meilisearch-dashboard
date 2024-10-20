@@ -1,13 +1,12 @@
 import { string } from "prop-types"
 
 type SettingsAPIOptions = {
+    host: string
     instanceKey: string,
     indexName: string
 }
 
 export const getIndexSettings = (options: SettingsAPIOptions) => {
-    const host = process.env.MEILI_HOST
-
     let myHeaders = new Headers({
         "Content-Type": "application/json",
         "Authorization": `Bearer ${options.instanceKey}`
@@ -19,7 +18,7 @@ export const getIndexSettings = (options: SettingsAPIOptions) => {
         redirect: "follow"
     };
 
-    const url = `${host}/indexes/${options.indexName}/settings`;
+    const url = `${options.host}/indexes/${options.indexName}/settings`;
 
 
     return fetch(url, requestOptions)

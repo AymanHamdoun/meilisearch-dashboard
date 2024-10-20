@@ -1,16 +1,15 @@
 import { string } from "prop-types"
 import { QueryType } from "./types"
+import { InstanceState } from "../../contexts/InstanceContext"
 
 type SearchWrapperOptions = {
+    instance: InstanceState,
     queryType: QueryType,
     query: string,
-    instanceKey: string,
     indexName: string
 }
 
 const indexSearchWrapper = (options: SearchWrapperOptions) => {
-    console.log(options)
-
     if (options.queryType == QueryType.ByQuery) {
         return basicSearch(options)
     }
@@ -22,11 +21,9 @@ const indexSearchWrapper = (options: SearchWrapperOptions) => {
 
 
 const basicSearch = (options: SearchWrapperOptions) => {
-    const host = process.env.MEILI_HOST
-
     let myHeaders = new Headers({
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${options.instanceKey}`
+        "Authorization": `Bearer ${options.instance.key}`
     });
 
     const requestOptions: RequestInit = {
@@ -35,7 +32,7 @@ const basicSearch = (options: SearchWrapperOptions) => {
         redirect: "follow"
     };
 
-    const url = `${host}/indexes/${options.indexName}/search?q=${options.query}`;
+    const url = `${options.instance.host}/indexes/${options.indexName}/search?q=${options.query}`;
 
 
     return fetch(url, requestOptions)
@@ -44,11 +41,9 @@ const basicSearch = (options: SearchWrapperOptions) => {
 }
 
 const getDocByObjectID = (options: SearchWrapperOptions) => {
-    const host = process.env.MEILI_HOST
-
     let myHeaders = new Headers({
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${options.instanceKey}`
+        "Authorization": `Bearer ${options.instance.key}`
     });
 
     const requestOptions: RequestInit = {
@@ -57,7 +52,7 @@ const getDocByObjectID = (options: SearchWrapperOptions) => {
         redirect: "follow"
     };
 
-    const url = `${host}/indexes/${options.indexName}/documents/${options.query}`;
+    const url = `${options.instance.host}/indexes/${options.indexName}/documents/${options.query}`;
 
 
     return fetch(url, requestOptions)

@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react"
 import { initFlowbite } from 'flowbite';
-import { getIndexSettings } from '../../../../services/meilisearch/settings'
-
-import useMeiliIndex from '../../../../hooks/useMeiliIndex.js'
-import useMeiliInstance from '../../../../hooks/useMeiliInstance.js'
 import { SearchableAttrs } from "./settings/SearchableAttrs";
 import TypoTolerance from "./settings/TypoTolerance";
 

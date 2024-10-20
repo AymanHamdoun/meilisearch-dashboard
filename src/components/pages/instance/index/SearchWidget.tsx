@@ -27,7 +27,7 @@ const SearchWidget = () => {
         }
 
         indexSearchWrapper({
-            instanceKey: instanceState.key, 
+            instance: instanceState,
             indexName: index, 
             query: debouncedSearchTerm,
             queryType: queryType
@@ -58,7 +58,7 @@ const SearchWidget = () => {
                 placeholder="What are you looking for ?" required
                 onChange={(e) => {
                     let newQuery = e.target.value
-                    setQuery(newQuery.trim().toLowerCase())
+                    setQuery(newQuery.trim())
                 }}
             />
         </div>
