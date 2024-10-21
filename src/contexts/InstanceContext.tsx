@@ -6,7 +6,7 @@ export type InstanceState = {
     host: string,
     key: string,
     isSet: boolean,
-    isWorking: boolean
+    isLoaded: boolean
 }
 
 export const _defaultState: InstanceState = {
@@ -14,7 +14,7 @@ export const _defaultState: InstanceState = {
     host: "http://localhost:7700",
     key: "",
     isSet: false,
-    isWorking: false
+    isLoaded: false
 }
 
 const InstanceContext = createContext({

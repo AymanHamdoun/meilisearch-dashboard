@@ -3,9 +3,11 @@ import React from "react";
 import InstanceForm from "../../commons/InstanceForm";
 import {InstanceState} from "../../../contexts/InstanceContext";
 import {_defaultState} from "../../../contexts/MeiliIndexContext";
+import {useNavigate} from "react-router-dom";
 export const PAGE_ID_ADD_INSTANCE = 'instance-form-page';
 
 const Page = () => {
+    const navigate = useNavigate()
     return (
         <div data-testid={PAGE_ID_ADD_INSTANCE}
              id="pageHome"
@@ -15,6 +17,7 @@ const Page = () => {
                         defaultInstance={_defaultState}
                         formSubmitCallback={(newInstance: InstanceState) => {
                             localStorage.setItem("instance", JSON.stringify(newInstance));
+                            navigate("/instance/");
                         }}
                     >
                         <button

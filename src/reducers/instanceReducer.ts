@@ -1,3 +1,5 @@
+import {useNavigate} from "react-router-dom";
+
 export const InstanceAction = {
     Set: 'SET',
     Load: 'LOAD',
@@ -9,21 +11,24 @@ const instanceReducer = (state, action) => {
             const instanceState = action.payload;
             localStorage.setItem("instance", JSON.stringify(instanceState));
             return {
-                ...instanceState
+                ...instanceState,
             };
         }
         // Load JSON from local storage
         case InstanceAction.Load: {
             const localInstanceJSON = localStorage.getItem("instance");
             const info = JSON.parse(localInstanceJSON);
-            if (localInstanceJSON.length == 0 || !info) {
-                return state
+            if (localInstanceJSON == null || localInstanceJSON.length == 0 || !info) {
+                return {
+                    ...state,
+                    isLoaded: true,
+                }
             }
 
             return {
                 ...info,
                 isSet: true,
-                isWorking: true
+                isLoaded: true
             }
         }
         default:
