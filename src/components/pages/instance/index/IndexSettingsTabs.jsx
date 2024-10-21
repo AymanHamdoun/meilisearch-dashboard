@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { initFlowbite } from 'flowbite';
 import { SearchableAttrs } from "./settings/SearchableAttrs";
 import TypoTolerance from "./settings/TypoTolerance";

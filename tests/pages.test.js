@@ -5,10 +5,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
-import HomePage, { PAGE_ID_HOMEPAGE } from '../src/components/pages/home/Page.jsx';
+import HomePage, { PAGE_ID_ADD_INSTANCE } from '../src/components/pages/instance-form/Page.tsx';
 
 const pagesToTest = {
-    [PAGE_ID_HOMEPAGE]: HomePage,
+    [PAGE_ID_ADD_INSTANCE]: HomePage,
 };
 
 describe('Page Rendering', () => {

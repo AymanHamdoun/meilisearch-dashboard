@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
-import { initFlowbite } from 'flowbite';
+// @ts-ignore
+import React, {useEffect} from "react";
+import {initFlowbite} from 'flowbite';
 
-export const TaskStatusBadge = ({ status, label, rounded }) => {
+export const TaskStatusBadge = ({status, label, rounded}) => {
     const statusClassMap = {
         enqueued: "bg-blue-100",
         processing: "bg-yellow-100",
@@ -20,10 +21,11 @@ export const TaskStatusBadge = ({ status, label, rounded }) => {
     return <span className={`${bgColorClass} ${roundedClass} px-2 py-1`}>{label}</span>
 }
 
-export const TaskDetails = ({ details }) => {
+export const TaskDetails = ({details}) => {
     return <div className="py-2">
         {Object.keys(details).map((key, j) => {
-            return <div key={j} className="md:flex sm:flex md:flex-row sm:flex-col p-1 border-b border-b-gray-200 last:border-b-0">
+            return <div key={j}
+                        className="md:flex sm:flex md:flex-row sm:flex-col p-1 border-b border-b-gray-200 last:border-b-0">
                 <div className="md:pr-2 sm:w-full sm:pr-0">{key}</div>
                 <div className="md:pl-2 sm:w-full sm:pl-0 text-gray-500">
                     {typeof details[key] === 'object' ? JSON.stringify(details[key]) : details[key]}
@@ -33,26 +35,28 @@ export const TaskDetails = ({ details }) => {
     </div>
 }
 
-export const ErrorAccordion = ({ uid, header, content }) => {
+export const ErrorAccordion = ({uid, header, content}) => {
     useEffect(() => {
         initFlowbite()
     }, [])
     return <div data-accordion="collapse">
         <h2 id={"accordion-collapse-heading-" + uid}>
             <button type="button"
-                className="flex items-center justify-between w-full p-2 font-medium rtl:text-right bg-gray-100 dark:bg-gray-100 dark:text-black focus:bg-gray-100 focus:text-red-500"
-                data-accordion-target={"#accordion-collapse-body-" + uid}
-                aria-expanded={"false"}
-                aria-controls={"accordion-collapse-body-" + uid}>
+                    className="flex items-center justify-between w-full p-2 font-medium rtl:text-right bg-gray-100 dark:bg-gray-100 dark:text-black focus:bg-gray-100 focus:text-red-500"
+                    data-accordion-target={"#accordion-collapse-body-" + uid}
+                    aria-expanded={"false"}
+                    aria-controls={"accordion-collapse-body-" + uid}>
                 {header}
-                <svg data-accordion-icon className="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5" />
+                <svg data-accordion-icon className="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
+                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                          d="M9 5 5 1 1 5"/>
                 </svg>
             </button>
         </h2>
         <div id={"accordion-collapse-body-" + uid}
-            className="hidden border border-gray-200"
-            aria-labelledby={"accordion-collapse-heading-" + uid}>
+             className="hidden border border-gray-200"
+             aria-labelledby={"accordion-collapse-heading-" + uid}>
             {content}
         </div>
     </div>

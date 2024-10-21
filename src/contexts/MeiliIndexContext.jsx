@@ -69,7 +69,7 @@ export const MeiliIndexProvider = ({ children }) => {
         if (meiliIndexState.availableIndexes.length === 0 || meiliIndexState.selectedIndex === '') {
             getIndexes();
         }
-    }, []); // Empty dependency array ensures this runs only once on component mount
+    }, [instanceState]); // Empty dependency array ensures this runs only once on component mount
 
 
     return <MeiliIndexContext.Provider value={{meiliIndexState, dispatch}}>

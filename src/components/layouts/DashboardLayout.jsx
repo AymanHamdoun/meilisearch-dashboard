@@ -1,3 +1,4 @@
+import React from "react";
 import { Outlet } from "react-router-dom"
 import { InstanceProvider } from "../../contexts/InstanceContext"
 import { MeiliIndexProvider } from "../../contexts/MeiliIndexContext"

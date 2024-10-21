@@ -1,5 +1,5 @@
+// @ts-ignore
 import React, {createContext, useEffect, useReducer, Dispatch, ReactNode} from "react";
-import PropTypes from "prop-types";
 import indexSettingsReducer, { IndexSettingsActions, ReducerAction } from "../reducers/indexSettingsReducer";
 
 import {APISettings} from "../services/meilisearch/types"
@@ -57,7 +57,9 @@ export const IndexSettingsProvider: React.FC<{ children: ReactNode }> = ({ child
     const {instanceState} = useMeiliInstance()
 
     useEffect(() => {
-        // Call ping() to check if the user is authenticated
+        if (!instanceState.isSet) {
+            return
+        }
         getIndexSettings({
             host: instanceState.host,
             instanceKey: instanceState.key,
@@ -65,7 +67,7 @@ export const IndexSettingsProvider: React.FC<{ children: ReactNode }> = ({ child
         }).then((response) => {
             dispatch({ type: IndexSettingsActions.Set, payload: response });
         })
-    }, []); // Empty dependency array ensures this runs only once on component mount
+    }, [instanceState]); // Empty dependency array ensures this runs only once on component mount
 
 
     return <IndexSettingsContext.Provider value={{settings, dispatch}}>

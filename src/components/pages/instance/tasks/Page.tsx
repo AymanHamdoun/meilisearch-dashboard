@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 import { getTasks, getTaskStats } from "../../../../services/meilisearch/tasks";
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
@@ -28,6 +29,9 @@ const Page = () => {
     })
 
     useEffect(() => {
+        if (!instanceState.isSet) {
+            return
+        }
         getTasks(instanceState, paginationData.from).then((data: GetTaskResponse) => {
             setTasks(data.results)
             setPaginationData({
@@ -68,7 +72,7 @@ const Page = () => {
                         ) : ""}
                         <span className="bg-gray-100 rounded-sm px-2 py-1 font-semibold">#{task.uid}</span>
                         <span className="bg-gray-100 rounded-sm px-2 py-1">{task.type}</span>
-                        <TaskStatusBadge rounded={false} colorClassPrefix={"bg"} status={task.status} label={task.status}/>
+                        <TaskStatusBadge rounded={false} status={task.status} label={task.status}/>
                     </div>
                     <div className="flex flex-col md:flex-row gap-1">
                         <button className="bg-transparent hover:bg-orange-500 text-orange-500 font-semibold hover:text-white py-1 px-4 border border-orange-500 hover:border-transparent rounded transition-all ease-in">

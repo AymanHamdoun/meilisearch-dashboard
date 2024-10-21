@@ -15,16 +15,19 @@ const Page = () => {
 
 
 const IndexStats = () => {
-    const { meiliIndexState, dispatch } = useIndex()
+    const { meiliIndexState } = useIndex()
     const {instanceState} = useMeiliInstance()
 
     const [stats, setStats] = useState({})
 
     useEffect(() => {
+        if (!instanceState.isSet) {
+            return
+        }
         getIndexStats(instanceState.host, instanceState.key, meiliIndexState.selectedIndex).then((stats) => {
             setStats(stats)
         })
-    }, [])
+    }, [instanceState])
 
 
     return <div className="mb-8">

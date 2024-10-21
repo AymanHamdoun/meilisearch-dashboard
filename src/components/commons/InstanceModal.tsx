@@ -1,21 +1,14 @@
-import React, { useEffect, useState } from "react";
+// @ts-ignore
+import React, {useEffect} from "react";
 import { InstanceState } from "../../contexts/InstanceContext";
 import useMeiliInstance from "../../hooks/useMeiliInstance";
 import { InstanceAction } from "../../reducers/instanceReducer";
+import InstanceForm from "./InstanceForm";
 
 const InstanceModal = () => {
     const { instanceState, dispatch } = useMeiliInstance()
-    const [instance, setInstance] = useState<InstanceState>({
-        label: "",
-        host: "",
-        key: ""
-    })
 
-    useEffect(() => {
-        setInstance(instanceState)
-    }, [])
-
-    const switchInstance = () => {
+    const switchInstance = (instance: InstanceState) => {
         dispatch({ type: InstanceAction.Set, payload: instance })
     }
 
@@ -37,61 +30,17 @@ const InstanceModal = () => {
                     </button>
                 </div>
                 <div className="p-4 md:p-5">
-                    <form action=""
-                        className="flex flex-col gap-5"
-                        onSubmit={(e) => {
-                            e.preventDefault()
-                            switchInstance()
-
-                        }}>
-                        <div className="flex flex-col gap-2">
-                            <label className="text-gray-700" htmlFor="meili_host">Instance Label</label>
-                            <input type="text" name="meili_host" placeholder="Prod"
-                                className="p-2 rounded border border-gray-200 w-full focus:border-primary focus:outline-none"
-                                value={instance.label}
-                                onChange={(e) => {
-                                    setInstance({
-                                        ...instance,
-                                        label: e.target.value
-                                    })
-                                }}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <label className="text-gray-700" htmlFor="meili_host">Meilisearch Host</label>
-                            <input type="text" name="meili_host" placeholder="http://localhost:7700"
-                                className="p-2 rounded border border-gray-200 w-full focus:border-primary focus:outline-none"
-                                value={instance.host}
-                                onChange={(e) => {
-                                    setInstance({
-                                        ...instance,
-                                        host: e.target.value
-                                    })
-                                }}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <label className="text-gray-700" htmlFor="meili_host">Meilisearch Key</label>
-                            <input type="text" name="meili_host" placeholder="abcdefghijk.."
-                                className="p-2 rounded border border-gray-200 w-full focus:border-primary focus:outline-none"
-                                value={instance.key}
-                                onChange={(e) => {
-                                    setInstance({
-                                        ...instance,
-                                        key: e.target.value
-                                    })
-                                }}
-                            />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            <button
-                                className="w-full py-3 border border-primary rounded text-primary font-semibold transition-all ease-in-out hover:bg-primary hover:text-white"
-                                type="submit"
-                                data-modal-hide="instance-modal">
-                                Switch
-                            </button>
-                        </div>
-                    </form>
+                    <InstanceForm defaultInstance={instanceState}
+                                  formSubmitCallback={(newInstance: InstanceState) => {
+                                      switchInstance(newInstance)
+                                  }}>
+                        <button
+                            className="w-full py-3 border border-primary rounded text-primary font-semibold transition-all ease-in-out hover:bg-primary hover:text-white"
+                            type="submit"
+                            data-modal-hide="instance-modal">
+                            Switch
+                        </button>
+                    </InstanceForm>
                 </div>
             </div>
         </div>
