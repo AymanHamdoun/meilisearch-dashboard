@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, {useEffect} from "react";
-import {_defaultState, InstanceState} from "../../contexts/InstanceContext";
+import {InstanceState} from "../../contexts/InstanceContext";
 
 interface InstanceFormProps {
     defaultInstance: InstanceState; // Replace InstanceType with the actual type of the 'instance' object
@@ -10,7 +10,9 @@ interface InstanceFormProps {
 const InstanceForm: React.FC<InstanceFormProps> = ({ defaultInstance, formSubmitCallback, children }) => {
     const [instance, setInstance] = React.useState(defaultInstance);
 
-    useEffect(() => {}, [defaultInstance])
+    useEffect(() => {
+        setInstance(defaultInstance)
+    }, [defaultInstance])
 
     return <form action=""
                  className="flex flex-col gap-5"

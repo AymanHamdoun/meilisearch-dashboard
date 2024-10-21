@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, {useEffect} from "react";
+import React from "react";
 import { InstanceState } from "../../contexts/InstanceContext";
 import useMeiliInstance from "../../hooks/useMeiliInstance";
 import { InstanceAction } from "../../reducers/instanceReducer";
