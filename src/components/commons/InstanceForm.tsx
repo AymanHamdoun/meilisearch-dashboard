@@ -15,7 +15,7 @@ const InstanceForm: React.FC<InstanceFormProps> = ({ defaultInstance, formSubmit
     }, [defaultInstance])
 
     return <form action=""
-                 className="flex flex-col gap-5"
+                 className="w-full flex flex-col gap-5"
                  onSubmit={(e) => {
                      e.preventDefault()
                      formSubmitCallback(instance)
