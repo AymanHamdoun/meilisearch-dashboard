@@ -1,19 +1,39 @@
 stages:
-  - test
+#  - test
+  - build
+  - push
 
-# This folder is cached between builds
-# https://docs.gitlab.com/ee/ci/yaml/index.html#cache
-cache:
-  paths:
-    - node_modules/
+variables:
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  LATEST_TAG: $CI_REGISTRY_IMAGE:latest
 
-lint_and_test:
-  # Use a Node.js image to run npm commands
-  image: node:18
-  stage: test
-  only:
-    - merge_request
+before_script:
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY"
+
+#lint_and_test:
+#  # Use a Node.js image to run npm commands
+#  image: node:18
+#  stage: test
+#  only:
+#    - merge_request
+#  script:
+#    - npm install
+#    - npm run lint
+#    - npm run test
+
+build_image:
+  stage: build
   script:
-    - npm install
-    - npm run lint
-    - npm run test
+    - docker build -t $IMAGE_TAG .
+    - docker tag $IMAGE_TAG $LATEST_TAG
+  only:
+    - main  # Specify the branch that should trigger the build
+    - merge_requests
+
+push_image:
+  stage: push
+  script:
+    - docker push $IMAGE_TAG
+    - docker push $LATEST_TAG
+  only:
+    - main

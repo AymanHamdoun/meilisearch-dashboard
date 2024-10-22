@@ -22,6 +22,16 @@ export const getIndexSettings = (options: SettingsAPIOptions) => {
 
 
     return fetch(url, requestOptions)
-        .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .then(async (response) => {
+            const status = response.status;
+            const responseBody = await response.json()
+            if (status >= 400) {
+                throw new Error(responseBody.message);
+            }
+
+            return responseBody
+        })
+        .catch((error) => {
+            console.error("error fetching index settings", error);
+        });
 }

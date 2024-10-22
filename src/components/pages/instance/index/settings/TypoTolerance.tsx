@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 import DocHeader from "./DocHeader"
 import DynamicTextBoxes from "../../../../commons/DynamicTextboxes"
@@ -10,7 +11,7 @@ const TypoTolerance = () => {
 
     useEffect(() => {
         setTypoTolerance(settings.typoTolerance)
-    }, [])
+    }, [settings.typoTolerance])
     
     return <div className="flex flex-col gap-8">
         <div>
@@ -83,7 +84,7 @@ const TypoTolerance = () => {
             />
             <DynamicTextBoxes
                 buttonText="+ Add attribute"
-                initialTextboxValues={settings.typoTolerance.disableOnAttributes}
+                initialTextboxValues={typoTolerance.disableOnAttributes}
             />
         </div>
         <div>
@@ -95,7 +96,7 @@ const TypoTolerance = () => {
             />
             <DynamicTextBoxes
                 buttonText="+ Add attribute"
-                initialTextboxValues={settings.typoTolerance.disableOnWords}
+                initialTextboxValues={typoTolerance.disableOnWords}
             />
         </div>
     </div>

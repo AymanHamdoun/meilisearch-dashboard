@@ -57,7 +57,7 @@ export const IndexSettingsProvider: React.FC<{ children: ReactNode }> = ({ child
     const {instanceState} = useMeiliInstance()
 
     useEffect(() => {
-        if (!instanceState.isSet) {
+        if (!instanceState.isLoaded || meiliIndexState.selectedIndex == '') {
             return
         }
         getIndexSettings({
@@ -65,6 +65,10 @@ export const IndexSettingsProvider: React.FC<{ children: ReactNode }> = ({ child
             instanceKey: instanceState.key,
             indexName: meiliIndexState.selectedIndex
         }).then((response) => {
+            if (Object.keys(response).length == 0) {
+              return
+            }
+
             dispatch({ type: IndexSettingsActions.Set, payload: response });
         })
     }, [instanceState]); // Empty dependency array ensures this runs only once on component mount
