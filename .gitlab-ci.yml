@@ -26,8 +26,7 @@ build_image:
     - docker build -t $IMAGE_TAG .
     - docker tag $IMAGE_TAG $LATEST_TAG
   only:
-    - main  # Specify the branch that should trigger the build
-    - merge_requests
+    - master 
 
 push_image:
   stage: push
@@ -35,4 +34,4 @@ push_image:
     - docker push $IMAGE_TAG
     - docker push $LATEST_TAG
   only:
-    - main
+    - master
