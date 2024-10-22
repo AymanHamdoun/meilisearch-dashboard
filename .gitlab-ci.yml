@@ -5,7 +5,6 @@ services:
 
 stages:
   - build
-  - push
 
 variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
@@ -31,12 +30,6 @@ build_image:
   script:
     - docker build -t $IMAGE_TAG .
     - docker tag $IMAGE_TAG $LATEST_TAG
-  only:
-    - master 
-
-push_image:
-  stage: push
-  script:
     - docker push $IMAGE_TAG
     - docker push $LATEST_TAG
   only:
