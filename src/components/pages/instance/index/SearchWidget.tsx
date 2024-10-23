@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 
 import { indexSearchWrapper } from "../../../../services/meilisearch/search"

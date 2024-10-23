@@ -21,7 +21,7 @@ const IndexStats = () => {
     const [stats, setStats] = useState({})
 
     useEffect(() => {
-        if (!instanceState.isSet) {
+        if (!instanceState.isLoaded) {
             return
         }
         getIndexStats(instanceState.host, instanceState.key, meiliIndexState.selectedIndex).then((stats) => {

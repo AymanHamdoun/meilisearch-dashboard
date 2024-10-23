@@ -29,7 +29,7 @@ const Page = () => {
     })
 
     useEffect(() => {
-        if (!instanceState.isSet) {
+        if (!instanceState.isLoaded) {
             return
         }
         getTasks(instanceState, paginationData.from).then((data: GetTaskResponse) => {

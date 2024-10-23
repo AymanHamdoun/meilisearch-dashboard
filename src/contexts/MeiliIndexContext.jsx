@@ -45,6 +45,9 @@ export const MeiliIndexProvider = ({ children }) => {
     const [meiliIndexState, dispatch] = useReducer(meiliIndexReducer, fetchDefaultState());
 
     useEffect(() => {
+        if (!instanceState.isLoaded) {
+            return
+        }
         // Call ping() to check if the user is authenticated
         const getIndexes = async () => {
             const response = await listIndexes(instanceState.host, instanceState.key);

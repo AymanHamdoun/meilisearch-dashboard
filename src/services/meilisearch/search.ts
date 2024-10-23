@@ -10,6 +10,12 @@ type SearchWrapperOptions = {
 }
 
 const indexSearchWrapper = (options: SearchWrapperOptions) => {
+    if (!options.instance.isLoaded) {
+        return new Promise(() => {
+            return {hits: []}
+        })
+    }
+
     if (options.queryType == QueryType.ByQuery) {
         return basicSearch(options)
     }
