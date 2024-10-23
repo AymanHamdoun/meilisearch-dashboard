@@ -4,7 +4,7 @@ import { indexSearchWrapper } from "../../../../services/meilisearch/search"
 import useDebouncedValue from "../../../../hooks/useDebounce"
 import useMeiliIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
-import {QueryType} from "../../../../services/meilisearch/types"
+import { QueryType } from "../../../../services/meilisearch/types"
 import parse from 'html-react-parser';
 
 const SearchWidget = () => {
@@ -12,7 +12,7 @@ const SearchWidget = () => {
     const { instanceState } = useMeiliInstance()
 
     const index = meiliIndexState.selectedIndex
-    
+
     const [query, setQuery] = useState("")
     const [queryType, setQueryType] = useState<QueryType>(QueryType.ByQuery)
 
@@ -29,7 +29,7 @@ const SearchWidget = () => {
 
         indexSearchWrapper({
             instance: instanceState,
-            indexName: index, 
+            indexName: index,
             query: debouncedSearchTerm,
             queryType: queryType
         }).then(resp => {
@@ -44,12 +44,12 @@ const SearchWidget = () => {
 
     return <div className="">
         <div className="mb-6 flex flex-row">
-            <select name="search_type" 
-                    className="text-gray-700 text-sm stl-select-input border border-gray-400 rounded-sm rounded-r-none text-center pl-4 pr-14 appearance-none"
-                    onChange={(e) => {
-                        setQueryType(e.target.value as QueryType)
-                    }}
-                    >
+            <select name="search_type"
+                className="text-gray-700 text-sm stl-select-input border border-gray-400 rounded-sm rounded-r-none text-center pl-4 pr-14 appearance-none"
+                onChange={(e) => {
+                    setQueryType(e.target.value as QueryType)
+                }}
+            >
                 <option value={QueryType.ByQuery}>Search</option>
                 <option value={QueryType.ByObjectID}>Object ID</option>
             </select>
@@ -70,35 +70,44 @@ const SearchWidget = () => {
 const SearchHits = ({ hits }) => {
     return <div className="flex flex-col mb-6">
         {hits.map((hit, i) => {
-            return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg relative">
-                <span className="absolute top-4 left-4 text-sm rounded-3xl bg-primary-faint font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{i+1}</span>
+            let printableObj = hit;
+            if (typeof printableObj["_formatted"] == "object") {
+                printableObj = printableObj["_formatted"]
+            }
 
-                {Object.keys(hit["_formatted"]).map((key, j) => {
+            return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg relative">
+                <span className="absolute top-4 left-4 text-sm rounded-3xl bg-primary-faint font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{i + 1}</span>
+
+                {Object.keys(printableObj).map((key, j) => {
                     if (key.startsWith("_")) {
                         return
                     }
 
                     return <div key={j} className="search-result-hit-detail md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
                         <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-semibold">{key}</div>
-                        <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500">{parse(hit["_formatted"][key])}</div>
+                        <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500">
+                            {typeof printableObj[key] == 'string' ? parse(printableObj[key]) : printableObj[key]}
+                        </div>
                     </div>
                 })}
 
-                <div className="bg-gray-50 text-gray-400 mt-3 flex flex-col md:flex-row gap-3 p-3 rounded justify-evenly">
-                    <div>Ranking Score: {hit["_rankingScore"]}</div>
-                    <div>Words: {hit["_rankingScoreDetails"]["words"]["matchingWords"]}</div>
-                    <div>Exact: {hit["_rankingScoreDetails"]["exactness"]["matchType"]} : {hit["_rankingScoreDetails"]["exactness"]["score"]}</div>
-                    <div>Typos: {hit["_rankingScoreDetails"]["typo"]["typoCount"]}</div>
-                    <div>Proximity: {hit["_rankingScoreDetails"]["proximity"]["score"]}</div>
-                    <div>Attribute: {hit["_rankingScoreDetails"]["attribute"]["attributeRankingOrderScore"]}</div>
-                </div>
+                {hit["_rankingScoreDetails"] ? (
+                    <div className="bg-gray-50 text-gray-400 mt-3 flex flex-col md:flex-row gap-3 p-3 rounded justify-evenly">
+                        <div>Ranking Score: {hit["_rankingScore"]}</div>
+                        <div>Words: {hit["_rankingScoreDetails"]["words"]["matchingWords"]}</div>
+                        <div>Exact: {hit["_rankingScoreDetails"]["exactness"]["matchType"]} : {hit["_rankingScoreDetails"]["exactness"]["score"]}</div>
+                        <div>Typos: {hit["_rankingScoreDetails"]["typo"]["typoCount"]}</div>
+                        <div>Proximity: {hit["_rankingScoreDetails"]["proximity"]["score"]}</div>
+                        <div>Attribute: {hit["_rankingScoreDetails"]["attribute"]["attributeRankingOrderScore"]}</div>
+                    </div>
+                ) : ''}
             </div>
         })}
-        {hits.length === 0 ? 
+        {hits.length === 0 ?
             <div className="flex items-center justify-center min-h-96">
                 No Hits
             </div>
-        : <></>}
+            : <></>}
     </div>
 }
 
