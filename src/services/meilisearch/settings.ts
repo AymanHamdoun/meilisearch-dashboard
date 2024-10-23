@@ -33,5 +33,6 @@ export const getIndexSettings = (options: SettingsAPIOptions) => {
         })
         .catch((error) => {
             console.error("error fetching index settings", error);
+            return {}
         });
 }

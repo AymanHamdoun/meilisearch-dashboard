@@ -92,7 +92,7 @@ const SearchHits = ({ hits }) => {
                     </div>
                 })}
 
-                <RankingInfoBar hit={hit} />
+                <RankingInfoBar hit={hit}/>
             </div>
         })}
         {hits.length === 0 ?
@@ -106,18 +106,18 @@ const SearchHits = ({ hits }) => {
 export default SearchWidget;
 
 
-const RankingInfoBar = (hit) => {
+const RankingInfoBar = ({hit}) => {
     if (typeof hit["_rankingScoreDetails"] !== 'object') {
         return <></>
     }
 
 
     return <div className="bg-gray-50 text-gray-400 mt-3 flex flex-col md:flex-row gap-3 p-3 rounded justify-evenly">
-        <div>Ranking Score: {hit["_rankingScore"]}</div>
+        <div>Ranking Score: {hit["_rankingScore"].toFixed(2)}</div>
         <div>Words: {hit["_rankingScoreDetails"]["words"]["matchingWords"]}</div>
         {
             hit["_rankingScoreDetails"]["exactness"] ?
-                <div>Exact: {hit["_rankingScoreDetails"]["exactness"]["matchType"]} : {hit["_rankingScoreDetails"]["exactness"]["score"]}</div>
+                <div>Exact: {hit["_rankingScoreDetails"]["exactness"]["matchType"]} : {hit["_rankingScoreDetails"]["exactness"]["score"].toFixed(2)}</div>
                 :
                 <></>
         }
