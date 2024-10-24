@@ -114,15 +114,35 @@ const RankingInfoBar = ({hit}) => {
 
     return <div className="bg-gray-50 text-gray-400 mt-3 flex flex-col md:flex-row gap-3 p-3 rounded justify-evenly">
         <div>Ranking Score: {hit["_rankingScore"].toFixed(2)}</div>
-        <div>Words: {hit["_rankingScoreDetails"]["words"]["matchingWords"]}</div>
+        {
+            hit["_rankingScoreDetails"]["words"] ?
+                <div>Typos: {hit["_rankingScoreDetails"]["words"]["matchingWords"]}</div>
+                :
+                <></>
+        }
         {
             hit["_rankingScoreDetails"]["exactness"] ?
                 <div>Exact: {hit["_rankingScoreDetails"]["exactness"]["matchType"]} : {hit["_rankingScoreDetails"]["exactness"]["score"].toFixed(2)}</div>
                 :
                 <></>
         }
-        <div>Typos: {hit["_rankingScoreDetails"]["typo"]["typoCount"]}</div>
-        <div>Proximity: {hit["_rankingScoreDetails"]["proximity"]["score"]}</div>
-        <div>Attribute: {hit["_rankingScoreDetails"]["attribute"]["attributeRankingOrderScore"]}</div>
+        {
+            hit["_rankingScoreDetails"]["typo"] ?
+                <div>Typos: {hit["_rankingScoreDetails"]["typo"]["typoCount"]}</div>
+                :
+                <></>
+        }
+        {
+            hit["_rankingScoreDetails"]["proximity"] ?
+                <div>Proximity: {hit["_rankingScoreDetails"]["proximity"]["score"]}</div>
+                :
+                <></>
+        }
+        {
+            hit["_rankingScoreDetails"]["attribute"] ?
+                <div>Attribute: {hit["_rankingScoreDetails"]["attribute"]["attributeRankingOrderScore"]}</div>
+                :
+                <></>
+        }
     </div>
 }
