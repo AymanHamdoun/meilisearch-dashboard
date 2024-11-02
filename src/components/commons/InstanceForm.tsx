@@ -1,10 +1,11 @@
 // @ts-ignore
-import React, {useEffect} from "react";
+import React, {ReactNode, useEffect} from "react";
 import {InstanceState} from "../../contexts/InstanceContext";
 
 interface InstanceFormProps {
     defaultInstance: InstanceState; // Replace InstanceType with the actual type of the 'instance' object
     formSubmitCallback: (instance: InstanceState) => void; // Adjust the argument type if necessary
+    children: ReactNode
 }
 
 const InstanceForm: React.FC<InstanceFormProps> = ({ defaultInstance, formSubmitCallback, children }) => {

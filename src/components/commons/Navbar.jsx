@@ -108,6 +108,8 @@ const IndexDropdown = () => {
         dispatch({ type: MeiliIndexAction.Change, payload: indexName })
     }
 
+    useEffect(() => {}, [meiliIndexState])
+
     return <div className="flex flex-row gap-3 items-center">
         <label className="text-sm text-gray-500" htmlFor="">INDEX</label>
         <select name="meili_index"
@@ -121,6 +123,10 @@ const IndexDropdown = () => {
                 return <option key={indexUID} value={indexUID}>{indexUID}</option>
             })}
         </select>
-        <button className="text-primary px-3 py-1 rounded border border-transparent hover:border-primary">+</button>
+        <button data-modal-target="index-creation-modal" 
+                data-modal-toggle="index-creation-modal" 
+                className="text-primary px-3 py-1 rounded border border-transparent hover:border-primary">
+                    +
+        </button>
     </div>
 }

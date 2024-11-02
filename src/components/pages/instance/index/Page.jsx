@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import IndexTabs from "./IndexTabs";
-import { getIndexStats } from "../../../../services/meilisearch/indexes";
+import { getIndexStats } from "../../../../services/meilisearch/indexes.ts";
 
 import useIndex from '../../../../hooks/useMeiliIndex'
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";

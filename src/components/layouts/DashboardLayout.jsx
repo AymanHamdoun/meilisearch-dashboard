@@ -6,11 +6,15 @@ import SideBar from "../commons/SideBar"
 import Navbar from "../commons/Navbar"
 import InstanceModal from "../commons/InstanceModal"
 import useMeiliInstance from "../../hooks/useMeiliInstance.js";
+import IndexCreationModal from "../pages/instance/index-creation/IndexCreationModal";
 
 const DashboardLayout = () => {
     return <InstanceProvider>
+        
         <InstanceModal/>
+
         <MeiliIndexProvider>
+            <IndexCreationModal/>
             <LayoutContent/>
         </MeiliIndexProvider>
     </InstanceProvider>
