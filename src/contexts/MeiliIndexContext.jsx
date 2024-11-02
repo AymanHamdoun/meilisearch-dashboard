@@ -20,7 +20,7 @@ export const _defaultState = {
 
 const MeiliIndexContext = createContext({
     meiliIndexState: _defaultState,
-    dispatch: (state, action) => {}
+    dispatch: (action) => {}
 });
 
 /**

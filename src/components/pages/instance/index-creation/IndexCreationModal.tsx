@@ -3,16 +3,26 @@ import {createIndex, listIndexes} from "../../../../services/meilisearch/indexes
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 import useIndex from "../../../../hooks/useMeiliIndex";
 import { MeiliIndexAction } from "../../../../reducers/meiliIndexReducer.js";
+import { NavigateFunction, useNavigate } from "react-router-dom";
+import { InstanceState } from "../../../../contexts/InstanceContext.tsx";
+
+type IndexCreationOptions = {
+    indexName: string,
+    primaryKey: string,
+    dispatch: (action) => void,
+    instance: InstanceState,
+    navigate: NavigateFunction
+}
 
 const IndexCreationModal = () => {
-    const {instanceState} = useMeiliInstance()
     const { dispatch } = useIndex()
+    const {instanceState} = useMeiliInstance()
+    const navigate = useNavigate()
 
     const [indexOptions, setIndexOptions] = useState({
         indexName: "",
         primaryKey: ""
     })
-
 
     return <div id="index-creation-modal" 
                 aria-hidden="true" 
@@ -63,16 +73,12 @@ const IndexCreationModal = () => {
                             data-modal-hide="index-creation-modal"
                             onClick={(e) => {
                                 e.preventDefault();
-                                createIndex({
-                                    instance: instanceState,
+                                handleIndexCreation({
                                     indexName: indexOptions.indexName,
-                                    primaryKey: indexOptions.primaryKey
-                                }).then((createIndexResponse) => {
-                                    listIndexes(instanceState.host, instanceState.key).then((response) => {
-                                        if (response.results) {
-                                            dispatch({ type: MeiliIndexAction.SetFromIndexList, payload: response.results });
-                                        }
-                                    });
+                                    primaryKey: indexOptions.primaryKey,
+                                    instance: instanceState,
+                                    dispatch: dispatch,
+                                    navigate: navigate
                                 })
                             }}>
                             Create
@@ -84,3 +90,33 @@ const IndexCreationModal = () => {
 }
 
 export default IndexCreationModal;
+
+const handleIndexCreation = (indexOptions: IndexCreationOptions) => {
+    createIndex({
+        instance: indexOptions.instance,
+        indexName: indexOptions.indexName,
+        primaryKey: indexOptions.primaryKey
+    }).then((createIndexResponse) => {
+        listIndexes(indexOptions.instance.host, indexOptions.instance.key).then((response) => {
+            if (!response.results) {
+                return
+            }
+
+            const newIndexFinishedCreating = response.results.filter((indexObj) => {
+                return indexObj.uid === indexOptions.indexName
+            }).length === 1
+
+            if (!newIndexFinishedCreating) {
+                indexOptions.navigate("/instance/tasks")
+                return
+            }
+
+            // Update Index Context (to add new index to dropdown)
+            indexOptions.dispatch({ type: MeiliIndexAction.SetAndDefaultTo, payload: {
+                indexList: response.results,
+                defaultIndexName: indexOptions.indexName
+            }});
+            indexOptions.navigate("/instance/index")
+        });
+    })
+}

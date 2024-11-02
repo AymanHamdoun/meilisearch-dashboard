@@ -8,6 +8,7 @@ import {_defaultState} from "../contexts/MeiliIndexContext.jsx";
 export const MeiliIndexAction = {
     Change: 'CHANGE',
     SetFromIndexList: 'SET_FROM_INDEXES',
+    SetAndDefaultTo: 'SET_FROM_AND_DEFAULT',
 }
 
 /**
@@ -22,6 +23,25 @@ export const MeiliIndexAction = {
 const meiliIndexReducer = (state, action) => {
  
     switch (action.type) {
+        case MeiliIndexAction.SetAndDefaultTo: {
+            const {indexList, defaultIndexName} = action.payload;
+            
+            const newMeiliIndexState = {
+                availableIndexes: [],
+                selectedIndex: ""
+            }
+            
+            indexList.map((indexObject) => {
+                newMeiliIndexState.availableIndexes.push(indexObject.uid)
+            })
+
+            newMeiliIndexState.selectedIndex = defaultIndexName;
+
+            localStorage.setItem("indexes", JSON.stringify(newMeiliIndexState));
+            return {
+                ...newMeiliIndexState
+            };
+        }
         case MeiliIndexAction.SetFromIndexList: {
             const indexList = action.payload;
             
@@ -34,7 +54,11 @@ const meiliIndexReducer = (state, action) => {
                 newMeiliIndexState.availableIndexes.push(indexObject.uid)
             })
 
-            if (state.selectedIndex === "" && newMeiliIndexState.availableIndexes.length > 0) {
+            let selectedIndexNeedsChanging = !newMeiliIndexState.availableIndexes.includes(state.selectedIndex);
+            selectedIndexNeedsChanging = selectedIndexNeedsChanging || state.selectedIndex === "";
+            selectedIndexNeedsChanging = selectedIndexNeedsChanging && newMeiliIndexState.availableIndexes.length > 0;
+
+            if (selectedIndexNeedsChanging) {
                 newMeiliIndexState.selectedIndex = newMeiliIndexState.availableIndexes[0]
             }
 
