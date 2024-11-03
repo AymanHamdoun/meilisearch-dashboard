@@ -73,17 +73,17 @@ const ManageIndexDropdown = () => {
     return <div className="relative flex flex-col gap-0">
         <button id="dropdownDividerButton" 
                 data-dropdown-toggle="dropdownDivider" 
-                class="flex flex-row items-center bg-white rounded border border-gray-300 px-3 py-1">
+                className="flex flex-row items-center bg-white rounded border border-gray-300 px-3 py-1">
             <span className="bg-white">Manage Index</span>
-            <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
+            <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
             </svg>
         </button>
 
-        <div id="dropdownDivider" class="hidden bg-white w-full border border-gray-200">
-            <ul class="py-2 text-sm" aria-labelledby="dropdownDividerButton">
+        <div id="dropdownDivider" className="hidden bg-white w-full border border-gray-200">
+            <ul className="py-2 text-sm" aria-labelledby="dropdownDividerButton">
                 <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">Delete</a>
+                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Delete</a>
                 </li>
             </ul>
         </div>
