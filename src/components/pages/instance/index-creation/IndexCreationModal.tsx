@@ -97,26 +97,29 @@ const handleIndexCreation = (indexOptions: IndexCreationOptions) => {
         indexName: indexOptions.indexName,
         primaryKey: indexOptions.primaryKey
     }).then((createIndexResponse) => {
-        listIndexes(indexOptions.instance.host, indexOptions.instance.key).then((response) => {
-            if (!response.results) {
-                return
-            }
-
-            const newIndexFinishedCreating = response.results.filter((indexObj) => {
-                return indexObj.uid === indexOptions.indexName
-            }).length === 1
-
-            if (!newIndexFinishedCreating) {
-                indexOptions.navigate("/instance/tasks")
-                return
-            }
-
-            // Update Index Context (to add new index to dropdown)
-            indexOptions.dispatch({ type: MeiliIndexAction.SetAndDefaultTo, payload: {
-                indexList: response.results,
-                defaultIndexName: indexOptions.indexName
-            }});
-            indexOptions.navigate("/instance/index")
-        });
+        // wait 1 second just to make sure the index has been created so we end up getting it
+        setTimeout(() => {
+            listIndexes(indexOptions.instance.host, indexOptions.instance.key).then((response) => {
+                if (!response.results) {
+                    return
+                }
+    
+                const newIndexFinishedCreating = response.results.filter((indexObj) => {
+                    return indexObj.uid === indexOptions.indexName
+                }).length === 1
+    
+                if (!newIndexFinishedCreating) {
+                    indexOptions.navigate("/instance/tasks")
+                    return
+                }
+    
+                // Update Index Context (to add new index to dropdown)
+                indexOptions.dispatch({ type: MeiliIndexAction.SetAndDefaultTo, payload: {
+                    indexList: response.results,
+                    defaultIndexName: indexOptions.indexName
+                }});
+                indexOptions.navigate("/instance/index")
+            });
+        }, 1000)
     })
 }
