@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import SearchWidget from './SearchWidget.tsx'
-import IndexSettingsTabs from './IndexSettingsTabs'
+import IndexSettingsTabs from './IndexSettingsTabs.jsx'
 import { initFlowbite } from 'flowbite';
+import useIndex from "../../../../hooks/useMeiliIndex.js";
 
 const tabs = [
     {
@@ -21,14 +22,15 @@ const tabsContentID = `#${tabsID}-content`
 
 const IndexTabs = () => {
 
+    const {meiliIndexState} = useIndex()
+
+    useEffect(() => {}, [meiliIndexState])
+
     useEffect(() => {
         initFlowbite();
     }, []);
 
     return <div>
-        <div className="flex flex-col md:flex-row justify-end px-3">
-            <ManageIndexDropdown/>
-        </div>
         <div className="mb-8 border-b border-gray-200">
             <ul className="flex flex-wrap -mb-px text-sm font-medium text-center"
                 id={tabsID}
@@ -66,26 +68,3 @@ const IndexTabs = () => {
 }
 
 export default IndexTabs;
-
-
-
-const ManageIndexDropdown = () => {
-    return <div className="relative flex flex-col gap-0">
-        <button id="dropdownDividerButton" 
-                data-dropdown-toggle="dropdownDivider" 
-                className="flex flex-row items-center bg-white rounded border border-gray-300 px-3 py-1">
-            <span className="bg-white">Manage Index</span>
-            <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-            </svg>
-        </button>
-
-        <div id="dropdownDivider" className="hidden bg-white w-full border border-gray-200">
-            <ul className="py-2 text-sm" aria-labelledby="dropdownDividerButton">
-                <li>
-                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Delete</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-}

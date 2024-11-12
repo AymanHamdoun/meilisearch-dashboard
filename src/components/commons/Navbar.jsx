@@ -108,7 +108,7 @@ const IndexDropdown = () => {
         dispatch({ type: MeiliIndexAction.Change, payload: indexName })
     }
 
-    useEffect(() => {}, [meiliIndexState])
+    useEffect(() => {}, [meiliIndexState.availableIndexes, meiliIndexState.selectedIndex])
 
     return <div className="flex flex-row gap-3 items-center">
         <label className="text-sm text-gray-500" htmlFor="">INDEX</label>

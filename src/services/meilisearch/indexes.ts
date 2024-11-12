@@ -80,8 +80,31 @@ const createIndex = (options: CreateIndexOptions) => {
         .catch((error) => console.error(error));
 }
 
+type DeleteIndexOptions = {
+    instance: InstanceState,
+    indexName: string,
+}
+const deleteIndex = (options: DeleteIndexOptions) => {
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${options.instance.key}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "DELETE",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${options.instance.host}/indexes/${options.indexName}`;
+    return fetch(url, requestOptions)
+        .then((response) => response.json())
+        .catch((error) => console.error(error));
+}
+
 export {
     listIndexes,
     getIndexStats,
-    createIndex
+    createIndex,
+    deleteIndex
 }

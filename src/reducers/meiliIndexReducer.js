@@ -25,7 +25,6 @@ const meiliIndexReducer = (state, action) => {
     switch (action.type) {
         case MeiliIndexAction.SetAndDefaultTo: {
             const {indexList, defaultIndexName} = action.payload;
-            
             const newMeiliIndexState = {
                 availableIndexes: [],
                 selectedIndex: ""
@@ -44,10 +43,10 @@ const meiliIndexReducer = (state, action) => {
         }
         case MeiliIndexAction.SetFromIndexList: {
             const indexList = action.payload;
-            
+
             const newMeiliIndexState = {
                 availableIndexes: [],
-                selectedIndex: ""
+                selectedIndex: state.selectedIndex
             }
             
             indexList.map((indexObject) => {
@@ -68,10 +67,6 @@ const meiliIndexReducer = (state, action) => {
             };
         }
         case MeiliIndexAction.Change: {
-            /**
-             * The form data state.
-             * @type {MeiliIndexState}
-             */
             const meiliIndexState = state;
             meiliIndexState.selectedIndex = action.payload;
             localStorage.setItem("indexes", JSON.stringify(meiliIndexState));
