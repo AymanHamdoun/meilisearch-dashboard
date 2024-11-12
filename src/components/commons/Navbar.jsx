@@ -15,6 +15,7 @@ const Navbar = () => {
                 <div className="flex flex-row gap-3">
                     <InstanceDropdown />
                     <IndexDropdown />
+
                 </div>
                 <div className="flex items-center justify-start rtl:justify-end">
                     <button data-drawer-target="default-sidebar" data-drawer-toggle="default-sidebar" aria-controls="default-sidebar" type="button" className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
@@ -107,6 +108,8 @@ const IndexDropdown = () => {
         dispatch({ type: MeiliIndexAction.Change, payload: indexName })
     }
 
+    useEffect(() => {}, [meiliIndexState.availableIndexes, meiliIndexState.selectedIndex])
+
     return <div className="flex flex-row gap-3 items-center">
         <label className="text-sm text-gray-500" htmlFor="">INDEX</label>
         <select name="meili_index"
@@ -120,5 +123,10 @@ const IndexDropdown = () => {
                 return <option key={indexUID} value={indexUID}>{indexUID}</option>
             })}
         </select>
+        <button data-modal-target="index-creation-modal" 
+                data-modal-toggle="index-creation-modal" 
+                className="text-primary px-3 py-1 rounded border border-transparent hover:border-primary">
+                    +
+        </button>
     </div>
 }

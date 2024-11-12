@@ -2,7 +2,7 @@
 import React from "react";
 import InstanceForm from "../../commons/InstanceForm";
 import {InstanceState} from "../../../contexts/InstanceContext";
-import {_defaultState} from "../../../contexts/MeiliIndexContext";
+import {_defaultState} from "../../../contexts/InstanceContext";
 import {useNavigate} from "react-router-dom";
 export const PAGE_ID_ADD_INSTANCE = 'instance-form-page';
 

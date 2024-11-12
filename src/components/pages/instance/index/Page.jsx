@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 
+import IndexManager from "./IndexManager";
 import IndexTabs from "./IndexTabs";
-import { getIndexStats } from "../../../../services/meilisearch/indexes";
+import { getIndexStats } from "../../../../services/meilisearch/indexes.ts";
 
 import useIndex from '../../../../hooks/useMeiliIndex'
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
@@ -9,6 +10,7 @@ import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 const Page = () => {
     return <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
         <IndexStats />
+        <IndexManager/>
         <IndexTabs/>
     </div>
 }
@@ -21,7 +23,7 @@ const IndexStats = () => {
     const [stats, setStats] = useState({})
 
     useEffect(() => {
-        if (!instanceState.isLoaded) {
+        if (!instanceState.isLoaded || meiliIndexState.selectedIndex === "") {
             return
         }
         getIndexStats(instanceState.host, instanceState.key, meiliIndexState.selectedIndex).then((stats) => {

@@ -6,8 +6,9 @@ import {_defaultState} from "../contexts/MeiliIndexContext.jsx";
  * @enum {string}
  */
 export const MeiliIndexAction = {
-    Set: 'SET',
     Change: 'CHANGE',
+    SetFromIndexList: 'SET_FROM_INDEXES',
+    SetAndDefaultTo: 'SET_FROM_AND_DEFAULT',
 }
 
 /**
@@ -20,23 +21,52 @@ export const MeiliIndexAction = {
  * @returns {MeiliIndexState} The new state after applying the action.
  */
 const meiliIndexReducer = (state, action) => {
+ 
     switch (action.type) {
-        case MeiliIndexAction.Set: {
-            /**
-             * The form data state.
-             * @type {MeiliIndexState}
-             */
-            const meiliIndexState = action.payload;
-            localStorage.setItem("indexes", JSON.stringify(meiliIndexState));
+        case MeiliIndexAction.SetAndDefaultTo: {
+            const {indexList, defaultIndexName} = action.payload;
+            const newMeiliIndexState = {
+                availableIndexes: [],
+                selectedIndex: ""
+            }
+            
+            indexList.map((indexObject) => {
+                newMeiliIndexState.availableIndexes.push(indexObject.uid)
+            })
+
+            newMeiliIndexState.selectedIndex = defaultIndexName;
+
+            localStorage.setItem("indexes", JSON.stringify(newMeiliIndexState));
             return {
-                ...action.payload
+                ...newMeiliIndexState
+            };
+        }
+        case MeiliIndexAction.SetFromIndexList: {
+            const indexList = action.payload;
+
+            const newMeiliIndexState = {
+                availableIndexes: [],
+                selectedIndex: state.selectedIndex
+            }
+            
+            indexList.map((indexObject) => {
+                newMeiliIndexState.availableIndexes.push(indexObject.uid)
+            })
+
+            let selectedIndexNeedsChanging = !newMeiliIndexState.availableIndexes.includes(state.selectedIndex);
+            selectedIndexNeedsChanging = selectedIndexNeedsChanging || state.selectedIndex === "";
+            selectedIndexNeedsChanging = selectedIndexNeedsChanging && newMeiliIndexState.availableIndexes.length > 0;
+
+            if (selectedIndexNeedsChanging) {
+                newMeiliIndexState.selectedIndex = newMeiliIndexState.availableIndexes[0]
+            }
+
+            localStorage.setItem("indexes", JSON.stringify(newMeiliIndexState));
+            return {
+                ...newMeiliIndexState
             };
         }
         case MeiliIndexAction.Change: {
-            /**
-             * The form data state.
-             * @type {MeiliIndexState}
-             */
             const meiliIndexState = state;
             meiliIndexState.selectedIndex = action.payload;
             localStorage.setItem("indexes", JSON.stringify(meiliIndexState));

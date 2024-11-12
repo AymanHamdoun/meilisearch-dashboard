@@ -1,7 +1,7 @@
 import React, {createContext, useEffect, useReducer} from "react";
 import PropTypes from "prop-types";
 import meiliIndexReducer, { MeiliIndexAction } from "../reducers/meiliIndexReducer";
-import {listIndexes} from "../services/meilisearch/indexes"
+import {listIndexes} from "../services/meilisearch/indexes.ts"
 import useMeiliInstance from "../hooks/useMeiliInstance";
 
 /**
@@ -20,7 +20,7 @@ export const _defaultState = {
 
 const MeiliIndexContext = createContext({
     meiliIndexState: _defaultState,
-    dispatch: () => {}
+    dispatch: (action) => {}
 });
 
 /**
@@ -48,30 +48,15 @@ export const MeiliIndexProvider = ({ children }) => {
         if (!instanceState.isLoaded) {
             return
         }
-        // Call ping() to check if the user is authenticated
+
         const getIndexes = async () => {
             const response = await listIndexes(instanceState.host, instanceState.key);
-            
             if (response.results) {
-                const newMeiliIndexState = {
-                    availableIndexes: [],
-                    selectedIndex: ""
-                }
-                response.results.map((indexObject) => {
-                    newMeiliIndexState.availableIndexes.push(indexObject.uid)
-                })
-    
-                if (meiliIndexState.selectedIndex === "" && newMeiliIndexState.availableIndexes.length > 0) {
-                    newMeiliIndexState.selectedIndex = newMeiliIndexState.availableIndexes[0]
-                }
-    
-                dispatch({ type: MeiliIndexAction.Set, payload: newMeiliIndexState });
+                dispatch({ type: MeiliIndexAction.SetFromIndexList, payload: response.results });
             }
         };
 
-        if (meiliIndexState.availableIndexes.length === 0 || meiliIndexState.selectedIndex === '') {
-            getIndexes();
-        }
+        getIndexes();
     }, [instanceState]); // Empty dependency array ensures this runs only once on component mount
 
 

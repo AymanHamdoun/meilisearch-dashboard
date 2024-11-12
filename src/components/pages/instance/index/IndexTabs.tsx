@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import SearchWidget from './SearchWidget.tsx'
-import IndexSettingsTabs from './IndexSettingsTabs'
+import IndexSettingsTabs from './IndexSettingsTabs.jsx'
 import { initFlowbite } from 'flowbite';
+import useIndex from "../../../../hooks/useMeiliIndex.js";
 
 const tabs = [
     {
@@ -21,6 +22,10 @@ const tabsContentID = `#${tabsID}-content`
 
 const IndexTabs = () => {
 
+    const {meiliIndexState} = useIndex()
+
+    useEffect(() => {}, [meiliIndexState])
+
     useEffect(() => {
         initFlowbite();
     }, []);
@@ -31,11 +36,11 @@ const IndexTabs = () => {
                 id={tabsID}
                 data-tabs-toggle={tabsContentID}
                 data-tabs-active-classes="text-primary border-b-2 hover:text-primary border-primary"
-                data-tabs-inactive-classes="text-gray-500 hover:text-gray-600 border-gray-100 hover:border-gray-300"
+                data-tabs-inactive-classes="text-gray-500 hover:text-gray-600 border-gray-100"
                 role="tablist">
                 {tabs.map((tab, i) => {
                     return <li className="me-2" role="presentation" key={i}>
-                        <button className="inline-block p-4 rounded-t-lg hover:text-gray-600 hover:border-b-2 hover:border-gray-300"
+                        <button className="inline-block p-4 rounded-t-lg hover:text-gray-600 hover:border-b-2"
                             id={`${tabsID}-${tab.key}-tab`}
                             data-tabs-target={`#${tabsID}-${tab.key}`}
                             type="button"

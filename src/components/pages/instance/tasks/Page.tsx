@@ -53,8 +53,8 @@ const Page = () => {
         <div className="flex flex-row justify-between items-end gap-3 mb-3">
             <div>
             <span className={`text-gray-600 px-2 py-1`}>{paginationData.total} Total</span>
-            {Object.keys(taskStats).map((status) => {
-                return <span className={`text-gray-500 px-2 py-1`}>{taskStats[status]} {status}</span>
+            {Object.keys(taskStats).map((status, i) => {
+                return <span key={i} className={`text-gray-500 px-2 py-1`}>{taskStats[status]} {status}</span>
             })}
             </div>
             <FilterDropdown applyFilters={(selectedFilters) => {
@@ -63,8 +63,8 @@ const Page = () => {
             }}/>
         </div>
         <PagePagination pagination={paginationData} setPaginationData={setPaginationData} />
-        {tasks.map((task: _api_task_object) => {
-            return <div className="p-3 bg-white border border-gray-100 shadow-md rounded-sm mb-4">
+        {tasks.map((task: _api_task_object, index: number) => {
+            return <div key={index} className="p-3 bg-white border border-gray-100 shadow-md rounded-sm mb-4">
                 <div className="flex flex-col md:flex-row justify-between">
                     <div className="flex flex-col md:flex-row gap-2">
                         {task.indexUid !== null ? (
