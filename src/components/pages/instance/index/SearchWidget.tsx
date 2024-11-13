@@ -82,7 +82,7 @@ const SearchHits = ({ response }) => {
     console.log(response)
     return <div className="flex flex-col mb-6">
         {processingTime !== undefined ?
-            <div className="text-center text-gray-400 px-3">
+            <div className="text-center text-gray-400 px-3 mb-2">
                 <span className="text-primary">{hitCountMsg} hits</span> matched in <span className="text-primary">{processingTime}ms</span>
             </div> : ""}
 
