@@ -11,6 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@codemirror/lang-json": "^6.0.1",
+    "@uiw/codemirror-theme-vscode": "^4.23.6",
+    "@uiw/react-codemirror": "^4.23.6",
     "flowbite": "^2.5.2",
     "flowbite-react": "^0.10.1",
     "html-react-parser": "^5.1.18",

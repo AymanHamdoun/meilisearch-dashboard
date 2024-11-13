@@ -6,6 +6,7 @@ import useMeiliInstance from "../../../../hooks/useMeiliInstance"
 import { InstanceState } from "../../../../contexts/InstanceContext"
 import { NavigateFunction, useNavigate } from "react-router-dom"
 import { MeiliIndexAction } from "../../../../reducers/meiliIndexReducer"
+import DocIndexingModal from "./documents/DocIndexingModal"
 
 const IndexManager = () => {
     return <div className="flex flex-col md:flex-row justify-end px-3">
@@ -16,15 +17,17 @@ const IndexManager = () => {
 const ManageIndexDropdown = () => {
     const { meiliIndexState, dispatch } = useIndex()
     const {instanceState} = useMeiliInstance()
-    const [isModalVisible, setIsModalVisible] = useState(false)
     const navigate = useNavigate()
+
+    const [isDeleteConfirmationModalVisible, setIsDeleteConfirmationModalVisible] = useState(false)
+    const [isDocIndexingModalVisible, setIsDocIndexingModalVisible] = useState(false)
 
     const indexName = meiliIndexState.selectedIndex;
 
     return <div className="relative flex flex-col gap-0">
         <ConfirmationModal
-            isVisible={isModalVisible}
-            onClose={() => setIsModalVisible(false)}
+            isVisible={isDeleteConfirmationModalVisible}
+            onClose={() => setIsDeleteConfirmationModalVisible(false)}
             onConfirm={() => {
                 handleIndexDeletion({
                     indexName: indexName,
@@ -33,9 +36,17 @@ const ManageIndexDropdown = () => {
                     navigate: navigate,
                 })
 
-                setIsModalVisible(false)
+                setIsDeleteConfirmationModalVisible(false)
             }}
             message={`Delete Index '${indexName}' ?`}
+        />
+        <DocIndexingModal
+            isVisible={isDocIndexingModalVisible}
+            onClose={() => setIsDocIndexingModalVisible(false)}
+            onConfirm={(code: string) => {
+                alert(code)
+                setIsDocIndexingModalVisible(false)
+            }}
         />
         <button id="dropdownDividerButton"
             data-dropdown-toggle="dropdownDivider"
@@ -49,13 +60,17 @@ const ManageIndexDropdown = () => {
         <div id="dropdownDivider" className="hidden bg-white w-full border border-gray-200">
             <ul className="py-2 text-sm" aria-labelledby="dropdownDividerButton">
                 <li>
-                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Add Records</a>
+                    <a href="#" 
+                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={() => {
+                            setIsDocIndexingModalVisible(true)
+                        }}>Add Records</a>
                 </li>
                 <li>
                     <a href="#" 
                         className="block px-4 py-2 hover:bg-gray-100 text-red-500"
                         onClick={() => {
-                            setIsModalVisible(true)
+                            setIsDeleteConfirmationModalVisible(true)
                         }}>Delete</a>
                 </li>
             </ul>
