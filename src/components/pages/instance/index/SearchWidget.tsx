@@ -72,12 +72,18 @@ const SearchHits = ({ response }) => {
     const hits = response.hits;
     const processingTime = response.processingTimeMs;
     const totalHits = response.totalHits !== undefined ? response.totalHits : 0; 
+    const estimatedHits = response.estimatedTotalHits !== undefined ? response.estimatedTotalHits : 0; 
+
+    let hitCountMsg = totalHits;
+    if (totalHits === 0 && estimatedHits > 0) {
+        hitCountMsg = `estimated ${estimatedHits}`
+    }
 
     console.log(response)
     return <div className="flex flex-col mb-6">
         {processingTime !== undefined ?
             <div className="text-center text-gray-400 px-3">
-                <span className="text-primary">{totalHits} hits</span> matched in <span className="text-primary">{processingTime}ms</span>
+                <span className="text-primary">{hitCountMsg} hits</span> matched in <span className="text-primary">{processingTime}ms</span>
             </div> : ""}
 
         {hits.map((hit, i) => {
