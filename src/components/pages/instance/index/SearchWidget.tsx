@@ -17,14 +17,14 @@ const SearchWidget = () => {
     const [query, setQuery] = useState("")
     const [queryType, setQueryType] = useState<QueryType>(QueryType.ByQuery)
 
-    const [hits, setHits] = useState([])
+    const [response, setResponse] = useState({hits: []})
 
     const debouncedSearchTerm = useDebouncedValue(query, 100);
 
 
     useEffect(() => {
         if (debouncedSearchTerm.length == 0) {
-            setHits([])
+            setResponse({hits: []})
             return
         }
 
@@ -37,7 +37,7 @@ const SearchWidget = () => {
             if (resp == undefined) {
                 return
             }
-            setHits(resp.hits)
+            setResponse(resp)
         })
 
     }, [debouncedSearchTerm, queryType])
@@ -64,12 +64,22 @@ const SearchWidget = () => {
                 }}
             />
         </div>
-        <SearchHits hits={hits} />
+        <SearchHits response={response} />
     </div>
 }
 
-const SearchHits = ({ hits }) => {
+const SearchHits = ({ response }) => {
+    const hits = response.hits;
+    const processingTime = response.processingTimeMs;
+    const totalHits = response.totalHits !== undefined ? response.totalHits : 0; 
+
+    console.log(response)
     return <div className="flex flex-col mb-6">
+        {processingTime !== undefined ?
+            <div className="text-center text-gray-400 px-3">
+                <span className="text-primary">{totalHits} hits</span> matched in <span className="text-primary">{processingTime}ms</span>
+            </div> : ""}
+
         {hits.map((hit, i) => {
             let printableObj = hit;
             if (typeof printableObj["_formatted"] == "object") {
@@ -92,7 +102,7 @@ const SearchHits = ({ hits }) => {
                     </div>
                 })}
 
-                <RankingInfoBar hit={hit}/>
+                <RankingInfoBar hit={hit} />
             </div>
         })}
         {hits.length === 0 ?
@@ -106,7 +116,7 @@ const SearchHits = ({ hits }) => {
 export default SearchWidget;
 
 
-const RankingInfoBar = ({hit}) => {
+const RankingInfoBar = ({ hit }) => {
     if (typeof hit["_rankingScoreDetails"] !== 'object') {
         return <></>
     }
