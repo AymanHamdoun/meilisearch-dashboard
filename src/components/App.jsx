@@ -4,7 +4,7 @@ import {BrowserRouter, Route, Routes} from 'react-router-dom'
 import DashboardLayout from './layouts/DashboardLayout.jsx'
 import BasicLayout from './layouts/AuthLayout.jsx'
 
-import OverviewPage from './pages/instance/OverviewPage'
+import OverviewPage from './pages/instance/OverviewPage.tsx'
 import IndexPage from './pages/instance/index/Page.jsx'
 import TasksPage from './pages/instance/tasks/Page.tsx'
 

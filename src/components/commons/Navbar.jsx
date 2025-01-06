@@ -10,7 +10,7 @@ import { MeiliIndexAction } from "../../reducers/meiliIndexReducer";
  */
 const Navbar = () => {
     return <nav className="w-full bg-transparent border-b border-b-gray-200">
-        <div className="px-3 py-3 lg:px-5 lg:pl-3">
+        <div className="px-3 py-5 lg:px-5 lg:pl-3">
             <div className="flex items-center justify-between">
                 <div className="flex flex-row gap-3">
                     <InstanceDropdown />

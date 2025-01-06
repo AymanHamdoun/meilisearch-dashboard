@@ -79,7 +79,6 @@ const SearchHits = ({ response }) => {
         hitCountMsg = `estimated ${estimatedHits}`
     }
 
-    console.log(response)
     return <div className="flex flex-col mb-6">
         {processingTime !== undefined ?
             <div className="text-center text-gray-400 px-3 mb-2">
