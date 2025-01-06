@@ -40,6 +40,26 @@ const getIndexStats = (host, masterKey, indexName) => {
         .catch((error) => console.error(error));
 }
 
+const getGlobalStats = (host, masterKey) => {
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${masterKey}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${host}/stats`;
+
+
+    return fetch(url, requestOptions)
+        .then((response) => response.json())
+        .catch((error) => console.error(error));
+}
+
 type CreateIndexOptions = {
     instance: InstanceState,
     indexName: string,
@@ -106,5 +126,6 @@ export {
     listIndexes,
     getIndexStats,
     createIndex,
-    deleteIndex
+    deleteIndex,
+    getGlobalStats
 }
