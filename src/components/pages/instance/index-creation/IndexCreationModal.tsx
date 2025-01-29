@@ -1,9 +1,12 @@
+// @ts-ignore
 import React, { useState } from "react";
+// @ts-ignore
 import {createIndex, listIndexes} from "../../../../services/meilisearch/indexes.ts"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 import useIndex from "../../../../hooks/useMeiliIndex";
 import { MeiliIndexAction } from "../../../../reducers/meiliIndexReducer.js";
 import { NavigateFunction, useNavigate } from "react-router-dom";
+// @ts-ignore
 import { InstanceState } from "../../../../contexts/InstanceContext.tsx";
 
 type IndexCreationOptions = {

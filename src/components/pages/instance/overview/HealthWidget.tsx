@@ -1,5 +1,7 @@
+// @ts-ignore
 import React, { useState, useEffect } from "react";
 import { getGlobalStats } from "../../../../services/meilisearch/indexes";
+import {useTranslation} from "react-i18next";
 
 // Define types for the responses
 interface IndexInfo {
@@ -34,6 +36,7 @@ type ApiResponse = GlobalStatsResponse | ErrorResponse;
 const HealthWidget: React.FC<HealthWidgetProps> = ({ instanceState }) => {
   const [res, setRes] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -56,7 +59,7 @@ const HealthWidget: React.FC<HealthWidgetProps> = ({ instanceState }) => {
   if (error) {
     return (
       <div className="health-widget">
-        <p className="error-message">Error: {error}</p>
+        <p className="error-message">{t("error")}: {error}</p>
       </div>
     );
   }
@@ -64,7 +67,7 @@ const HealthWidget: React.FC<HealthWidgetProps> = ({ instanceState }) => {
   if (!res) {
     return (
       <div className="health-widget">
-        <p>Loading...</p>
+        <p>{t("loading")}</p>
       </div>
     );
   }
@@ -73,22 +76,22 @@ const HealthWidget: React.FC<HealthWidgetProps> = ({ instanceState }) => {
     // This should never be reached since we handle errors separately
     return (
       <div className="health-widget">
-        <p>Error: {res.message}</p>
+        <p>{t("error")}: {res.message}</p>
       </div>
     );
   }
 
   return (
     <div className="health-widget p-4 border rounded-lg shadow-md">
-      <h2 className="text-lg font-bold mb-4">Database Stats</h2>
-      <p className="mb-4 text-gray-700">Database Size: {res.databaseSize} bytes</p>
-      <h3 className="text-md font-semibold mb-2">Indexes</h3>
+      <h2 className="text-lg font-bold mb-4">{t("meili.database_stats")}</h2>
+      <p className="mb-4 text-gray-700">{t("meili.database_size")}: {res.databaseSize} bytes</p>
+      <h3 className="text-md font-semibold mb-2">{t("meili.indices")}</h3>
       <table className="w-full border-collapse">
         <thead>
           <tr className="text-left text-gray-500 border-b">
-            <th className="pb-2">Index Name</th>
-            <th className="pb-2">Documents</th>
-            <th className="pb-2">Indexing</th>
+            <th className="pb-2">{t("meili.index_name")}</th>
+            <th className="pb-2">{t("meili.documents")}</th>
+            <th className="pb-2">{t("meili.index_status")}</th>
           </tr>
         </thead>
         <tbody>
@@ -99,11 +102,11 @@ const HealthWidget: React.FC<HealthWidgetProps> = ({ instanceState }) => {
               <td className="py-2 flex items-center">
                 {indexInfo.isIndexing ? (
                   <span className="text-yellow-600 flex items-center">
-                    Building
+                    {t("meili.statuses.building")}
                   </span>
                 ) : (
                   <span className="text-green-600 flex items-center">
-                    Idle
+                    {t("meili.statuses.idle")}
                   </span>
                 )}
               </td>

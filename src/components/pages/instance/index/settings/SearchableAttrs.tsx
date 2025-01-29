@@ -1,3 +1,4 @@
+// @ts-ignore
 import React from "react"
 import DynamicTextBoxes from "../../../../commons/DynamicTextboxes"
 import DocHeader from "./DocHeader"
