@@ -4,6 +4,7 @@ import { SearchableAttrs } from "./settings/SearchableAttrs";
 import TypoTolerance from "./settings/TypoTolerance";
 
 import { IndexSettingsProvider } from "../../../../contexts/IndexSettingsContext"
+import RankingInfo from "./settings/RankingInfo.tsx";
 
 
 const tabs = [
@@ -15,7 +16,7 @@ const tabs = [
     {
         key: "ranking",
         label: "Ranking and Sorting",
-        element: <div>Ranking & Sorting ... to be done</div>
+        element: <RankingInfo/>
     },
     {
         key: "typos",

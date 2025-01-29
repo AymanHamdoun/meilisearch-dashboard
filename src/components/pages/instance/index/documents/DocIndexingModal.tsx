@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useState } from 'react';
 import CodeMirror from "@uiw/react-codemirror";
 import { vscodeLight, vscodeDark } from "@uiw/codemirror-theme-vscode";

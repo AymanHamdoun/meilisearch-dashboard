@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react"
 import ConfirmationModal from "../../../commons/ConfirmationModal"
 import { deleteIndex, listIndexes } from "../../../../services/meilisearch/indexes"
@@ -44,7 +45,8 @@ const ManageIndexDropdown = () => {
             isVisible={isDocIndexingModalVisible}
             onClose={() => setIsDocIndexingModalVisible(false)}
             onConfirm={(code: string) => {
-                alert(code)
+                console.log(code);
+                // @TODO upload doc to meili
                 setIsDocIndexingModalVisible(false)
             }}
         />

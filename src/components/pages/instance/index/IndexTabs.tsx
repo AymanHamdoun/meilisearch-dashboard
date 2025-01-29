@@ -1,4 +1,6 @@
+// @ts-ignore
 import React, { useEffect } from "react";
+// @ts-ignore
 import SearchWidget from './SearchWidget.tsx'
 import IndexSettingsTabs from './IndexSettingsTabs.jsx'
 import { initFlowbite } from 'flowbite';
