@@ -1,4 +1,20 @@
 {
+  "error": "Error",
+  "loading": "Loading",
+  "meili": {
+    "database": "Database",
+    "database_stats": "Database Stats",
+    "database_size": "Database Size",
+    "indices": "Indices",
+    "index": "Index",
+    "index_name": "Index Name",
+    "documents": "Documents",
+    "index_status":  "Index Status",
+    "statuses": {
+      "building": "Building",
+      "idle": "Idle"
+    }
+  },
   "auth": {
     "login": "Login",
     "logout": "Logout"
