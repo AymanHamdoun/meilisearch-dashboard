@@ -68,7 +68,7 @@ const SearchWidget = () => {
     </div>
 }
 
-const SearchHits = ({ response }) => {
+export const SearchHits = ({ response }) => {
     const hits = response.hits;
     const processingTime = response.processingTimeMs;
     const totalHits = response.totalHits !== undefined ? response.totalHits : 0; 

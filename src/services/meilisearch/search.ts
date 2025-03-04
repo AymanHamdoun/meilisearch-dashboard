@@ -62,15 +62,7 @@ const federatedSearch = (options: MultiSearchOptions) => {
         })
     };
 
-    const queryParams = new URLSearchParams({
-        showRankingScoreDetails: "true",
-        showRankingScore: "true",
-        attributesToHighlight: "*",
-        showMatchesPosition: "true"
-    })
-
-    const url = `${options.instance.host}/multi-search?${queryParams.toString()}`;
-
+    const url = `${options.instance.host}/multi-search`;
 
     return fetch(url, requestOptions)
         .then((response) => response.json())
