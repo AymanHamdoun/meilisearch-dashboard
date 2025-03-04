@@ -60,6 +60,26 @@ const getGlobalStats = (host, masterKey) => {
         .catch((error) => console.error(error));
 }
 
+const getVersion = (host, masterKey) => {
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${masterKey}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${host}/version`;
+
+
+    return fetch(url, requestOptions)
+        .then((response) => response.json())
+        .catch((error) => console.error(error));
+}
+
 type CreateIndexOptions = {
     instance: InstanceState,
     indexName: string,
