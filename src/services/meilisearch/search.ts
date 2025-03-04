@@ -25,6 +25,58 @@ const indexSearchWrapper = (options: SearchWrapperOptions) => {
     })
 }
 
+interface QueryFederationOptions {
+    weight: number;
+};
+
+interface MultiSearchQuery {
+    q: string;
+    indexUid: string;
+    federationOptions: QueryFederationOptions;
+};
+
+interface FederationOptions {
+    offset?: number
+    limit?: number
+}
+
+interface MultiSearchOptions {
+    instance: InstanceState,
+    queries: MultiSearchQuery[]
+    federation: FederationOptions
+}
+
+const federatedSearch = (options: MultiSearchOptions) => {
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${options.instance.key}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow",
+        body: JSON.stringify({
+            queries: options.queries,
+            federation: options.federation,
+        })
+    };
+
+    const queryParams = new URLSearchParams({
+        showRankingScoreDetails: "true",
+        showRankingScore: "true",
+        attributesToHighlight: "*",
+        showMatchesPosition: "true"
+    })
+
+    const url = `${options.instance.host}/multi-search?${queryParams.toString()}`;
+
+
+    return fetch(url, requestOptions)
+        .then((response) => response.json())
+        .catch((error) => console.error(error));
+}
+
 
 const basicSearch = (options: SearchWrapperOptions) => {
     let myHeaders = new Headers({
@@ -75,5 +127,6 @@ const getDocByObjectID = (options: SearchWrapperOptions) => {
 }
 
 export {
-    indexSearchWrapper
+    indexSearchWrapper,
+    federatedSearch
 }
