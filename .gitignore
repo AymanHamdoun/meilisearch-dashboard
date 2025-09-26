@@ -25,3 +25,6 @@ dist-ssr
 
 .env
 local-env/meili.env
+
+.claude/
+CLAUDE.md

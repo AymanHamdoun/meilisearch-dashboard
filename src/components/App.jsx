@@ -8,6 +8,7 @@ import OverviewPage from './pages/instance/OverviewPage.tsx'
 import IndexPage from './pages/instance/index/Page.jsx'
 import FederatedSearchPage from './pages/instance/search/federated/Page.tsx'
 import TasksPage from './pages/instance/tasks/Page.tsx'
+import InstanceErrorPage from './pages/instance/InstanceErrorPage.tsx'
 
 import LoginPage from './pages/login/Page.jsx'
 import InstanceFormPage from './pages/instance-form/Page.tsx'
@@ -27,6 +28,7 @@ const App = () => {
             <Route path="index" element={<IndexPage />} />
             <Route path="search/federated" element={<FederatedSearchPage />} />
             <Route path="tasks" element={<TasksPage />} />
+            <Route path="error" element={<InstanceErrorPage />} />
           </Route>
       </Routes>
     </BrowserRouter>

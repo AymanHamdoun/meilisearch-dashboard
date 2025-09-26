@@ -1,4 +1,5 @@
 import { string } from "prop-types"
+import { fetchWithTimeout } from "./fetchWithTimeout"
 
 type SettingsAPIOptions = {
     host: string
@@ -21,7 +22,7 @@ export const getIndexSettings = (options: SettingsAPIOptions) => {
     const url = `${options.host}/indexes/${options.indexName}/settings`;
 
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then(async (response) => {
             const status = response.status;
             const responseBody = await response.json()
@@ -33,6 +34,6 @@ export const getIndexSettings = (options: SettingsAPIOptions) => {
         })
         .catch((error) => {
             console.error("error fetching index settings", error);
-            return {}
+            throw error;
         });
 }

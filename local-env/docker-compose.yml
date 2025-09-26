@@ -1,7 +1,7 @@
 services:
   meilisearch:
-    image: getmeili/meilisearch:v1.10.2
-    container_name: meilisearch
+    image: getmeili/meilisearch:v1.22.0
+    container_name: meilisearch-instance
     ports:
       - "7700:7700"
     env_file: meili.env

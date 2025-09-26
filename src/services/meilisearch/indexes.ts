@@ -1,4 +1,5 @@
 import { InstanceState } from "../../contexts/InstanceContext";
+import { fetchWithTimeout } from "./fetchWithTimeout";
 
 const listIndexes = (host, masterKey) => {
     let myHeaders = new Headers({
@@ -15,9 +16,12 @@ const listIndexes = (host, masterKey) => {
     const url = `${host}/indexes/`;
 
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('API error:', error);
+            throw error;
+        });
 }
 
 const getIndexStats = (host, masterKey, indexName) => {
@@ -35,9 +39,12 @@ const getIndexStats = (host, masterKey, indexName) => {
     const url = `${host}/indexes/${indexName}/stats`;
 
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('API error:', error);
+            throw error;
+        });
 }
 
 const getGlobalStats = (host, masterKey) => {
@@ -55,9 +62,12 @@ const getGlobalStats = (host, masterKey) => {
     const url = `${host}/stats`;
 
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('API error:', error);
+            throw error;
+        });
 }
 
 const getVersion = (host, masterKey) => {
@@ -75,9 +85,12 @@ const getVersion = (host, masterKey) => {
     const url = `${host}/version`;
 
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('API error:', error);
+            throw error;
+        });
 }
 
 type CreateIndexOptions = {
@@ -115,9 +128,12 @@ const createIndex = (options: CreateIndexOptions) => {
     const url = `${options.instance.host}/indexes`;
 
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('API error:', error);
+            throw error;
+        });
 }
 
 type DeleteIndexOptions = {
@@ -137,9 +153,12 @@ const deleteIndex = (options: DeleteIndexOptions) => {
     };
 
     const url = `${options.instance.host}/indexes/${options.indexName}`;
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('API error:', error);
+            throw error;
+        });
 }
 
 export {

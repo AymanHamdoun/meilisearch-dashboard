@@ -1,6 +1,7 @@
 import { string } from "prop-types"
 import { QueryType } from "./types"
 import { InstanceState } from "../../contexts/InstanceContext"
+import { fetchWithTimeout } from "./fetchWithTimeout"
 
 type SearchWrapperOptions = {
     instance: InstanceState,
@@ -64,9 +65,12 @@ const federatedSearch = (options: MultiSearchOptions) => {
 
     const url = `${options.instance.host}/multi-search`;
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('Search API error:', error);
+            throw error;
+        });
 }
 
 
@@ -93,9 +97,12 @@ const basicSearch = (options: SearchWrapperOptions) => {
     const url = `${options.instance.host}/indexes/${options.indexName}/search?${queryParams.toString()}`;
 
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('Search API error:', error);
+            throw error;
+        });
 }
 
 const getDocByObjectID = (options: SearchWrapperOptions) => {
@@ -113,9 +120,12 @@ const getDocByObjectID = (options: SearchWrapperOptions) => {
     const url = `${options.instance.host}/indexes/${options.indexName}/documents/${options.query}`;
 
 
-    return fetch(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions)
         .then((response) => response.json())
-        .catch((error) => console.error(error));
+        .catch((error) => {
+            console.error('Search API error:', error);
+            throw error;
+        });
 }
 
 export {

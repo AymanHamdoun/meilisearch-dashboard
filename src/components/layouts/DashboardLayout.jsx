@@ -7,16 +7,18 @@ import Navbar from "../commons/Navbar"
 import InstanceModal from "../commons/InstanceModal"
 import useMeiliInstance from "../../hooks/useMeiliInstance.js";
 import IndexCreationModal from "../pages/instance/index-creation/IndexCreationModal";
+import InstanceErrorBoundary from "../commons/InstanceErrorBoundary";
 
 const DashboardLayout = () => {
     return <InstanceProvider>
-        
-        <InstanceModal/>
+        <InstanceErrorBoundary>
+            <InstanceModal/>
 
-        <MeiliIndexProvider>
-            <IndexCreationModal/>
-            <LayoutContent/>
-        </MeiliIndexProvider>
+            <MeiliIndexProvider>
+                <IndexCreationModal/>
+                <LayoutContent/>
+            </MeiliIndexProvider>
+        </InstanceErrorBoundary>
     </InstanceProvider>
 }
 

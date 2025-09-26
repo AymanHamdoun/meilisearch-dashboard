@@ -1,5 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { indexSearchWrapper } from "../../../../services/meilisearch/search"
 import useDebouncedValue from "../../../../hooks/useDebounce"
@@ -7,10 +8,12 @@ import useMeiliIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 import { QueryType } from "../../../../services/meilisearch/types"
 import parse from 'html-react-parser';
+import { ErrorType } from "../InstanceErrorPage";
 
 const SearchWidget = () => {
     const { meiliIndexState } = useMeiliIndex()
     const { instanceState } = useMeiliInstance()
+    const navigate = useNavigate()
 
     const index = meiliIndexState.selectedIndex
 
@@ -38,6 +41,20 @@ const SearchWidget = () => {
                 return
             }
             setResponse(resp)
+        }).catch(error => {
+            console.error('Search error:', error);
+
+            // Determine error type and navigate to error page
+            let errorType = ErrorType.UNKNOWN;
+            if (error.errorType) {
+                errorType = error.errorType;
+            } else if (error.message?.toLowerCase().includes('api key')) {
+                errorType = ErrorType.API_KEY;
+            } else if (error.message?.includes('timeout')) {
+                errorType = ErrorType.TIMEOUT;
+            }
+
+            navigate('/instance/error', { state: { errorType } });
         })
 
     }, [debouncedSearchTerm, queryType])

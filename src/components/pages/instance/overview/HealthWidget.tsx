@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { getGlobalStats } from "../../../../services/meilisearch/indexes";
 import {useTranslation} from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { ErrorType } from "../InstanceErrorPage";
 
 // Define types for the responses
 interface IndexInfo {
@@ -37,24 +39,55 @@ const HealthWidget: React.FC<HealthWidgetProps> = ({ instanceState }) => {
   const [res, setRes] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const response = await getGlobalStats(instanceState.host, instanceState.key);
+
+        // Check if response is undefined/null (connection error)
+        if (!response) {
+          console.error("Failed to connect to Meilisearch instance");
+          navigate('/instance/error', { state: { errorType: ErrorType.CONNECTION } });
+          return;
+        }
+
         if ("message" in response) {
-          setError(response.message); // Handle error response
+          // Check if it's an authentication error
+          if (response.code === 'invalid_api_key' ||
+              response.code === 'missing_authorization_header' ||
+              response.message?.toLowerCase().includes('api key')) {
+            console.error("API Key error:", response.message);
+            navigate('/instance/error', { state: { errorType: ErrorType.API_KEY } });
+          } else {
+            // For other errors, might be connection issues
+            console.error("Meilisearch error:", response);
+            navigate('/instance/error', { state: { errorType: ErrorType.UNKNOWN } });
+          }
         } else {
           setRes(response); // Handle success response
         }
-      } catch (err) {
-        setError("An error occurred while fetching data.");
-        console.error(err);
+      } catch (err: any) {
+        console.error("Connection error:", err);
+
+        // Determine error type from the error object
+        let errorType = ErrorType.CONNECTION;
+        if (err.errorType) {
+          errorType = err.errorType;
+        } else if (err.name === 'AbortError' || err.message?.includes('timeout')) {
+          errorType = ErrorType.TIMEOUT;
+        } else if (err.message?.toLowerCase().includes('api key')) {
+          errorType = ErrorType.API_KEY;
+        }
+
+        // Navigate to error page with appropriate error type
+        navigate('/instance/error', { state: { errorType } });
       }
     };
 
     fetchStats();
-  }, [instanceState]);
+  }, [instanceState, navigate]);
 
   if (error) {
     return (
