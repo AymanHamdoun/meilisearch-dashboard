@@ -20,7 +20,8 @@ export const _defaultState = {
 
 const MeiliIndexContext = createContext({
     meiliIndexState: _defaultState,
-    dispatch: (action) => {}
+    dispatch: (action) => {},
+    refreshIndexes: () => Promise.resolve(null)
 });
 
 /**
@@ -44,6 +45,24 @@ export const MeiliIndexProvider = ({ children }) => {
 
     const [meiliIndexState, dispatch] = useReducer(meiliIndexReducer, fetchDefaultState());
 
+    // Function to refresh indexes that can be called by components
+    const refreshIndexes = async () => {
+        if (!instanceState.isLoaded || !instanceState.isSet) {
+            return;
+        }
+
+        try {
+            const response = await listIndexes(instanceState.host, instanceState.key);
+            if (response && response.results) {
+                dispatch({ type: MeiliIndexAction.SetFromIndexList, payload: response.results });
+                return response.results;
+            }
+        } catch (error) {
+            console.error('Failed to refresh indexes:', error);
+        }
+        return null;
+    };
+
     useEffect(() => {
         if (!instanceState.isLoaded) {
             return
@@ -60,7 +79,7 @@ export const MeiliIndexProvider = ({ children }) => {
     }, [instanceState]); // Empty dependency array ensures this runs only once on component mount
 
 
-    return <MeiliIndexContext.Provider value={{meiliIndexState, dispatch}}>
+    return <MeiliIndexContext.Provider value={{meiliIndexState, dispatch, refreshIndexes}}>
         {children}
     </MeiliIndexContext.Provider>;
 }

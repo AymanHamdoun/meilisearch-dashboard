@@ -1,7 +1,7 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react"
 import ConfirmationModal from "../../../commons/ConfirmationModal"
-import { deleteIndex, listIndexes } from "../../../../services/meilisearch/indexes"
+import { deleteIndex } from "../../../../services/meilisearch/indexes"
 import useIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance"
 import { InstanceState } from "../../../../contexts/InstanceContext"
@@ -16,7 +16,7 @@ const IndexManager = () => {
 }
 
 const ManageIndexDropdown = () => {
-    const { meiliIndexState, dispatch } = useIndex()
+    const { meiliIndexState, refreshIndexes } = useIndex()
     const {instanceState} = useMeiliInstance()
     const navigate = useNavigate()
 
@@ -29,17 +29,15 @@ const ManageIndexDropdown = () => {
         <ConfirmationModal
             isVisible={isDeleteConfirmationModalVisible}
             onClose={() => setIsDeleteConfirmationModalVisible(false)}
-            onConfirm={() => {
-                handleIndexDeletion({
-                    indexName: indexName,
-                    dispatch: dispatch,
-                    instance: instanceState,
-                    navigate: navigate,
-                })
-
-                setIsDeleteConfirmationModalVisible(false)
-            }}
+            onConfirm={() => handleIndexDeletion({
+                indexName: indexName,
+                refreshIndexes: refreshIndexes,
+                instance: instanceState,
+                navigate: navigate,
+            })}
             message={`Delete Index '${indexName}' ?`}
+            confirmButtonText="Delete"
+            confirmButtonColor="red"
         />
         <DocIndexingModal
             isVisible={isDocIndexingModalVisible}
@@ -82,42 +80,46 @@ const ManageIndexDropdown = () => {
 
 type IndexDeletingOptions = {
     indexName: string,
-    dispatch: (action) => void,
+    refreshIndexes: () => Promise<any>,
     instance: InstanceState,
     navigate: NavigateFunction,
-    
 }
 
-const handleIndexDeletion = (options: IndexDeletingOptions) => {
-    deleteIndex({
-        instance: options.instance,
-        indexName: options.indexName,
-    }).then((createIndexResponse) => {
-        // wait 1 second just to make sure the index has been created so we end up getting it
-        setTimeout(() => {
-            listIndexes(options.instance.host, options.instance.key).then((response) => {
-                if (!response.results) {
-                    return
-                }
-    
-                const newIndexFinishedDeleting = response.results.filter((indexObj) => {
-                    return indexObj.uid === options.indexName
-                }).length === 0
-    
-                if (!newIndexFinishedDeleting) {
-                    options.navigate("/instance/tasks")
-                    return
-                }
-    
-                // Update Index Context (to add new index to dropdown)
-                options.dispatch({ type: MeiliIndexAction.SetAndDefaultTo, payload: {
-                    indexList: response.results,
-                    defaultIndexName: options.indexName
-                }});
-                options.navigate("/instance/index")
-            });
-        }, 1000)
-    })
+const handleIndexDeletion = async (options: IndexDeletingOptions) => {
+    try {
+        // Delete the index
+        await deleteIndex({
+            instance: options.instance,
+            indexName: options.indexName,
+        });
+
+        // Wait a bit before checking if deletion completed
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Refresh the index list to see if deletion completed
+        const indexList = await options.refreshIndexes();
+
+        if (indexList) {
+            const indexStillExists = indexList.some((indexObj: any) =>
+                indexObj.uid === options.indexName
+            );
+
+            if (indexStillExists) {
+                // Index is still being deleted, go to tasks page
+                options.navigate("/instance/tasks");
+            } else {
+                // Index deleted successfully, stay on current page or go to overview
+                options.navigate("/instance/index");
+            }
+        } else {
+            // If refresh fails, assume it's still processing
+            options.navigate("/instance/tasks");
+        }
+    } catch (error: any) {
+        console.error('Index deletion failed:', error);
+        // Re-throw the error so the modal can catch it
+        throw new Error(error.message || 'Failed to delete index');
+    }
 }
 
 export default IndexManager;

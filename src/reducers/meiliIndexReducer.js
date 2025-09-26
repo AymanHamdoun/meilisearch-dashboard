@@ -9,6 +9,7 @@ export const MeiliIndexAction = {
     Change: 'CHANGE',
     SetFromIndexList: 'SET_FROM_INDEXES',
     SetAndDefaultTo: 'SET_FROM_AND_DEFAULT',
+    RefreshIndexes: 'REFRESH_INDEXES',
 }
 
 /**

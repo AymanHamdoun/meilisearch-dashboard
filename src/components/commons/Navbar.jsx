@@ -3,6 +3,7 @@ import useMeiliInstance from '../../hooks/useMeiliInstance'
 import useIndex from '../../hooks/useMeiliIndex'
 import { MeiliIndexAction } from "../../reducers/meiliIndexReducer";
 import {useLocation} from "react-router-dom";
+import { useModal } from "../layouts/DashboardLayout";
 
 /**
  * Navbar component that renders the logged-in Navbar.
@@ -103,6 +104,7 @@ const InstanceDropdown = () => {
  */
 const IndexDropdown = () => {
     const { meiliIndexState, dispatch } = useIndex()
+    const { setShowIndexCreationModal } = useModal()
     const location = useLocation();
 
     useEffect(() => {}, [meiliIndexState.availableIndexes, meiliIndexState.selectedIndex])
@@ -132,8 +134,7 @@ const IndexDropdown = () => {
                 return <option key={indexUID} value={indexUID}>{indexUID}</option>
             })}
         </select>
-        <button data-modal-target="index-creation-modal" 
-                data-modal-toggle="index-creation-modal" 
+        <button onClick={() => setShowIndexCreationModal(true)}
                 className="text-primary px-3 py-1 rounded border border-transparent hover:border-primary">
                     +
         </button>
