@@ -26,11 +26,7 @@ const SearchWidget = () => {
 
 
     useEffect(() => {
-        if (debouncedSearchTerm.length == 0) {
-            setResponse({hits: []})
-            return
-        }
-
+        // Always make a request, even with empty query
         indexSearchWrapper({
             instance: instanceState,
             indexName: index,
@@ -57,7 +53,7 @@ const SearchWidget = () => {
             navigate('/instance/error', { state: { errorType } });
         })
 
-    }, [debouncedSearchTerm, queryType])
+    }, [debouncedSearchTerm, queryType, index])
 
 
     return <div className="">
@@ -127,9 +123,9 @@ export const SearchHits = ({ response }) => {
                 <RankingInfoBar hit={hit} />
             </div>
         })}
-        {hits.length === 0 ?
-            <div className="flex items-center justify-center min-h-96">
-                No Hits
+        {hits.length === 0 && processingTime !== undefined ?
+            <div className="flex items-center justify-center min-h-96 text-gray-500">
+                No documents found
             </div>
             : <></>}
     </div>

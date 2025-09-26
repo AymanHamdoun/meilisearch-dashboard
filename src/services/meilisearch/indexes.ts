@@ -161,10 +161,39 @@ const deleteIndex = (options: DeleteIndexOptions) => {
         });
 }
 
+type UploadDocumentsOptions = {
+    instance: InstanceState,
+    indexName: string,
+    documents: any[]
+}
+
+const uploadDocuments = (options: UploadDocumentsOptions) => {
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${options.instance.key}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "POST",
+        body: JSON.stringify(options.documents),
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${options.instance.host}/indexes/${options.indexName}/documents`;
+    return fetchWithTimeout(url, requestOptions)
+        .then((response) => response.json())
+        .catch((error) => {
+            console.error('API error:', error);
+            throw error;
+        });
+}
+
 export {
     listIndexes,
     getIndexStats,
     createIndex,
     deleteIndex,
+    uploadDocuments,
     getGlobalStats
 }

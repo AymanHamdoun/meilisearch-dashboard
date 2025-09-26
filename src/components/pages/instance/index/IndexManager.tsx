@@ -42,11 +42,7 @@ const ManageIndexDropdown = () => {
         <DocIndexingModal
             isVisible={isDocIndexingModalVisible}
             onClose={() => setIsDocIndexingModalVisible(false)}
-            onConfirm={(code: string) => {
-                console.log(code);
-                // @TODO upload doc to meili
-                setIsDocIndexingModalVisible(false)
-            }}
+            indexName={indexName || ''}
         />
         <button id="dropdownDividerButton"
             data-dropdown-toggle="dropdownDivider"

@@ -87,7 +87,7 @@ const IndexCreationModal: React.FC<IndexCreationModalProps> = ({ isVisible, onCl
     const handleIndexCreation = async () => {
         await handleAsyncOperation(
             performIndexCreation,
-            undefined, // onSuccess callback
+            resetModal, // onSuccess callback - clears inputs
             onClose, // onClose callback
             1000 // success delay
         );
