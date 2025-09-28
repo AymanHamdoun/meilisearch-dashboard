@@ -11,7 +11,7 @@ import parse from 'html-react-parser';
 import { ErrorType } from "../InstanceErrorPage";
 
 const SearchWidget = () => {
-    const { meiliIndexState } = useMeiliIndex()
+    const { meiliIndexState, refreshIndexes } = useMeiliIndex()
     const { instanceState } = useMeiliInstance()
     const navigate = useNavigate()
 
@@ -37,20 +37,24 @@ const SearchWidget = () => {
                 return
             }
             setResponse(resp)
-        }).catch(error => {
+        }).catch(async error => {
             console.error('Search error:', error);
 
-            // Determine error type and navigate to error page
-            let errorType = ErrorType.UNKNOWN;
-            if (error.errorType) {
-                errorType = error.errorType;
-            } else if (error.message?.toLowerCase().includes('api key')) {
-                errorType = ErrorType.API_KEY;
-            } else if (error.message?.includes('timeout')) {
-                errorType = ErrorType.TIMEOUT;
+            // Check if it's an index not found error - refresh indexes instead of showing error page
+            if (error.code === 'index_not_found') {
+                console.log('Index not found, refreshing index list...');
+                await refreshIndexes();
+                // Clear the response since the index doesn't exist
+                setResponse({hits: []});
+                return;
             }
 
-            navigate('/instance/error', { state: { errorType } });
+            // Only navigate to error page for actual connection/auth issues
+            if (error.errorType) {
+                // This is a connection/timeout/auth error from fetchWithTimeout
+                navigate('/instance/error', { state: { errorType: error.errorType } });
+            }
+            // For other API errors, just log them but don't navigate away
         })
 
     }, [debouncedSearchTerm, queryType, index])

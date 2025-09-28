@@ -66,7 +66,20 @@ const federatedSearch = (options: MultiSearchOptions) => {
     const url = `${options.instance.host}/multi-search`;
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                // Check for index not found error
+                if (response.status === 404 && data.code === 'index_not_found') {
+                    const error = new Error(data.message || 'Index not found');
+                    (error as any).code = 'index_not_found';
+                    (error as any).status = 404;
+                    throw error;
+                }
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('Search API error:', error);
             throw error;
@@ -98,7 +111,20 @@ const basicSearch = (options: SearchWrapperOptions) => {
 
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                // Check for index not found error
+                if (response.status === 404 && data.code === 'index_not_found') {
+                    const error = new Error(data.message || 'Index not found');
+                    (error as any).code = 'index_not_found';
+                    (error as any).status = 404;
+                    throw error;
+                }
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('Search API error:', error);
             throw error;
@@ -121,7 +147,27 @@ const getDocByObjectID = (options: SearchWrapperOptions) => {
 
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                // Check for index not found or document not found
+                if (response.status === 404) {
+                    if (data.code === 'index_not_found') {
+                        const error = new Error(data.message || 'Index not found');
+                        (error as any).code = 'index_not_found';
+                        (error as any).status = 404;
+                        throw error;
+                    } else if (data.code === 'document_not_found') {
+                        const error = new Error(data.message || 'Document not found');
+                        (error as any).code = 'document_not_found';
+                        (error as any).status = 404;
+                        throw error;
+                    }
+                }
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('Search API error:', error);
             throw error;

@@ -23,7 +23,10 @@ export const fetchWithTimeout = async (
 
         clearTimeout(timeoutId);
 
-        // Check for API key errors
+        // If we got a response from the server, even if it's an error,
+        // it means Meilisearch is reachable. Return the response and let
+        // the caller handle API-level errors.
+        // Only throw for specific auth errors that should redirect to error page
         if (response.status === 401 || response.status === 403) {
             const data = await response.json();
             if (data.message?.toLowerCase().includes('api key') ||
@@ -35,6 +38,8 @@ export const fetchWithTimeout = async (
             }
         }
 
+        // For all other responses (including 404, 400, 500 etc),
+        // return the response as-is since the server is reachable
         return response;
     } catch (error: any) {
         clearTimeout(timeoutId);
@@ -66,27 +71,4 @@ export const fetchWithTimeout = async (
         fetchError.originalError = error;
         throw fetchError;
     }
-};
-
-// Helper function to handle API responses and navigate to error page if needed
-export const handleApiResponse = async (response: Response, navigate?: (path: string, options?: any) => void) => {
-    if (!response.ok) {
-        const data = await response.json().catch(() => ({ message: 'Unknown error' }));
-
-        // Check for API key errors
-        if (response.status === 401 || response.status === 403) {
-            if (data.message?.toLowerCase().includes('api key') ||
-                data.code === 'invalid_api_key' ||
-                data.code === 'missing_authorization_header') {
-                if (navigate) {
-                    navigate('/instance/error', { state: { errorType: ErrorType.API_KEY } });
-                }
-                throw new Error(data.message || 'Invalid API key');
-            }
-        }
-
-        throw new Error(data.message || `HTTP error! status: ${response.status}`);
-    }
-
-    return response.json();
 };

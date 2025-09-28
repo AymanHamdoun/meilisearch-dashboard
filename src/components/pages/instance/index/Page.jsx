@@ -17,7 +17,7 @@ const Page = () => {
 
 
 const IndexStats = () => {
-    const { meiliIndexState } = useIndex()
+    const { meiliIndexState, refreshIndexes } = useIndex()
     const {instanceState} = useMeiliInstance()
 
     const [stats, setStats] = useState({})
@@ -26,10 +26,24 @@ const IndexStats = () => {
         if (!instanceState.isLoaded || meiliIndexState.selectedIndex === "") {
             return
         }
-        getIndexStats(instanceState.host, instanceState.key, meiliIndexState.selectedIndex).then((stats) => {
-            setStats(stats)
-        })
-    }, [instanceState])
+        getIndexStats(instanceState.host, instanceState.key, meiliIndexState.selectedIndex)
+            .then((stats) => {
+                setStats(stats)
+            })
+            .catch(async (error) => {
+                // If the index was not found, refresh the index list
+                // The reducer will automatically select a new index if available
+                if (error.code === 'index_not_found') {
+                    console.log(`Index '${meiliIndexState.selectedIndex}' not found, refreshing index list...`);
+                    await refreshIndexes();
+                    // Clear the stats since the index doesn't exist
+                    setStats({});
+                } else {
+                    // For other errors, log them but don't crash
+                    console.error('Error fetching index stats:', error);
+                }
+            })
+    }, [instanceState, meiliIndexState.selectedIndex])
 
 
     return <div className="mb-8">

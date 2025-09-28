@@ -20,7 +20,13 @@ export const getTasks = async (instance: InstanceState, from: number): Promise<G
 
 
     let data = await fetchWithTimeout(url, requestOptions)
-        .then((response) => {return response.json()})
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('Get tasks error:', error);
             throw error;
@@ -62,7 +68,13 @@ const getStatusTaskResponse = (instance: InstanceState, status: string) => {
 
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => {return response.json()})
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('Get status task error:', error);
             return _defaultResponse

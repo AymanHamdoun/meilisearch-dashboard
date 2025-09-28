@@ -17,7 +17,14 @@ const listIndexes = (host, masterKey) => {
 
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                // For API errors, throw them as regular errors
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('API error:', error);
             throw error;
@@ -40,7 +47,22 @@ const getIndexStats = (host, masterKey, indexName) => {
 
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                // Check if it's specifically an index not found error
+                if (response.status === 404 && data.code === 'index_not_found') {
+                    // Return a special error that can be handled by the caller
+                    const error = new Error(data.message || 'Index not found');
+                    (error as any).code = 'index_not_found';
+                    (error as any).status = 404;
+                    throw error;
+                }
+                // For other API errors, throw them as regular errors
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('API error:', error);
             throw error;
@@ -63,7 +85,13 @@ const getGlobalStats = (host, masterKey) => {
 
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('API error:', error);
             throw error;
@@ -86,7 +114,13 @@ const getVersion = (host, masterKey) => {
 
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('API error:', error);
             throw error;
@@ -129,7 +163,13 @@ const createIndex = (options: CreateIndexOptions) => {
 
 
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('API error:', error);
             throw error;
@@ -154,7 +194,13 @@ const deleteIndex = (options: DeleteIndexOptions) => {
 
     const url = `${options.instance.host}/indexes/${options.indexName}`;
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('API error:', error);
             throw error;
@@ -182,7 +228,20 @@ const uploadDocuments = (options: UploadDocumentsOptions) => {
 
     const url = `${options.instance.host}/indexes/${options.indexName}/documents`;
     return fetchWithTimeout(url, requestOptions)
-        .then((response) => response.json())
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                // Check for index not found error
+                if (response.status === 404 && data.code === 'index_not_found') {
+                    const error = new Error(data.message || 'Index not found');
+                    (error as any).code = 'index_not_found';
+                    (error as any).status = 404;
+                    throw error;
+                }
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
         .catch((error) => {
             console.error('API error:', error);
             throw error;
