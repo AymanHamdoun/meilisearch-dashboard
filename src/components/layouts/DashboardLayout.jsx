@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState, createContext, useContext} from "react";
 import {Outlet, useNavigate} from "react-router-dom"
 import { InstanceProvider } from "../../contexts/InstanceContext"
 import { MeiliIndexProvider } from "../../contexts/MeiliIndexContext"
@@ -6,17 +6,36 @@ import SideBar from "../commons/SideBar"
 import Navbar from "../commons/Navbar"
 import InstanceModal from "../commons/InstanceModal"
 import useMeiliInstance from "../../hooks/useMeiliInstance.js";
+import InstanceErrorBoundary from "../commons/InstanceErrorBoundary";
 import IndexCreationModal from "../pages/instance/index-creation/IndexCreationModal";
 
-const DashboardLayout = () => {
-    return <InstanceProvider>
-        
-        <InstanceModal/>
+// Generic modal context for dashboard-wide modals
+const DashboardModalContext = createContext({
+    showIndexCreationModal: false,
+    setShowIndexCreationModal: () => {}
+});
 
-        <MeiliIndexProvider>
-            <IndexCreationModal/>
-            <LayoutContent/>
-        </MeiliIndexProvider>
+export const useDashboardModal = () => useContext(DashboardModalContext);
+
+const DashboardLayout = () => {
+    const [showIndexCreationModal, setShowIndexCreationModal] = useState(false);
+
+    return <InstanceProvider>
+        <InstanceErrorBoundary>
+            <InstanceModal/>
+            <DashboardModalContext.Provider value={{
+                showIndexCreationModal,
+                setShowIndexCreationModal
+            }}>
+                <MeiliIndexProvider>
+                    <IndexCreationModal
+                        isVisible={showIndexCreationModal}
+                        onClose={() => setShowIndexCreationModal(false)}
+                    />
+                    <LayoutContent/>
+                </MeiliIndexProvider>
+            </DashboardModalContext.Provider>
+        </InstanceErrorBoundary>
     </InstanceProvider>
 }
 

@@ -1,11 +1,10 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react"
 import ConfirmationModal from "../../../commons/ConfirmationModal"
-import { deleteIndex, listIndexes } from "../../../../services/meilisearch/indexes"
+import { deleteIndex } from "../../../../services/meilisearch/indexes"
 import useIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance"
 import { InstanceState } from "../../../../contexts/InstanceContext"
-import { NavigateFunction, useNavigate } from "react-router-dom"
 import { MeiliIndexAction } from "../../../../reducers/meiliIndexReducer"
 import DocIndexingModal from "./documents/DocIndexingModal"
 
@@ -16,9 +15,8 @@ const IndexManager = () => {
 }
 
 const ManageIndexDropdown = () => {
-    const { meiliIndexState, dispatch } = useIndex()
+    const { meiliIndexState, refreshIndexes } = useIndex()
     const {instanceState} = useMeiliInstance()
-    const navigate = useNavigate()
 
     const [isDeleteConfirmationModalVisible, setIsDeleteConfirmationModalVisible] = useState(false)
     const [isDocIndexingModalVisible, setIsDocIndexingModalVisible] = useState(false)
@@ -29,26 +27,19 @@ const ManageIndexDropdown = () => {
         <ConfirmationModal
             isVisible={isDeleteConfirmationModalVisible}
             onClose={() => setIsDeleteConfirmationModalVisible(false)}
-            onConfirm={() => {
-                handleIndexDeletion({
-                    indexName: indexName,
-                    dispatch: dispatch,
-                    instance: instanceState,
-                    navigate: navigate,
-                })
-
-                setIsDeleteConfirmationModalVisible(false)
-            }}
+            onConfirm={() => handleIndexDeletion({
+                indexName: indexName,
+                refreshIndexes: refreshIndexes,
+                instance: instanceState,
+            })}
             message={`Delete Index '${indexName}' ?`}
+            confirmButtonText="Delete"
+            confirmButtonColor="red"
         />
         <DocIndexingModal
             isVisible={isDocIndexingModalVisible}
             onClose={() => setIsDocIndexingModalVisible(false)}
-            onConfirm={(code: string) => {
-                console.log(code);
-                // @TODO upload doc to meili
-                setIsDocIndexingModalVisible(false)
-            }}
+            indexName={indexName || ''}
         />
         <button id="dropdownDividerButton"
             data-dropdown-toggle="dropdownDivider"
@@ -82,42 +73,32 @@ const ManageIndexDropdown = () => {
 
 type IndexDeletingOptions = {
     indexName: string,
-    dispatch: (action) => void,
+    refreshIndexes: () => Promise<any>,
     instance: InstanceState,
-    navigate: NavigateFunction,
-    
 }
 
-const handleIndexDeletion = (options: IndexDeletingOptions) => {
-    deleteIndex({
-        instance: options.instance,
-        indexName: options.indexName,
-    }).then((createIndexResponse) => {
-        // wait 1 second just to make sure the index has been created so we end up getting it
-        setTimeout(() => {
-            listIndexes(options.instance.host, options.instance.key).then((response) => {
-                if (!response.results) {
-                    return
-                }
-    
-                const newIndexFinishedDeleting = response.results.filter((indexObj) => {
-                    return indexObj.uid === options.indexName
-                }).length === 0
-    
-                if (!newIndexFinishedDeleting) {
-                    options.navigate("/instance/tasks")
-                    return
-                }
-    
-                // Update Index Context (to add new index to dropdown)
-                options.dispatch({ type: MeiliIndexAction.SetAndDefaultTo, payload: {
-                    indexList: response.results,
-                    defaultIndexName: options.indexName
-                }});
-                options.navigate("/instance/index")
-            });
-        }, 1000)
-    })
+const handleIndexDeletion = async (options: IndexDeletingOptions) => {
+    try {
+        // Delete the index
+        await deleteIndex({
+            instance: options.instance,
+            indexName: options.indexName,
+        });
+
+        // wait one second hopefully the index would have been deleted by then.
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Refresh the index list - the reducer will automatically handle selecting a new index
+        await options.refreshIndexes();
+
+        // Stay on the index page - if there are other indexes, they'll be selected automatically
+        // If no indexes remain, the page will show empty state
+
+    } catch (error: any) {
+        console.error('Index deletion failed:', error);
+        // Re-throw the error so the modal can catch it
+        throw new Error(error.message || 'Failed to delete index');
+    }
 }
 
 export default IndexManager;

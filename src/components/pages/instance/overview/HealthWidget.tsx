@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { getGlobalStats } from "../../../../services/meilisearch/indexes";
 import {useTranslation} from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { ErrorType } from "../InstanceErrorPage";
 
 // Define types for the responses
 interface IndexInfo {
@@ -37,24 +39,36 @@ const HealthWidget: React.FC<HealthWidgetProps> = ({ instanceState }) => {
   const [res, setRes] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const response = await getGlobalStats(instanceState.host, instanceState.key);
+
+        // Check if response is undefined/null (connection error)
+        if (!response) {
+          console.error("Failed to connect to Meilisearch instance");
+          navigate('/instance/error', { state: { error: new Error('No response received') } });
+          return;
+        }
+
+        // Check if response contains an error message
         if ("message" in response) {
-          setError(response.message); // Handle error response
+          console.error("Meilisearch error:", response);
+          navigate('/instance/error', { state: { error: response } });
         } else {
           setRes(response); // Handle success response
         }
-      } catch (err) {
-        setError("An error occurred while fetching data.");
-        console.error(err);
+      } catch (err: any) {
+        console.error("Connection error:", err);
+        // Just pass the error to the error page - let it figure out the type
+        navigate('/instance/error', { state: { error: err } });
       }
     };
 
     fetchStats();
-  }, [instanceState]);
+  }, [instanceState, navigate]);
 
   if (error) {
     return (

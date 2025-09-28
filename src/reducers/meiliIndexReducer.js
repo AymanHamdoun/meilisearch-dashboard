@@ -9,6 +9,7 @@ export const MeiliIndexAction = {
     Change: 'CHANGE',
     SetFromIndexList: 'SET_FROM_INDEXES',
     SetAndDefaultTo: 'SET_FROM_AND_DEFAULT',
+    RefreshIndexes: 'REFRESH_INDEXES',
 }
 
 /**
@@ -53,12 +54,17 @@ const meiliIndexReducer = (state, action) => {
                 newMeiliIndexState.availableIndexes.push(indexObject.uid)
             })
 
-            let selectedIndexNeedsChanging = !newMeiliIndexState.availableIndexes.includes(state.selectedIndex);
-            selectedIndexNeedsChanging = selectedIndexNeedsChanging || state.selectedIndex === "";
-            selectedIndexNeedsChanging = selectedIndexNeedsChanging && newMeiliIndexState.availableIndexes.length > 0;
+            // Check if the currently selected index is no longer available
+            const currentIndexStillExists = newMeiliIndexState.availableIndexes.includes(state.selectedIndex);
 
-            if (selectedIndexNeedsChanging) {
-                newMeiliIndexState.selectedIndex = newMeiliIndexState.availableIndexes[0]
+            if (!currentIndexStillExists || state.selectedIndex === "") {
+                // If current index was deleted or none selected, pick the first available
+                if (newMeiliIndexState.availableIndexes.length > 0) {
+                    newMeiliIndexState.selectedIndex = newMeiliIndexState.availableIndexes[0];
+                } else {
+                    // No indexes available
+                    newMeiliIndexState.selectedIndex = "";
+                }
             }
 
             localStorage.setItem("indexes", JSON.stringify(newMeiliIndexState));
@@ -67,12 +73,12 @@ const meiliIndexReducer = (state, action) => {
             };
         }
         case MeiliIndexAction.Change: {
-            const meiliIndexState = state;
-            meiliIndexState.selectedIndex = action.payload;
-            localStorage.setItem("indexes", JSON.stringify(meiliIndexState));
-            return {
-                ...meiliIndexState
+            const newMeiliIndexState = {
+                ...state,
+                selectedIndex: action.payload
             };
+            localStorage.setItem("indexes", JSON.stringify(newMeiliIndexState));
+            return newMeiliIndexState;
         }
         default:
             return state;

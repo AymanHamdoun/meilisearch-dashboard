@@ -1,5 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { indexSearchWrapper } from "../../../../services/meilisearch/search"
 import useDebouncedValue from "../../../../hooks/useDebounce"
@@ -7,10 +8,12 @@ import useMeiliIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 import { QueryType } from "../../../../services/meilisearch/types"
 import parse from 'html-react-parser';
+import { ErrorType } from "../InstanceErrorPage";
 
 const SearchWidget = () => {
-    const { meiliIndexState } = useMeiliIndex()
+    const { meiliIndexState, refreshIndexes } = useMeiliIndex()
     const { instanceState } = useMeiliInstance()
+    const navigate = useNavigate()
 
     const index = meiliIndexState.selectedIndex
 
@@ -23,11 +26,7 @@ const SearchWidget = () => {
 
 
     useEffect(() => {
-        if (debouncedSearchTerm.length == 0) {
-            setResponse({hits: []})
-            return
-        }
-
+        // Always make a request, even with empty query
         indexSearchWrapper({
             instance: instanceState,
             indexName: index,
@@ -38,9 +37,27 @@ const SearchWidget = () => {
                 return
             }
             setResponse(resp)
+        }).catch(async error => {
+            console.error('Search error:', error);
+
+            // Check if it's an index not found error - refresh indexes instead of showing error page
+            if (error.code === 'index_not_found') {
+                console.log('Index not found, refreshing index list...');
+                await refreshIndexes();
+                // Clear the response since the index doesn't exist
+                setResponse({hits: []});
+                return;
+            }
+
+            // Only navigate to error page for actual connection/auth issues
+            if (error.errorType) {
+                // This is a connection/timeout/auth error from fetchWithTimeout
+                navigate('/instance/error', { state: { error } });
+            }
+            // For other API errors, just log them but don't navigate away
         })
 
-    }, [debouncedSearchTerm, queryType])
+    }, [debouncedSearchTerm, queryType, index])
 
 
     return <div className="">
@@ -110,9 +127,9 @@ export const SearchHits = ({ response }) => {
                 <RankingInfoBar hit={hit} />
             </div>
         })}
-        {hits.length === 0 ?
-            <div className="flex items-center justify-center min-h-96">
-                No Hits
+        {hits.length === 0 && processingTime !== undefined ?
+            <div className="flex items-center justify-center min-h-96 text-gray-500">
+                No documents found
             </div>
             : <></>}
     </div>
