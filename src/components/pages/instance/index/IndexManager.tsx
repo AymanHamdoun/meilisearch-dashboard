@@ -85,6 +85,9 @@ const handleIndexDeletion = async (options: IndexDeletingOptions) => {
             indexName: options.indexName,
         });
 
+        // wait one second hopefully the index would have been deleted by then.
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         // Refresh the index list - the reducer will automatically handle selecting a new index
         await options.refreshIndexes();
 

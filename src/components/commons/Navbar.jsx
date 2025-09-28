@@ -3,7 +3,8 @@ import useMeiliInstance from '../../hooks/useMeiliInstance'
 import useIndex from '../../hooks/useMeiliIndex'
 import { MeiliIndexAction } from "../../reducers/meiliIndexReducer";
 import {useLocation} from "react-router-dom";
-import { useIndexCreationModal } from "../pages/instance/index/Page";
+import { useDashboardModal } from "../layouts/DashboardLayout";
+import { PlusIcon } from "./SideBar";
 
 /**
  * Navbar component that renders the logged-in Navbar.
@@ -26,7 +27,8 @@ const Navbar = () => {
                         </svg>
                     </button>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center gap-3">
+                    <CreateIndexButton />
                     <UserMenu />
                 </div>
             </div>
@@ -35,6 +37,24 @@ const Navbar = () => {
 }
 
 export default Navbar;
+
+/**
+ * CreateIndexButton component for creating new indexes
+ * @returns {JSX.Element}
+ */
+const CreateIndexButton = () => {
+    const { setShowIndexCreationModal } = useDashboardModal();
+
+    return (
+        <button
+            onClick={() => setShowIndexCreationModal(true)}
+            className="p-2 text-gray-500 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+            title="Create New Index"
+        >
+            {PlusIcon}
+        </button>
+    );
+};
 
 /**
  * UserMenu component that renders logged in user menu.
@@ -104,7 +124,6 @@ const InstanceDropdown = () => {
  */
 const IndexDropdown = () => {
     const { meiliIndexState, dispatch } = useIndex()
-    const { setShowIndexCreationModal } = useIndexCreationModal()
     const location = useLocation();
 
     useEffect(() => {}, [meiliIndexState.availableIndexes, meiliIndexState.selectedIndex])
@@ -130,13 +149,13 @@ const IndexDropdown = () => {
                 changeSelectedIndex(e.target.value)
             }}
         >
-            {meiliIndexState.availableIndexes.map((indexUID) => {
-                return <option key={indexUID} value={indexUID}>{indexUID}</option>
-            })}
+            {meiliIndexState.availableIndexes.length === 0 ? (
+                <option value="" disabled>None</option>
+            ) : (
+                meiliIndexState.availableIndexes.map((indexUID) => {
+                    return <option key={indexUID} value={indexUID}>{indexUID}</option>
+                })
+            )}
         </select>
-        <button onClick={() => setShowIndexCreationModal(true)}
-                className="text-primary px-3 py-1 rounded border border-transparent hover:border-primary">
-                    +
-        </button>
     </div>
 }

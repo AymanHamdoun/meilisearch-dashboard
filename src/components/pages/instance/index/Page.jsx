@@ -1,40 +1,18 @@
-import React, { useEffect, useState, createContext, useContext } from "react";
+import React, { useEffect, useState } from "react";
 
 import IndexManager from "./IndexManager";
 import IndexTabs from "./IndexTabs";
 import { getIndexStats } from "../../../../services/meilisearch/indexes.ts";
-import IndexCreationModal from "../index-creation/IndexCreationModal";
 
 import useIndex from '../../../../hooks/useMeiliIndex'
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 
-// Context for index creation modal
-const IndexCreationModalContext = createContext({
-    showIndexCreationModal: false,
-    setShowIndexCreationModal: () => {}
-});
-
-export const useIndexCreationModal = () => useContext(IndexCreationModalContext);
-
 const Page = () => {
-    const [showIndexCreationModal, setShowIndexCreationModal] = useState(false);
-
-    return (
-        <IndexCreationModalContext.Provider value={{
-            showIndexCreationModal,
-            setShowIndexCreationModal
-        }}>
-            <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
-                <IndexCreationModal
-                    isVisible={showIndexCreationModal}
-                    onClose={() => setShowIndexCreationModal(false)}
-                />
-                <IndexStats />
-                <IndexManager/>
-                <IndexTabs/>
-            </div>
-        </IndexCreationModalContext.Provider>
-    );
+    return <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
+        <IndexStats />
+        <IndexManager/>
+        <IndexTabs/>
+    </div>
 }
 
 
