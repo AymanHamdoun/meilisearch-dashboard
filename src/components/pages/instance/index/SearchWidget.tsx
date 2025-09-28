@@ -52,7 +52,7 @@ const SearchWidget = () => {
             // Only navigate to error page for actual connection/auth issues
             if (error.errorType) {
                 // This is a connection/timeout/auth error from fetchWithTimeout
-                navigate('/instance/error', { state: { errorType: error.errorType } });
+                navigate('/instance/error', { state: { error } });
             }
             // For other API errors, just log them but don't navigate away
         })

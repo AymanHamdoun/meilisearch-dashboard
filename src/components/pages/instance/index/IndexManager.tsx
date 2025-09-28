@@ -5,7 +5,6 @@ import { deleteIndex } from "../../../../services/meilisearch/indexes"
 import useIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance"
 import { InstanceState } from "../../../../contexts/InstanceContext"
-import { NavigateFunction, useNavigate } from "react-router-dom"
 import { MeiliIndexAction } from "../../../../reducers/meiliIndexReducer"
 import DocIndexingModal from "./documents/DocIndexingModal"
 
@@ -18,7 +17,6 @@ const IndexManager = () => {
 const ManageIndexDropdown = () => {
     const { meiliIndexState, refreshIndexes } = useIndex()
     const {instanceState} = useMeiliInstance()
-    const navigate = useNavigate()
 
     const [isDeleteConfirmationModalVisible, setIsDeleteConfirmationModalVisible] = useState(false)
     const [isDocIndexingModalVisible, setIsDocIndexingModalVisible] = useState(false)
@@ -33,7 +31,6 @@ const ManageIndexDropdown = () => {
                 indexName: indexName,
                 refreshIndexes: refreshIndexes,
                 instance: instanceState,
-                navigate: navigate,
             })}
             message={`Delete Index '${indexName}' ?`}
             confirmButtonText="Delete"
@@ -78,7 +75,6 @@ type IndexDeletingOptions = {
     indexName: string,
     refreshIndexes: () => Promise<any>,
     instance: InstanceState,
-    navigate: NavigateFunction,
 }
 
 const handleIndexDeletion = async (options: IndexDeletingOptions) => {
@@ -89,28 +85,12 @@ const handleIndexDeletion = async (options: IndexDeletingOptions) => {
             indexName: options.indexName,
         });
 
-        // Wait a bit before checking if deletion completed
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Refresh the index list - the reducer will automatically handle selecting a new index
+        await options.refreshIndexes();
 
-        // Refresh the index list to see if deletion completed
-        const indexList = await options.refreshIndexes();
+        // Stay on the index page - if there are other indexes, they'll be selected automatically
+        // If no indexes remain, the page will show empty state
 
-        if (indexList) {
-            const indexStillExists = indexList.some((indexObj: any) =>
-                indexObj.uid === options.indexName
-            );
-
-            if (indexStillExists) {
-                // Index is still being deleted, go to tasks page
-                options.navigate("/instance/tasks");
-            } else {
-                // Index deleted successfully, stay on current page or go to overview
-                options.navigate("/instance/index");
-            }
-        } else {
-            // If refresh fails, assume it's still processing
-            options.navigate("/instance/tasks");
-        }
     } catch (error: any) {
         console.error('Index deletion failed:', error);
         // Re-throw the error so the modal can catch it

@@ -11,6 +11,40 @@ export enum ErrorType {
     UNKNOWN = 'unknown'
 }
 
+// Helper function to determine error type from error object/response
+export const determineErrorType = (error: any): ErrorType => {
+    // If error already has errorType (from fetchWithTimeout), use it
+    if (error?.errorType) {
+        return error.errorType;
+    }
+
+    // Check for API key errors in error object or response
+    if (error?.code === 'invalid_api_key' ||
+        error?.code === 'missing_authorization_header' ||
+        error?.message?.toLowerCase().includes('api key')) {
+        return ErrorType.API_KEY;
+    }
+
+    // Check for timeout errors
+    if (error?.name === 'AbortError' ||
+        error?.message?.includes('timeout') ||
+        error?.message?.includes('Request timeout')) {
+        return ErrorType.TIMEOUT;
+    }
+
+    // Check for connection errors
+    if (error?.message?.toLowerCase().includes('fetch') ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.message?.toLowerCase().includes('connection') ||
+        error?.message?.toLowerCase().includes('failed to fetch') ||
+        error?.name === 'TypeError') {
+        return ErrorType.CONNECTION;
+    }
+
+    // Default to connection error for unknown issues
+    return ErrorType.CONNECTION;
+};
+
 const InstanceErrorPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -19,9 +53,18 @@ const InstanceErrorPage: React.FC = () => {
     const [errorType, setErrorType] = useState<ErrorType>(ErrorType.UNKNOWN);
 
     useEffect(() => {
-        // Get error type from location state if available
+        // Check if errorType is explicitly provided
         if (location.state?.errorType) {
             setErrorType(location.state.errorType);
+        }
+        // Otherwise try to parse from error object
+        else if (location.state?.error) {
+            const determinedType = determineErrorType(location.state.error);
+            setErrorType(determinedType);
+        }
+        // Fallback to connection error
+        else {
+            setErrorType(ErrorType.CONNECTION);
         }
     }, [location]);
 

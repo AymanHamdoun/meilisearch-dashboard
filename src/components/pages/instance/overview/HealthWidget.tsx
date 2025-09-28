@@ -49,40 +49,21 @@ const HealthWidget: React.FC<HealthWidgetProps> = ({ instanceState }) => {
         // Check if response is undefined/null (connection error)
         if (!response) {
           console.error("Failed to connect to Meilisearch instance");
-          navigate('/instance/error', { state: { errorType: ErrorType.CONNECTION } });
+          navigate('/instance/error', { state: { error: new Error('No response received') } });
           return;
         }
 
+        // Check if response contains an error message
         if ("message" in response) {
-          // Check if it's an authentication error
-          if (response.code === 'invalid_api_key' ||
-              response.code === 'missing_authorization_header' ||
-              response.message?.toLowerCase().includes('api key')) {
-            console.error("API Key error:", response.message);
-            navigate('/instance/error', { state: { errorType: ErrorType.API_KEY } });
-          } else {
-            // For other errors, might be connection issues
-            console.error("Meilisearch error:", response);
-            navigate('/instance/error', { state: { errorType: ErrorType.UNKNOWN } });
-          }
+          console.error("Meilisearch error:", response);
+          navigate('/instance/error', { state: { error: response } });
         } else {
           setRes(response); // Handle success response
         }
       } catch (err: any) {
         console.error("Connection error:", err);
-
-        // Determine error type from the error object
-        let errorType = ErrorType.CONNECTION;
-        if (err.errorType) {
-          errorType = err.errorType;
-        } else if (err.name === 'AbortError' || err.message?.includes('timeout')) {
-          errorType = ErrorType.TIMEOUT;
-        } else if (err.message?.toLowerCase().includes('api key')) {
-          errorType = ErrorType.API_KEY;
-        }
-
-        // Navigate to error page with appropriate error type
-        navigate('/instance/error', { state: { errorType } });
+        // Just pass the error to the error page - let it figure out the type
+        navigate('/instance/error', { state: { error: err } });
       }
     };
 
