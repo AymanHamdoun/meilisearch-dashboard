@@ -1,15 +1,22 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
-export const useModalState = () => {
+interface UseModalStateOptions<T = any> {
+    initialValues?: T;
+    onReset?: () => void;
+}
+
+export const useModalState = <T = any>(options?: UseModalStateOptions<T>) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
 
-    const resetState = () => {
+    const resetState = useCallback(() => {
         setIsLoading(false);
         setError(null);
         setSuccess(false);
-    };
+        // Call custom reset if provided
+        options?.onReset?.();
+    }, [options]);
 
     const handleAsyncOperation = async (
         operation: () => Promise<void>,
@@ -25,15 +32,14 @@ export const useModalState = () => {
             await operation();
             setSuccess(true);
 
-            if (onSuccess) {
-                onSuccess();
-            }
+            // Call success callback if provided
+            onSuccess?.();
 
             // Auto-close after showing success
             if (onClose) {
                 setTimeout(() => {
-                    onClose();
                     resetState();
+                    onClose();
                 }, successDelay);
             }
         } catch (error: any) {
