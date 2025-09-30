@@ -75,7 +75,7 @@ const Page = () => {
                 })
                 setIsLoading(false)
             })
-    }, [instanceState])
+    }, [instanceState.isLoaded, instanceState.host, instanceState.key])
 
     // Load tasks whenever URL params or instance state changes
     useEffect(() => {

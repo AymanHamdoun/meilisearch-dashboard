@@ -28,7 +28,14 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, isLoading }) => {
 
     const formatDuration = (duration: string | null) => {
         if (!duration) return '-';
-        return Duration.fromISO(duration).toObject().seconds + ' s';
+        const durationObj = Duration.fromISO(duration);
+        const totalMs = durationObj.as('milliseconds');
+
+        if (totalMs < 1000) {
+            return `${Math.round(totalMs)} ms`;
+        } else {
+            return `${(totalMs / 1000).toFixed(3)} s`;
+        }
     };
 
     if (isLoading) {
@@ -142,12 +149,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
                     onClick={onToggleExpand}
                 >
                     {isExpanded ? 'Hide' : 'Details'}
-                </button>
-                <button className="text-orange-500 hover:text-orange-600 mr-3">
-                    Cancel
-                </button>
-                <button className="text-red-500 hover:text-red-600">
-                    Delete
                 </button>
             </td>
         </tr>

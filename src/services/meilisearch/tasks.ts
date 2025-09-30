@@ -67,20 +67,32 @@ export const getTasks = async (instance: InstanceState, options?: TaskFilterOpti
 }
 
 export const getTaskStats = async (instance: InstanceState): Promise<{ [key: string]: number }> => {
-    let data = {
+    const data = {
         'enqueued': 0,
         'processing': 0,
         'succeeded': 0,
         'failed': 0,
         'canceled': 0,
-    }
+    };
 
-    for (const [key, value] of Object.entries(data)) {
-        const results = await getStatusTaskResponse(instance, key)
-        data[key] = results.total
-    }
+    // Make all status requests concurrently instead of sequentially
+    const statusPromises = Object.keys(data).map(status =>
+        getStatusTaskResponse(instance, status)
+    );
 
-    return data
+    try {
+        const results = await Promise.all(statusPromises);
+        const statuses = Object.keys(data);
+
+        results.forEach((result, index) => {
+            data[statuses[index]] = result.total;
+        });
+
+        return data;
+    } catch (error) {
+        console.error('Get task stats error:', error);
+        return data;
+    }
 }
 
 const getStatusTaskResponse = (instance: InstanceState, status: string) => {
