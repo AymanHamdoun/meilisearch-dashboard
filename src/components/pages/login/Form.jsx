@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {authenticate} from "../../../services/auth.js";
 import {AuthAction} from "../../../reducers/authReducer.js";
-import {Navigate, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {useAuth} from '../../../hooks/useAuth.js'
 
 /**

@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Link, useLocation } from "react-router-dom";
 
 const DashboardIcon = <svg className="w-5 h-5 transition duration-75" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21"><path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z" /><path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" /></svg>
@@ -63,7 +64,7 @@ const SideBar = () => {
 
 export default SideBar;
 
-/** 
+/**
  * DynamicSideBarLink component that renders an individual link in the sidebar.
  * @component
  * @returns {JSX.Element} The rendered DynamicSideBarLink.
@@ -78,7 +79,7 @@ const DynamicSideBarLink = ({ sideBarLink }) => {
         return cleanLink === link ? "text-primary " : ""
     };
 
-    if (sideBarLink.children.length > 0) {
+    if (sideBarLink.children && sideBarLink.children.length > 0) {
         const dropdownID = "sidebar-dropdown-" + sideBarLink.key
         return <li key={sideBarLink.key}>
             <button type="button"
@@ -113,4 +114,19 @@ const DynamicSideBarLink = ({ sideBarLink }) => {
             <span className="ms-3">{sideBarLink.label}</span>
         </Link>
     </li>
+}
+
+DynamicSideBarLink.propTypes = {
+    sideBarLink: PropTypes.shape({
+        key: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired,
+        link: PropTypes.string.isRequired,
+        icon: PropTypes.element.isRequired,
+        children: PropTypes.arrayOf(PropTypes.shape({
+            key: PropTypes.string.isRequired,
+            label: PropTypes.string.isRequired,
+            link: PropTypes.string.isRequired,
+            icon: PropTypes.element.isRequired,
+        }))
+    }).isRequired
 }
