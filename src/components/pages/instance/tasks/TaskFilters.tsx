@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const availableFilters = {
     types: [
@@ -39,6 +40,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={selectedStatus}
                 onChange={(e) => onFilterChange('statuses', e.target.value)}
+                aria-label="Filter tasks by status"
             >
                 <option value="">All Statuses</option>
                 {availableFilters.statuses.map(status => (
@@ -52,6 +54,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={selectedType}
                 onChange={(e) => onFilterChange('types', e.target.value)}
+                aria-label="Filter tasks by type"
             >
                 <option value="">All Types</option>
                 {availableFilters.types.map(type => (
@@ -62,6 +65,12 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
             </select>
         </div>
     );
+};
+
+TaskFilters.propTypes = {
+    selectedStatus: PropTypes.string.isRequired,
+    selectedType: PropTypes.string.isRequired,
+    onFilterChange: PropTypes.func.isRequired
 };
 
 export default TaskFilters;

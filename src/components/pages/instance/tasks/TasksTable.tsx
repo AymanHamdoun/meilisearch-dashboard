@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { DateTime, Duration } from 'luxon';
 import { _api_task_object } from "../../../../services/meilisearch/types";
 import { TaskStatusBadge } from "./Widgets";
+import TasksTableSkeleton from "./TasksTableSkeleton";
 
 interface TasksTableProps {
     tasks: _api_task_object[];
@@ -39,16 +41,12 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, isLoading }) => {
     };
 
     if (isLoading) {
-        return (
-            <div className="flex justify-center items-center py-12 bg-white rounded-lg shadow">
-                <div className="text-gray-500">Loading tasks...</div>
-            </div>
-        );
+        return <TasksTableSkeleton />;
     }
 
     if (tasks.length === 0) {
         return (
-            <div className="flex justify-center items-center py-12 bg-white rounded-lg shadow">
+            <div className="flex justify-center items-center py-12 bg-white rounded-lg shadow" role="status" aria-live="polite">
                 <div className="text-gray-500">No tasks found</div>
             </div>
         );
@@ -56,7 +54,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, isLoading }) => {
 
     return (
         <div className="overflow-x-auto bg-white rounded-lg shadow">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200" role="table" aria-label="Tasks table">
                 <thead className="bg-gray-50">
                     <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -147,6 +145,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
                 <button
                     className="text-primary hover:text-primary-dark mr-3"
                     onClick={onToggleExpand}
+                    aria-expanded={isExpanded}
+                    aria-label={`View details for task #${task.uid}`}
                 >
                     {isExpanded ? 'Hide' : 'Details'}
                 </button>
@@ -209,4 +209,25 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task, formatDate }) => {
     );
 };
 
-export default TasksTable;
+TasksTable.propTypes = {
+    tasks: PropTypes.arrayOf(PropTypes.shape({
+        uid: PropTypes.number.isRequired,
+        indexUid: PropTypes.string,
+        status: PropTypes.string.isRequired,
+        type: PropTypes.string.isRequired,
+        enqueuedAt: PropTypes.string,
+        startedAt: PropTypes.string,
+        finishedAt: PropTypes.string,
+        duration: PropTypes.string,
+        details: PropTypes.object,
+        error: PropTypes.shape({
+            message: PropTypes.string,
+            code: PropTypes.string,
+            type: PropTypes.string,
+            link: PropTypes.string
+        })
+    })).isRequired,
+    isLoading: PropTypes.bool.isRequired
+};
+
+export default React.memo(TasksTable);

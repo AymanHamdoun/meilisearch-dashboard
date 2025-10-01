@@ -16,6 +16,8 @@ type PaginationData = {
     total: number
 }
 
+const TASKS_PER_PAGE = 20;
+
 const Page = () => {
     const { instanceState } = useMeiliInstance()
     const [searchParams, setSearchParams] = useSearchParams()
@@ -23,13 +25,12 @@ const Page = () => {
     const [taskStats, setTaskStats] = useState<{ [key: string]: number }>({})
     const [paginationData, setPaginationData] = useState<PaginationData>({
         from: null,
-        limit: 20,
+        limit: TASKS_PER_PAGE,
         next: null,
         total: 0
     })
     const [isLoading, setIsLoading] = useState(true)
-    // taskHistory: Stores task UIDs for pagination back-navigation since Meilisearch uses UIDs not offsets
-    const [taskHistory, setTaskHistory] = useState<number[]>([])
+    const [error, setError] = useState<{ type: 'network' | 'api', message: string } | null>(null)
 
     // Parse filters from URL query parameters without side effects
     const getFiltersFromParams = useCallback((): TaskFilterOptions & { page: number } => {
@@ -42,7 +43,7 @@ const Page = () => {
             statuses: status ? [status] : [],
             types: type ? [type] : [],
             from: from ? parseInt(from) : undefined,
-            limit: 20,
+            limit: TASKS_PER_PAGE,
             page
         }
     }, [searchParams])
@@ -52,6 +53,7 @@ const Page = () => {
             return
         }
         setIsLoading(true)
+        setError(null)
         getTasks(instanceState, options)
             .then((data: GetTaskResponse) => {
                 setTasks(data.results)
@@ -65,11 +67,17 @@ const Page = () => {
             })
             .catch((error) => {
                 console.error('Error fetching tasks:', error)
-                // Set empty data on error
+                const errorType = error.message?.includes('network') || error.message?.includes('fetch') ? 'network' : 'api'
+                setError({
+                    type: errorType,
+                    message: errorType === 'network'
+                        ? 'Unable to connect to Meilisearch. Please check your connection.'
+                        : `Failed to load tasks: ${error.message || 'Unknown error'}`
+                })
                 setTasks([])
                 setPaginationData({
                     from: null,
-                    limit: 20,
+                    limit: TASKS_PER_PAGE,
                     next: null,
                     total: 0
                 })
@@ -125,10 +133,17 @@ const Page = () => {
         setSearchParams(newParams)
     }
 
-    const handleFilterChange = (filterType: 'statuses' | 'types', value: string) => {
-        // Reset pagination when filters change
-        setTaskHistory([])
+    const handleRefresh = useCallback(() => {
+        const filters = getFiltersFromParams()
+        fetchTasks(filters)
+        getTaskStats(instanceState).then(data => {
+            setTaskStats(data)
+        }).catch(error => {
+            console.error('Error fetching task stats:', error)
+        })
+    }, [getFiltersFromParams, fetchTasks, instanceState])
 
+    const handleFilterChange = (filterType: 'statuses' | 'types', value: string) => {
         const update = {
             [filterType]: value === '' ? [] : [value],
             from: undefined,
@@ -140,42 +155,31 @@ const Page = () => {
     const handleNextPage = () => {
         if (paginationData.next !== null) {
             const currentFilters = getFiltersFromParams()
-            // Store current from value in history for back navigation
-            if (paginationData.from !== null) {
-                setTaskHistory(prev => [...prev, paginationData.from as number])
-            }
             const nextPage = currentFilters.page + 1
             updateUrlParams({ from: paginationData.next, page: nextPage })
         }
     }
 
     const handlePrevPage = () => {
+        // Since Meilisearch doesn't support backward pagination by UID,
+        // we can only go back to the first page
         const currentFilters = getFiltersFromParams()
-
-        if (currentFilters.page <= 1 || taskHistory.length === 0) {
+        if (currentFilters.page <= 1) {
             return
         }
-        const newHistory = [...taskHistory]
-        const prevFrom = newHistory.pop()
-        setTaskHistory(newHistory)
-        const prevPage = currentFilters.page - 1
 
-        if (prevPage === 1) {
-            // Going back to first page - remove both from and page params
-            const newParams = new URLSearchParams()
+        // Reset to first page when going back
+        const newParams = new URLSearchParams()
 
-            // Keep only the filters
-            if (currentFilters.statuses && currentFilters.statuses.length > 0) {
-                newParams.set('status', currentFilters.statuses[0])
-            }
-            if (currentFilters.types && currentFilters.types.length > 0) {
-                newParams.set('type', currentFilters.types[0])
-            }
-
-            setSearchParams(newParams)
-        } else {
-            updateUrlParams({ from: prevFrom, page: prevPage })
+        // Keep only the filters
+        if (currentFilters.statuses && currentFilters.statuses.length > 0) {
+            newParams.set('status', currentFilters.statuses[0])
         }
+        if (currentFilters.types && currentFilters.types.length > 0) {
+            newParams.set('type', currentFilters.types[0])
+        }
+
+        setSearchParams(newParams)
     }
 
     const currentFilters = getFiltersFromParams()
@@ -186,7 +190,31 @@ const Page = () => {
 
     return (
         <div className="px-4 py-5">
-            <h1 className="text-3xl font-semibold mb-3">Tasks</h1>
+            <div className="flex justify-between items-center mb-3">
+                <h1 className="text-3xl font-semibold">Tasks</h1>
+                <button
+                    onClick={handleRefresh}
+                    className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    aria-label="Refresh tasks"
+                >
+                    ↻ Refresh
+                </button>
+            </div>
+
+            {/* Error display */}
+            {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
+                    <p className="text-red-700">{error.message}</p>
+                    {error.type === 'network' && (
+                        <button
+                            onClick={handleRefresh}
+                            className="mt-2 text-sm text-red-600 underline hover:text-red-800"
+                        >
+                            Try again
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Stats and Filters Row */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
