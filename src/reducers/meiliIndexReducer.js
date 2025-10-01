@@ -1,4 +1,3 @@
-import {_defaultState} from "../contexts/MeiliIndexContext.jsx";
 
 /**
  * Enum for meiliIndex-state values.
