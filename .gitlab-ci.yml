@@ -1,35 +1,34 @@
 image: docker:latest
 
 services:
-  - docker:dind
+- docker:dind
 
 stages:
-  - build
+- build
 
 variables:
   DOCKER_DRIVER: overlay2
 
-#lint_and_test:
-#  # Use a Node.js image to run npm commands
-#  image: node:18
-#  stage: test
-#  only:
-#    - merge_request
-#  script:
-#    - npm install
-#    - npm run lint
-#    - npm run test
-
+lint_and_test:
+  # Use a Node.js image to run npm commands
+  image: node:18
+  stage: test
+  only:
+  - merge_request
+  script:
+  - npm install
+  - npm run lint
+  - npm run test
 
 build_image:
   stage: build
   before_script:
   - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
-    - version=$(cat .version)
-    - docker build -t $CI_REGISTRY_IMAGE:$version .
-    - docker tag $CI_REGISTRY_IMAGE:$version $CI_REGISTRY_IMAGE:latest
-    - docker push $CI_REGISTRY_IMAGE:latest
-    - docker push $CI_REGISTRY_IMAGE:$version
+  - version=$(cat .version)
+  - docker build -t $CI_REGISTRY_IMAGE:$version .
+  - docker tag $CI_REGISTRY_IMAGE:$version $CI_REGISTRY_IMAGE:latest
+  - docker push $CI_REGISTRY_IMAGE:latest
+  - docker push $CI_REGISTRY_IMAGE:$version
   only:
-    - master
+  - master
