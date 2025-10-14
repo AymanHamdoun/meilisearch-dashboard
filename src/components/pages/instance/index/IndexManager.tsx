@@ -33,6 +33,7 @@ const ManageIndexDropdown = () => {
                 instance: instanceState,
             })}
             message={`Delete Index '${indexName}' ?`}
+            description="This will permanently delete the index and all its documents. This action cannot be undone."
             confirmButtonText="Delete"
             confirmButtonColor="red"
         />

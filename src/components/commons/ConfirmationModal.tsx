@@ -6,8 +6,9 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => Promise<void> | void;
   message: string;
+  description?: string;
   confirmButtonText?: string;
-  confirmButtonColor?: 'red' | 'blue' | 'green';
+  confirmButtonColor?: 'red' | 'blue' | 'green' | 'primary';
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -15,6 +16,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onClose,
   onConfirm,
   message,
+  description = 'This action cannot be undone',
   confirmButtonText = 'Confirm',
   confirmButtonColor = 'red'
 }) => {
@@ -35,9 +37,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   const getConfirmButtonColor = () => {
     if (isLoading) return 'bg-gray-400 cursor-not-allowed';
-    if (success) return 'bg-green-500 hover:bg-green-600';
+    if (success) return 'bg-primary hover:primary-midfaint';
 
     switch (confirmButtonColor) {
+      case 'primary': return 'bg-primary hover:primary-midfaint';
       case 'blue': return 'bg-blue-500 hover:bg-blue-600';
       case 'green': return 'bg-green-500 hover:bg-green-600';
       case 'red': default: return 'bg-red-500 hover:bg-red-600';
@@ -48,7 +51,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-lg p-6 w-96 max-w-md shadow-lg">
         <h2 className="pb-2 text-lg font-semibold mb-4 border-b border-b-gray-200">{message}</h2>
-        <p className='mb-4 text-gray-800'>This action cannot be undone</p>
+        <p className='mb-4 text-gray-800'>{description}</p>
 
         {/* Error Message */}
         {error && (
