@@ -1,7 +1,15 @@
 import { InstanceState } from "../../contexts/InstanceContext";
 import { fetchWithTimeout } from "./fetchWithTimeout";
 
-export const createSnapshot = async (instance: InstanceState): Promise<{ taskUid: number }> => {
+export interface CreateSnapshotResponse {
+    taskUid: number;
+    indexUid: string | null;
+    status: string;
+    type: string;
+    enqueuedAt: string;
+}
+
+export const createSnapshot = async (instance: InstanceState): Promise<CreateSnapshotResponse> => {
     const myHeaders = new Headers({
         "Content-Type": "application/json",
         "Authorization": `Bearer ${instance.key}`

@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import CreateSnapshotAction from './actions/CreateSnapshotAction';
 
+// Constants
+const DROPDOWN_Z_INDEX = 10;
+
 interface ActionsDropdownProps {
     onError?: (error: Error) => void;
 }
@@ -50,7 +53,10 @@ const ActionsDropdown: React.FC<ActionsDropdownProps> = ({ onError }) => {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                <div
+                    className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg"
+                    style={{ zIndex: DROPDOWN_Z_INDEX }}
+                >
                     <div className="py-1">
                         <CreateSnapshotAction
                             onActionComplete={handleActionComplete}

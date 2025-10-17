@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createSnapshot } from '../../../../../services/meilisearch/snapshots';
 import useMeiliInstance from '../../../../../hooks/useMeiliInstance';
+import { getErrorMessage } from '../../../../../utils/errorHandling';
+
+// Constants
+const DEBOUNCE_DELAY_MS = 1000; // Prevent clicks within 1 second
 
 interface CreateSnapshotActionProps {
     onActionComplete?: () => void;
@@ -15,8 +19,16 @@ const CreateSnapshotAction: React.FC<CreateSnapshotActionProps> = ({
     const { instanceState } = useMeiliInstance();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const lastClickTime = useRef<number>(0);
 
     const handleClick = async () => {
+        // Debounce rapid clicks
+        const now = Date.now();
+        if (now - lastClickTime.current < DEBOUNCE_DELAY_MS) {
+            return;
+        }
+        lastClickTime.current = now;
+
         if (isLoading) return;
 
         setIsLoading(true);
@@ -29,7 +41,8 @@ const CreateSnapshotAction: React.FC<CreateSnapshotActionProps> = ({
             }
         } catch (error) {
             console.error('Failed to create snapshot:', error);
-            onError?.(error as Error);
+            const errorWithMessage = new Error(getErrorMessage(error, 'Create snapshot'));
+            onError?.(errorWithMessage);
         } finally {
             setIsLoading(false);
         }

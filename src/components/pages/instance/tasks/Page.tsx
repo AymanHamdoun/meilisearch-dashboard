@@ -17,7 +17,9 @@ type PaginationData = {
     total: number
 }
 
+// Constants
 const TASKS_PER_PAGE = 20;
+const TASK_HIGHLIGHT_DURATION_MS = 5000;
 
 const Page = () => {
     const { instanceState } = useMeiliInstance()
@@ -95,6 +97,8 @@ const Page = () => {
             return
         }
 
+        let highlightTimer: NodeJS.Timeout | null = null
+
         const taskUidParam = searchParams.get('taskuid')
 
         if (taskUidParam) {
@@ -102,7 +106,7 @@ const Page = () => {
             if (!isNaN(taskUid)) {
                 // Highlight the specific task for better visibility
                 setHighlightedTaskUid(taskUid)
-                setTimeout(() => setHighlightedTaskUid(null), 5000)
+                highlightTimer = setTimeout(() => setHighlightedTaskUid(null), TASK_HIGHLIGHT_DURATION_MS)
             }
         }
 
@@ -114,6 +118,13 @@ const Page = () => {
         }).catch(error => {
             console.error('Error fetching task stats:', error)
         })
+
+        // Cleanup function to clear timeout
+        return () => {
+            if (highlightTimer) {
+                clearTimeout(highlightTimer)
+            }
+        }
     }, [instanceState.isLoaded, searchParams, fetchTasks, getFiltersFromParams])
 
     const updateUrlParams = (updates: Partial<{statuses: string[], types: string[], from: number | undefined, page: number}>) => {
