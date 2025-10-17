@@ -8,6 +8,7 @@ export interface TaskFilterOptions {
     statuses?: string[];
     types?: string[];
     indexUids?: string[];
+    uids?: number[];
     from?: number;
     limit?: number;
 }
@@ -46,6 +47,10 @@ export const getTasks = async (instance: InstanceState, options?: TaskFilterOpti
 
     if (options?.indexUids && options.indexUids.length > 0) {
         params.append('indexUids', options.indexUids.join(','));
+    }
+
+    if (options?.uids && options.uids.length > 0) {
+        params.append('uids', options.uids.join(','));
     }
 
     const url = `${instance.host}/tasks${params.toString() ? '?' + params.toString() : ''}`;

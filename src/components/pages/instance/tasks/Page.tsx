@@ -8,6 +8,7 @@ import TaskStats from "./TaskStats";
 import TaskFilters from "./TaskFilters";
 import TasksTable from "./TasksTable";
 import TasksPagination from "./TasksPagination";
+import ActionsDropdown from "./ActionsDropdown";
 
 type PaginationData = {
     from: number | null,  // This is a task UID, not an offset
@@ -16,7 +17,9 @@ type PaginationData = {
     total: number
 }
 
+// Constants
 const TASKS_PER_PAGE = 20;
+const TASK_HIGHLIGHT_DURATION_MS = 5000;
 
 const Page = () => {
     const { instanceState } = useMeiliInstance()
@@ -31,6 +34,7 @@ const Page = () => {
     })
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<{ type: 'network' | 'api', message: string } | null>(null)
+    const [highlightedTaskUid, setHighlightedTaskUid] = useState<number | null>(null)
 
     // Parse filters from URL query parameters without side effects
     const getFiltersFromParams = useCallback((): TaskFilterOptions & { page: number } => {
@@ -38,13 +42,15 @@ const Page = () => {
         const type = searchParams.get('type')
         const from = searchParams.get('from')
         const page = parseInt(searchParams.get('page') || '1')
+        const taskUid = searchParams.get('taskuid')
 
         return {
             statuses: status ? [status] : [],
             types: type ? [type] : [],
             from: from ? parseInt(from) : undefined,
             limit: TASKS_PER_PAGE,
-            page
+            page,
+            uids: taskUid ? [parseInt(taskUid)] : undefined
         }
     }, [searchParams])
 
@@ -91,6 +97,19 @@ const Page = () => {
             return
         }
 
+        let highlightTimer: NodeJS.Timeout | null = null
+
+        const taskUidParam = searchParams.get('taskuid')
+
+        if (taskUidParam) {
+            const taskUid = parseInt(taskUidParam)
+            if (!isNaN(taskUid)) {
+                // Highlight the specific task for better visibility
+                setHighlightedTaskUid(taskUid)
+                highlightTimer = setTimeout(() => setHighlightedTaskUid(null), TASK_HIGHLIGHT_DURATION_MS)
+            }
+        }
+
         const filters = getFiltersFromParams()
         fetchTasks(filters)
 
@@ -99,6 +118,13 @@ const Page = () => {
         }).catch(error => {
             console.error('Error fetching task stats:', error)
         })
+
+        // Cleanup function to clear timeout
+        return () => {
+            if (highlightTimer) {
+                clearTimeout(highlightTimer)
+            }
+        }
     }, [instanceState.isLoaded, searchParams, fetchTasks, getFiltersFromParams])
 
     const updateUrlParams = (updates: Partial<{statuses: string[], types: string[], from: number | undefined, page: number}>) => {
@@ -182,7 +208,26 @@ const Page = () => {
         setSearchParams(newParams)
     }
 
+    const handleActionError = (error: Error) => {
+        setError({
+            type: 'api',
+            message: `Action failed: ${error.message || 'Unknown error'}`
+        })
+    }
+
+    const handleClearFilters = () => {
+        // Clear all filters by resetting search params
+        setSearchParams(new URLSearchParams())
+    }
+
     const currentFilters = getFiltersFromParams()
+
+    // Check if any filters are active
+    const hasActiveFilters =
+        (currentFilters.statuses && currentFilters.statuses.length > 0) ||
+        (currentFilters.types && currentFilters.types.length > 0) ||
+        (currentFilters.uids !== undefined) ||
+        (currentFilters.page > 1)
 
     // Calculate display range for pagination
     const startItem = tasks.length > 0 ? ((currentFilters.page - 1) * paginationData.limit) + 1 : 0
@@ -192,13 +237,25 @@ const Page = () => {
         <div className="px-4 py-5">
             <div className="flex justify-between items-center mb-3">
                 <h1 className="text-3xl font-semibold">Tasks</h1>
-                <button
-                    onClick={handleRefresh}
-                    className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    aria-label="Refresh tasks"
-                >
-                    ↻ Refresh
-                </button>
+                <div className="flex gap-2">
+                    <ActionsDropdown onError={handleActionError} />
+                    <button
+                        onClick={handleRefresh}
+                        className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        aria-label="Refresh tasks"
+                    >
+                        ↻ Refresh
+                    </button>
+                    {hasActiveFilters && (
+                        <button
+                            onClick={handleClearFilters}
+                            className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            aria-label="Clear all filters"
+                        >
+                            ✕ Clear Filters
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Error display */}
@@ -234,6 +291,7 @@ const Page = () => {
             <TasksTable
                 tasks={tasks}
                 isLoading={isLoading}
+                highlightedTaskUid={highlightedTaskUid}
             />
 
             {/* Pagination */}

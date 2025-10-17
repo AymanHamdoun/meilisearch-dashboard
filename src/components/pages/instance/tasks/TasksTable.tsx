@@ -8,9 +8,10 @@ import TasksTableSkeleton from "./TasksTableSkeleton";
 interface TasksTableProps {
     tasks: _api_task_object[];
     isLoading: boolean;
+    highlightedTaskUid?: number | null;
 }
 
-const TasksTable: React.FC<TasksTableProps> = ({ tasks, isLoading }) => {
+const TasksTable: React.FC<TasksTableProps> = ({ tasks, isLoading, highlightedTaskUid }) => {
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
     const toggleRowExpand = (taskUid: number) => {
@@ -89,6 +90,7 @@ const TasksTable: React.FC<TasksTableProps> = ({ tasks, isLoading }) => {
                                 onToggleExpand={() => toggleRowExpand(task.uid)}
                                 formatDate={formatDate}
                                 formatDuration={formatDuration}
+                                isHighlighted={highlightedTaskUid === task.uid}
                             />
                             {expandedRows.has(task.uid) && (
                                 <TaskDetails
@@ -110,6 +112,7 @@ interface TaskRowProps {
     onToggleExpand: () => void;
     formatDate: (date: string | null) => string;
     formatDuration: (duration: string | null) => string;
+    isHighlighted?: boolean;
 }
 
 const TaskRow: React.FC<TaskRowProps> = ({
@@ -117,10 +120,11 @@ const TaskRow: React.FC<TaskRowProps> = ({
     isExpanded,
     onToggleExpand,
     formatDate,
-    formatDuration
+    formatDuration,
+    isHighlighted = false
 }) => {
     return (
-        <tr className="hover:bg-gray-50">
+        <tr className={`hover:bg-gray-50 ${isHighlighted ? 'bg-yellow-50 animate-pulse' : ''}`}>
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 #{task.uid}
             </td>
@@ -227,7 +231,8 @@ TasksTable.propTypes = {
             link: PropTypes.string
         })
     })).isRequired,
-    isLoading: PropTypes.bool.isRequired
+    isLoading: PropTypes.bool.isRequired,
+    highlightedTaskUid: PropTypes.number
 };
 
 export default React.memo(TasksTable);
