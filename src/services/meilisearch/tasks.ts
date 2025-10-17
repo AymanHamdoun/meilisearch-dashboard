@@ -1,5 +1,5 @@
 import { InstanceState } from "../../contexts/InstanceContext";
-import {GetTaskResponse} from "./types";
+import {GetTaskResponse, _api_task_object} from "./types";
 import { fetchWithTimeout } from "./fetchWithTimeout";
 
 const _defaultResponse: GetTaskResponse = {results: [],total: 0,limit: 0,from: 0,next: 0}
@@ -8,6 +8,7 @@ export interface TaskFilterOptions {
     statuses?: string[];
     types?: string[];
     indexUids?: string[];
+    uids?: number[];
     from?: number;
     limit?: number;
 }
@@ -46,6 +47,10 @@ export const getTasks = async (instance: InstanceState, options?: TaskFilterOpti
 
     if (options?.indexUids && options.indexUids.length > 0) {
         params.append('indexUids', options.indexUids.join(','));
+    }
+
+    if (options?.uids && options.uids.length > 0) {
+        params.append('uids', options.uids.join(','));
     }
 
     const url = `${instance.host}/tasks${params.toString() ? '?' + params.toString() : ''}`;
@@ -121,5 +126,33 @@ const getStatusTaskResponse = (instance: InstanceState, status: string) => {
         .catch((error) => {
             console.error('Get status task error:', error);
             return _defaultResponse
+        });
+}
+
+export const getTask = async (instance: InstanceState, taskUid: number): Promise<_api_task_object | null> => {
+    const myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${instance.key}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${instance.host}/tasks/${taskUid}`;
+
+    return fetchWithTimeout(url, requestOptions)
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error('Get task error:', error);
+            return null;
         });
 }
