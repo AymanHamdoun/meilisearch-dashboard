@@ -9,7 +9,6 @@ import IndexPage from './pages/instance/index/Page.jsx'
 import FederatedSearchPage from './pages/instance/search/federated/Page.tsx'
 import TasksPage from './pages/instance/tasks/Page.tsx'
 import InstanceErrorPage from './pages/instance/InstanceErrorPage.tsx'
-import DumpsPage from './pages/instance/dumps/Page.tsx'
 import APIKeysPage from './pages/instance/keys/Page.tsx'
 import ExperimentalFeaturesPage from './pages/instance/experimental/Page.tsx'
 
@@ -31,7 +30,6 @@ const App = () => {
             <Route path="index" element={<IndexPage />} />
             <Route path="search/federated" element={<FederatedSearchPage />} />
             <Route path="tasks" element={<TasksPage />} />
-            <Route path="dumps" element={<DumpsPage />} />
             <Route path="keys" element={<APIKeysPage />} />
             <Route path="experimental" element={<ExperimentalFeaturesPage />} />
             <Route path="error" element={<InstanceErrorPage />} />
