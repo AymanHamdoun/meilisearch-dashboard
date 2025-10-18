@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import CreateSnapshotAction from './actions/CreateSnapshotAction';
+import CreateDumpAction from './actions/CreateDumpAction';
 
 // Constants
 const DROPDOWN_Z_INDEX = 10;
@@ -62,18 +63,10 @@ const ActionsDropdown: React.FC<ActionsDropdownProps> = ({ onError }) => {
                             onActionComplete={handleActionComplete}
                             onError={handleError}
                         />
-
-                        {/* Add more action components here as needed */}
-                        {/* Example:
                         <CreateDumpAction
                             onActionComplete={handleActionComplete}
                             onError={handleError}
                         />
-                        <CancelTasksAction
-                            onActionComplete={handleActionComplete}
-                            onError={handleError}
-                        />
-                        */}
                     </div>
                 </div>
             )}
