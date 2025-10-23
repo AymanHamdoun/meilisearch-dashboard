@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useMeiliInstance from '../../../../hooks/useMeiliInstance';
-import { MeiliKey, CreateKeyPayload, listKeys, createKey, deleteKey } from '../../../../services/meilisearch/keys';
+import { KeyResource, CreateKeyPayload, listKeys, createKey, deleteKey } from '../../../../services/meilisearch/keys';
 import ConfirmationModal from '../../../commons/ConfirmationModal';
 import KeysTable from './KeysTable';
 import ViewKeyModal from './ViewKeyModal';
@@ -9,7 +9,7 @@ import AddKeyModal from './AddKeyModal';
 const KeysPage: React.FC = () => {
     const { instanceState } = useMeiliInstance();
 
-    const [keys, setKeys] = useState<MeiliKey[]>([]);
+    const [keys, setKeys] = useState<KeyResource[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +17,7 @@ const KeysPage: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedKey, setSelectedKey] = useState<MeiliKey | null>(null);
+    const [selectedKey, setSelectedKey] = useState<KeyResource | null>(null);
 
     // Pagination state
     const [pagination, setPagination] = useState({
@@ -60,12 +60,12 @@ const KeysPage: React.FC = () => {
         }
     };
 
-    const handleViewDetails = (key: MeiliKey) => {
+    const handleViewDetails = (key: KeyResource) => {
         setSelectedKey(key);
         setIsViewModalOpen(true);
     };
 
-    const handleDeleteRequest = (key: MeiliKey) => {
+    const handleDeleteRequest = (key: KeyResource) => {
         setSelectedKey(key);
         setIsDeleteModalOpen(true);
     };

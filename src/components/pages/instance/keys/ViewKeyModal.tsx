@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { DateTime } from 'luxon';
-import { MeiliKey } from '../../../../services/meilisearch/keys';
+import { KeyResource } from '../../../../services/meilisearch/keys';
 import { getPermissionByValue } from '../../../../constants/permissions';
 import { BaseModal } from '../../../commons/modal/ModalComponents';
 
 interface ViewKeyModalProps {
     isOpen: boolean;
     onClose: () => void;
-    apiKey: MeiliKey | null;
+    apiKey: KeyResource | null;
 }
 
 const ViewKeyModal: React.FC<ViewKeyModalProps> = ({ isOpen, onClose, apiKey }) => {

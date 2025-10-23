@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { DateTime } from 'luxon';
-import { MeiliKey } from '../../../../services/meilisearch/keys';
+import { KeyResource } from '../../../../services/meilisearch/keys';
 import { getPermissionByValue } from '../../../../constants/permissions';
 
 interface KeysTableProps {
-    keys: MeiliKey[];
+    keys: KeyResource[];
     isLoading: boolean;
-    onViewDetails: (key: MeiliKey) => void;
-    onDelete: (key: MeiliKey) => void;
+    onViewDetails: (key: KeyResource) => void;
+    onDelete: (key: KeyResource) => void;
 }
 
 const KeysTable: React.FC<KeysTableProps> = ({ keys, isLoading, onViewDetails, onDelete }) => {
@@ -129,12 +129,12 @@ const KeysTable: React.FC<KeysTableProps> = ({ keys, isLoading, onViewDetails, o
 };
 
 interface KeyRowProps {
-    apiKey: MeiliKey;
+    apiKey: KeyResource;
     formatDate: (date: string | null) => string;
     formatPermissions: (actions: string[]) => string;
     formatIndexes: (indexes: string[]) => string;
-    onViewDetails: (key: MeiliKey) => void;
-    onDelete: (key: MeiliKey) => void;
+    onViewDetails: (key: KeyResource) => void;
+    onDelete: (key: KeyResource) => void;
 }
 
 const KeyRow: React.FC<KeyRowProps> = ({

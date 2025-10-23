@@ -1,6 +1,19 @@
 import { fetchWithTimeout } from './fetchWithTimeout';
 
-export interface MeiliKey {
+/**
+ * KeyResource represents an API key resource returned by the Meilisearch API.
+ * This is the response format from Meilisearch's /keys endpoints.
+ *
+ * Note: This is NOT the API key used by the dashboard to connect to Meilisearch.
+ * The dashboard's connection key is stored in InstanceState.key.
+ *
+ * KeyResource is used for managing API keys within a Meilisearch instance:
+ * - Creating new API keys with specific permissions
+ * - Listing existing API keys
+ * - Updating key metadata (name, description)
+ * - Deleting API keys
+ */
+export interface KeyResource {
     name: string | null;
     description: string | null;
     key: string;
@@ -26,7 +39,7 @@ export interface UpdateKeyPayload {
 }
 
 export interface KeysListResponse {
-    results: MeiliKey[];
+    results: KeyResource[];
     offset: number;
     limit: number;
     total: number;
@@ -61,7 +74,7 @@ export async function getKey(
     meilisearchHost: string,
     meilisearchApiKey: string,
     keyOrUid: string
-): Promise<MeiliKey> {
+): Promise<KeyResource> {
     const response = await fetchWithTimeout(
         `${meilisearchHost}/keys/${keyOrUid}`,
         {
@@ -85,7 +98,7 @@ export async function createKey(
     meilisearchHost: string,
     meilisearchApiKey: string,
     payload: CreateKeyPayload
-): Promise<MeiliKey> {
+): Promise<KeyResource> {
     const response = await fetchWithTimeout(
         `${meilisearchHost}/keys`,
         {
@@ -111,7 +124,7 @@ export async function updateKey(
     meilisearchApiKey: string,
     keyOrUid: string,
     payload: UpdateKeyPayload
-): Promise<MeiliKey> {
+): Promise<KeyResource> {
     const response = await fetchWithTimeout(
         `${meilisearchHost}/keys/${keyOrUid}`,
         {
