@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { DateTime } from 'luxon';
 import { KeyResource } from '../../../../services/meilisearch/keys';
 import { getPermissionByValue } from '../../../../constants/permissions';
-import LoadingTable from './LoadingTable';
+import PageKeysTableLoading from './PageKeysTableLoading';
 
 interface KeysTableProps {
     keys: KeyResource[];
@@ -34,7 +34,7 @@ const KeysTable: React.FC<KeysTableProps> = ({ keys, isLoading, onViewDetails, o
     };
 
     if (isLoading) {
-        return <LoadingTable />;
+        return <PageKeysTableLoading />;
     }
 
     if (keys.length === 0) {

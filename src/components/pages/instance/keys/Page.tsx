@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import useMeiliInstance from '../../../../hooks/useMeiliInstance';
 import { KeyResource, CreateKeyPayload, listKeys, createKey, deleteKey } from '../../../../services/meilisearch/keys';
 import ConfirmationModal from '../../../commons/ConfirmationModal';
-import KeysTable from './KeysTable';
-import ViewKeyModal from './ViewKeyModal';
-import AddKeyModal from './AddKeyModal';
+import PageKeysTable from './PageKeysTable';
+import PageViewKeyModal from './PageViewKeyModal';
+import PageAddKeyModal from './PageAddKeyModal';
+import PageErrorDisplay from './PageErrorDisplay';
+import PageKeysStats from './PageKeysStats';
+import PagePaginationControls from './PagePaginationControls';
 
 const KeysPage: React.FC = () => {
     const { instanceState } = useMeiliInstance();
@@ -100,9 +103,6 @@ const KeysPage: React.FC = () => {
         }
     };
 
-    const totalPages = Math.ceil(pagination.total / pagination.limit);
-    const currentPage = Math.floor(pagination.offset / pagination.limit) + 1;
-
     return (
         <div className="container mx-auto px-4 py-6">
             {/* Header */}
@@ -137,50 +137,19 @@ const KeysPage: React.FC = () => {
             </div>
 
             {/* Error Display */}
-            {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-                    <div className="flex">
-                        <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
-                        <div className="ml-3">
-                            <p className="text-sm text-red-700">{error}</p>
-                            <button
-                                onClick={handleRefresh}
-                                className="mt-2 text-sm text-red-600 hover:text-red-500 underline"
-                            >
-                                Try again
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {error && <PageErrorDisplay error={error} onRetry={handleRefresh} />}
 
             {/* Stats */}
-            {!isLoading && !error && (
-                <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white p-4 rounded-lg shadow border">
-                        <div className="text-2xl font-bold text-gray-900">{pagination.total}</div>
-                        <div className="text-sm text-gray-600">Total Keys</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow border">
-                        <div className="text-2xl font-bold text-gray-900">
-                            {keys.filter(k => k.expiresAt && new Date(k.expiresAt) < new Date()).length}
-                        </div>
-                        <div className="text-sm text-gray-600">Expired Keys</div>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg shadow border">
-                        <div className="text-2xl font-bold text-gray-900">
-                            {keys.filter(k => !k.expiresAt).length}
-                        </div>
-                        <div className="text-sm text-gray-600">Never Expires</div>
-                    </div>
-                </div>
-            )}
+            <PageKeysStats
+                keys={keys}
+                total={pagination.total}
+                isLoading={isLoading}
+                error={error}
+            />
 
             {/* Keys Table */}
             <div className="mb-6">
-                <KeysTable
+                <PageKeysTable
                     keys={keys}
                     isLoading={isLoading}
                     onViewDetails={handleViewDetails}
@@ -189,41 +158,24 @@ const KeysPage: React.FC = () => {
             </div>
 
             {/* Pagination */}
-            {!isLoading && !error && totalPages > 1 && (
-                <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-700">
-                        Showing {pagination.offset + 1} to {Math.min(pagination.offset + pagination.limit, pagination.total)} of {pagination.total} results
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={prevPage}
-                            disabled={pagination.offset === 0}
-                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Previous
-                        </button>
-                        <span className="px-3 py-2 text-sm text-gray-700">
-                            Page {currentPage} of {totalPages}
-                        </span>
-                        <button
-                            onClick={nextPage}
-                            disabled={pagination.offset + pagination.limit >= pagination.total}
-                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Next
-                        </button>
-                    </div>
-                </div>
+            {!isLoading && !error && (
+                <PagePaginationControls
+                    offset={pagination.offset}
+                    limit={pagination.limit}
+                    total={pagination.total}
+                    onPrevPage={prevPage}
+                    onNextPage={nextPage}
+                />
             )}
 
             {/* Modals */}
-            <AddKeyModal
+            <PageAddKeyModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSubmit={handleCreateKey}
             />
 
-            <ViewKeyModal
+            <PageViewKeyModal
                 isOpen={isViewModalOpen}
                 onClose={() => {
                     setIsViewModalOpen(false);

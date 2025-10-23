@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LoadingTable: React.FC = () => {
+const PageKeysTableLoading: React.FC = () => {
     return (
         <div className="overflow-x-auto bg-white rounded-lg shadow">
             <table className="min-w-full divide-y divide-gray-200">
@@ -43,4 +43,4 @@ const LoadingTable: React.FC = () => {
     );
 };
 
-export default LoadingTable;
+export default PageKeysTableLoading;

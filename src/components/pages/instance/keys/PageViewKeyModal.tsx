@@ -10,7 +10,7 @@ interface ViewKeyModalProps {
     apiKey: KeyResource | null;
 }
 
-const ViewKeyModal: React.FC<ViewKeyModalProps> = ({ isOpen, onClose, apiKey }) => {
+const PageViewKeyModal: React.FC<ViewKeyModalProps> = ({ isOpen, onClose, apiKey }) => {
     const [showFullKey, setShowFullKey] = useState(false);
     const [copied, setCopied] = useState(false);
 
@@ -187,4 +187,4 @@ const ViewKeyModal: React.FC<ViewKeyModalProps> = ({ isOpen, onClose, apiKey }) 
     );
 };
 
-export default ViewKeyModal;
+export default PageViewKeyModal;

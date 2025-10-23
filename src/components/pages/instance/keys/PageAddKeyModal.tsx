@@ -10,7 +10,7 @@ interface AddKeyModalProps {
     onSubmit: (payload: CreateKeyPayload) => Promise<void>;
 }
 
-const AddKeyModal: React.FC<AddKeyModalProps> = ({ isOpen, onClose, onSubmit }) => {
+const PageAddKeyModal: React.FC<AddKeyModalProps> = ({ isOpen, onClose, onSubmit }) => {
     const [formData, setFormData] = useState<CreateKeyPayload>({
         name: '',
         description: '',
@@ -459,4 +459,4 @@ const AddKeyModal: React.FC<AddKeyModalProps> = ({ isOpen, onClose, onSubmit }) 
     );
 };
 
-export default AddKeyModal;
+export default PageAddKeyModal;
