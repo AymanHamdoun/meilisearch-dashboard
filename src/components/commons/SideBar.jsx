@@ -70,23 +70,10 @@ const SideBar = () => {
             { key: "s-3", label: "Federation", link: "/instance/search/federated", icon: FederationIcon, children: [] },
         ];
 
-        // Add Chat Completions with development badge (always visible as placeholder)
-        featureChildren.push({
-            key: "s-chat",
-            label: "Chat Completions",
-            link: "/instance/features/chat",
-            icon: ChatIcon,
-            children: [],
-            isDevelopment: true
-        });
-
         // Add enabled experimental features dynamically
         if (features) {
             const enabledFeatureItems = getEnabledFeatureNavItems(features);
             enabledFeatureItems.forEach(item => {
-                // Skip chat completions as we already added it as a placeholder
-                if (item.key === 'ef-chat') return;
-
                 featureChildren.push({
                     key: item.key,
                     label: item.label,

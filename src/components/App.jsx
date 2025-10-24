@@ -15,6 +15,9 @@ import ExperimentalFeaturesPage from './pages/instance/experimental/Page.tsx'
 import LoginPage from './pages/login/Page.jsx'
 import InstanceFormPage from './pages/instance-form/Page.tsx'
 import ChatCompletionsPage from './pages/instance/features/chat/Page.tsx'
+import VectorStorePage from './pages/instance/features/vector/Page.tsx'
+import CustomScorersPage from './pages/instance/features/scorers/Page.tsx'
+import AdvancedMetricsPage from './pages/instance/features/metrics/Page.tsx'
 
 const App = () => {
   return (
@@ -34,6 +37,9 @@ const App = () => {
             <Route path="keys" element={<APIKeysPage />} />
             <Route path="experimental" element={<ExperimentalFeaturesPage />} />
             <Route path="features/chat" element={<ChatCompletionsPage />} />
+            <Route path="features/vector" element={<VectorStorePage />} />
+            <Route path="features/scorers" element={<CustomScorersPage />} />
+            <Route path="features/metrics" element={<AdvancedMetricsPage />} />
             <Route path="error" element={<InstanceErrorPage />} />
           </Route>
       </Routes>
