@@ -14,6 +14,7 @@ import ExperimentalFeaturesPage from './pages/instance/experimental/Page.tsx'
 
 import LoginPage from './pages/login/Page.jsx'
 import InstanceFormPage from './pages/instance-form/Page.tsx'
+import ChatCompletionsPage from './pages/instance/features/chat/Page.tsx'
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
             <Route path="tasks" element={<TasksPage />} />
             <Route path="keys" element={<APIKeysPage />} />
             <Route path="experimental" element={<ExperimentalFeaturesPage />} />
+            <Route path="features/chat" element={<ChatCompletionsPage />} />
             <Route path="error" element={<InstanceErrorPage />} />
           </Route>
       </Routes>
