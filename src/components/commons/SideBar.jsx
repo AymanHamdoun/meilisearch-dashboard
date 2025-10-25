@@ -2,7 +2,8 @@ import React, { useMemo } from "react";
 import PropTypes from "prop-types";
 import { Link, useLocation } from "react-router-dom";
 import { useExperimentalFeatures } from '../../contexts/ExperimentalFeaturesContext';
-import { getEnabledFeatureNavItems, hasEnabledFeatures } from '../../config/experimentalFeatures';
+import { getEnabledFeatureNavItems } from '../../config/experimentalFeatures';
+import { createNavItem, createDropdownItem } from '../../types/navigation';
 
 // Better, more relevant icons for each page
 const DashboardIcon = <svg className="w-5 h-5 transition duration-75" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 21"><path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z" /><path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" /></svg>
@@ -28,21 +29,11 @@ const FeaturesIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height
 // Federation/Network icon
 const FederationIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/></svg>
 
-// Chat icon (already imported from config)
-const ChatIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
 
 const DownCaretIcon = <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" /></svg>
 export const PlusIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
 
-/**
- * @typedef {Object} SideBarLink
- * @property {string} key - The unique key for the link.
- * @property {string} label - The display label.
- * @property {string} link - The route path.
- * @property {JSX.Element} icon - The icon element.
- * @property {Array.<SideBarLink>} children - Sub menu links.
- * @property {boolean} isDevelopment - Whether the item is in development.
- */
+// Type definitions are now imported from '../../types/navigation'
 
 // Development badge component
 const DevelopmentBadge = () => (
@@ -60,53 +51,43 @@ const SideBar = () => {
     // Build sidebar links dynamically based on enabled features
     const sideBarLinks = useMemo(() => {
         const baseLinks = [
-            { key: "s-1", label: "Dashboard", link: "/instance", icon: DashboardIcon, children: [] },
-            { key: "s-2", label: "Index", link: "/instance/index", icon: IndexIcon, children: [] },
-            { key: "s-4", label: "Tasks", link: "/instance/tasks", icon: TasksIcon, children: [] },
+            createNavItem("s-1", "Dashboard", "/instance", DashboardIcon),
+            createNavItem("s-2", "Index", "/instance/index", IndexIcon),
+            createNavItem("s-4", "Tasks", "/instance/tasks", TasksIcon),
         ];
 
         // Build Features dropdown
         const featureChildren = [
-            { key: "s-3", label: "Federation", link: "/instance/search/federated", icon: FederationIcon, children: [] },
+            createNavItem("s-3", "Federation", "/instance/search/federated", FederationIcon),
         ];
 
         // Add enabled experimental features dynamically
         if (features) {
             const enabledFeatureItems = getEnabledFeatureNavItems(features);
             enabledFeatureItems.forEach(item => {
-                featureChildren.push({
-                    key: item.key,
-                    label: item.label,
-                    link: item.link,
-                    icon: item.icon,
-                    children: [],
-                    isDevelopment: item.isDevelopment
-                });
+                featureChildren.push(
+                    createNavItem(item.key, item.label, item.link, item.icon, {
+                        isDevelopment: item.isDevelopment,
+                        description: item.description
+                    })
+                );
             });
         }
 
         // Only show Features dropdown if there are items
         if (featureChildren.length > 0) {
-            baseLinks.splice(2, 0, {
-                key: "s-features",
-                label: "Features",
-                link: "#",
-                icon: FeaturesIcon,
-                children: featureChildren
-            });
+            baseLinks.splice(2, 0,
+                createDropdownItem("s-features", "Features", FeaturesIcon, featureChildren)
+            );
         }
 
         // Settings dropdown
-        baseLinks.push({
-            key: "s-5",
-            label: "Settings",
-            link: "#",
-            icon: SettingsIcon,
-            children: [
-                { key: "s-6", label: "API Keys", link: "/instance/keys", icon: KeyIcon, children: [] },
-                { key: "s-7", label: "Experimental Features", link: "/instance/experimental", icon: ExperimentalIcon, children: [] },
-            ]
-        });
+        baseLinks.push(
+            createDropdownItem("s-5", "Settings", SettingsIcon, [
+                createNavItem("s-6", "API Keys", "/instance/keys", KeyIcon),
+                createNavItem("s-7", "Experimental Features", "/instance/experimental", ExperimentalIcon),
+            ])
+        );
 
         return baseLinks;
     }, [features]);
@@ -188,19 +169,17 @@ const DynamicSideBarLink = ({ sideBarLink }) => {
     </li>
 }
 
+// Recursive PropTypes definition for NavItem
+const navItemPropType = PropTypes.shape({
+    key: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    link: PropTypes.string.isRequired,
+    icon: PropTypes.element.isRequired,
+    isDevelopment: PropTypes.bool,
+    description: PropTypes.string,
+    children: PropTypes.array // Will be validated recursively
+});
+
 DynamicSideBarLink.propTypes = {
-    sideBarLink: PropTypes.shape({
-        key: PropTypes.string.isRequired,
-        label: PropTypes.string.isRequired,
-        link: PropTypes.string.isRequired,
-        icon: PropTypes.element.isRequired,
-        isDevelopment: PropTypes.bool,
-        children: PropTypes.arrayOf(PropTypes.shape({
-            key: PropTypes.string.isRequired,
-            label: PropTypes.string.isRequired,
-            link: PropTypes.string.isRequired,
-            icon: PropTypes.element.isRequired,
-            isDevelopment: PropTypes.bool,
-        }))
-    }).isRequired
+    sideBarLink: navItemPropType.isRequired
 }

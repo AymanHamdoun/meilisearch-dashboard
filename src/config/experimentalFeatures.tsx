@@ -1,4 +1,5 @@
 import React from "react";
+import type { NavItem } from '../types/navigation';
 
 // Icon definitions for experimental features
 const ChatIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
@@ -6,14 +7,8 @@ const VectorIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="
 const ScorerIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
 const MetricsIcon = <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>;
 
-export interface ExperimentalFeatureNavItem {
-  key: string;
-  label: string;
-  link: string;
-  icon: JSX.Element;
+export interface ExperimentalFeatureNavItem extends NavItem {
   featureFlag?: string; // The experimental feature flag that must be enabled
-  isDevelopment?: boolean; // Shows "In Development" badge
-  description?: string;
 }
 
 // Map experimental features to their navigation items
@@ -59,14 +54,22 @@ export const experimentalFeatureNavItems: ExperimentalFeatureNavItem[] = [
 // Get navigation items for enabled experimental features
 export const getEnabledFeatureNavItems = (
   enabledFeatures: Record<string, boolean>
-): ExperimentalFeatureNavItem[] => {
+): NavItem[] => {
   return experimentalFeatureNavItems.filter(item => {
     // If no feature flag is required, always show the item
     if (!item.featureFlag) return true;
 
     // Check if the feature is enabled
     return enabledFeatures[item.featureFlag] === true;
-  });
+  }).map(item => ({
+    key: item.key,
+    label: item.label,
+    link: item.link,
+    icon: item.icon,
+    isDevelopment: item.isDevelopment,
+    description: item.description,
+    children: []
+  }));
 };
 
 // Check if any experimental features are enabled
