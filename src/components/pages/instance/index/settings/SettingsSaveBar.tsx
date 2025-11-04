@@ -1,4 +1,5 @@
 import React from 'react';
+import { ActionButton } from '../../../../commons/modal/ModalComponents';
 
 interface SettingsSaveBarProps {
     onPreviewChanges: () => void;
@@ -20,18 +21,18 @@ const SettingsSaveBar: React.FC<SettingsSaveBarProps> = ({
                 )}
             </div>
             <div className="flex gap-2">
-                <button
+                <ActionButton
                     onClick={onReset}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    variant="secondary"
                 >
                     Reset
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
                     onClick={onPreviewChanges}
-                    className="px-4 py-2 text-sm font-medium text-white bg-primary border border-primary rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    variant="primary"
                 >
                     Preview Changes
-                </button>
+                </ActionButton>
             </div>
         </div>
     );

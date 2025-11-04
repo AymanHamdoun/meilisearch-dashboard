@@ -1,5 +1,16 @@
 /**
  * Format a value for display in UI
+ *
+ * @example
+ * formatValue(null) // returns "null"
+ * formatValue(true) // returns "true"
+ * formatValue("hello") // returns "hello"
+ * formatValue("") // returns '""'
+ * formatValue(42) // returns "42"
+ * formatValue([1, 2, 3]) // returns "1, 2, 3"
+ * formatValue([1, 2, 3, 4, 5]) // returns "1, 2, 3, ... (5 items)"
+ * formatValue({foo: "bar", baz: 42}) // returns "foo: bar, baz: 42"
+ * formatValue({a: 1, b: 2, c: 3, d: 4}) // returns "{a, b, ...}"
  */
 export const formatValue = (value: any): string => {
     if (value === null) return 'null';
@@ -29,6 +40,25 @@ export const formatValue = (value: any): string => {
 /**
  * Get differences between two objects
  * Returns an array of changes with field paths and old/new values
+ *
+ * @example
+ * const original = {
+ *   name: "John",
+ *   age: 30,
+ *   settings: { theme: "light", notifications: true }
+ * };
+ *
+ * const modified = {
+ *   name: "Jane",
+ *   age: 30,
+ *   settings: { theme: "dark", notifications: true }
+ * };
+ *
+ * getDifferences(original, modified);
+ * // returns [
+ * //   { field: "name", original: "John", modified: "Jane" },
+ * //   { field: "settings.theme", original: "light", modified: "dark" }
+ * // ]
  */
 export const getDifferences = (original: any, modified: any): { field: string; original: any; modified: any }[] => {
     const changes: { field: string; original: any; modified: any }[] = [];
