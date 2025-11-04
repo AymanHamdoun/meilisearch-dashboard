@@ -1,10 +1,13 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { initFlowbite } from 'flowbite';
 import { SearchableAttrs } from "./settings/SearchableAttrs";
 import TypoTolerance from "./settings/TypoTolerance";
 
 import { IndexSettingsProvider } from "../../../../contexts/IndexSettingsContext"
 import RankingInfo from "./settings/RankingInfo.tsx";
+import useIndexSettings from "../../../../hooks/useIndexSettings";
+import SettingsSaveBar from "./settings/SettingsSaveBar";
+import SettingDiffPreviewModal from "./settings/SettingDiffPreviewModal";
 
 
 const tabs = [
@@ -33,12 +36,43 @@ const tabs = [
 const tabsID = "meili-index-settings-tabs"
 const tabsContentID = `#${tabsID}-content`
 
-const IndexSettingsTabs = () => {
+const IndexSettingsContent = () => {
+    const { hasChanges, saveSettings, resetSettings, originalSettings, modifiedSettings } = useIndexSettings();
+    const [saveSuccess, setSaveSuccess] = useState(false);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+
     useEffect(() => {
         initFlowbite();
     }, []);
 
-    return <IndexSettingsProvider>
+    const handleSave = async () => {
+        setSaveSuccess(false);
+        try {
+            await saveSettings();
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 3000);
+            setShowPreviewModal(false);
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+            throw error; // Re-throw to let modal handle the error
+        }
+    };
+
+    return <div className="flex flex-col gap-4">
+        {hasChanges && (
+            <SettingsSaveBar
+                onPreviewChanges={() => setShowPreviewModal(true)}
+                onReset={resetSettings}
+                saveSuccess={saveSuccess}
+            />
+        )}
+        <SettingDiffPreviewModal
+            isVisible={showPreviewModal}
+            onClose={() => setShowPreviewModal(false)}
+            onConfirm={handleSave}
+            originalSettings={originalSettings}
+            modifiedSettings={modifiedSettings}
+        />
         <div className="md:flex bg-white rounded-md border-2 border-gray-100 shadow-sm w-full">
             <ul className="flex-column text-sm font-medium text-gray-500 dark:text-gray-400 md:w-1/3 sm:w-full border-r border-r-gray-100"
                 id={tabsID}
@@ -72,6 +106,12 @@ const IndexSettingsTabs = () => {
                 })}
             </div>
         </div>
+    </div>
+};
+
+const IndexSettingsTabs = () => {
+    return <IndexSettingsProvider>
+        <IndexSettingsContent />
     </IndexSettingsProvider>
 }
 

@@ -3,9 +3,17 @@ import DynamicTextBoxes from "../../../../commons/DynamicTextboxes";
 // @ts-ignore
 import React from "react";
 import DocHeader from "./DocHeader";
+import { IndexSettingsActions } from "../../../../../reducers/indexSettingsReducer";
 
 const RankingInfo = () => {
-    const { settings } = useIndexSettings()
+    const { settings, dispatch } = useIndexSettings()
+
+    const handleRankingRulesChange = (values: string[]) => {
+        dispatch({
+            type: IndexSettingsActions.Update,
+            payload: { rankingRules: values }
+        });
+    };
 
     return <div>
         <DocHeader
@@ -21,6 +29,7 @@ const RankingInfo = () => {
         <DynamicTextBoxes
             buttonText="+ Add a Ranking Attribute"
             initialTextboxValues={settings.rankingRules}
+            onChange={handleRankingRulesChange}
         />
     </div>
 }

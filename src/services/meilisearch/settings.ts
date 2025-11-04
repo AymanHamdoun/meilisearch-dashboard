@@ -102,3 +102,33 @@ export const updateExperimentalFeatures = (
             throw error;
         });
 }
+
+export const updateIndexSettings = (options: SettingsAPIOptions, settings: any) => {
+    const myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${options.instanceKey}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "PATCH",
+        headers: myHeaders,
+        body: JSON.stringify(settings),
+        redirect: "follow"
+    };
+
+    const url = `${options.host}/indexes/${options.indexName}/settings`;
+
+    return fetchWithTimeout(url, requestOptions)
+        .then(async (response) => {
+            const status = response.status;
+            const responseBody = await response.json();
+            if (status >= 400) {
+                throw new Error(responseBody.message || "Failed to update index settings");
+            }
+            return responseBody;
+        })
+        .catch((error) => {
+            console.error("Error updating index settings:", error);
+            throw error;
+        });
+}
