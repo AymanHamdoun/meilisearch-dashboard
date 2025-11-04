@@ -3,15 +3,24 @@ import React, { useEffect, useState } from "react";
 import DocHeader from "./DocHeader"
 import DynamicTextBoxes from "../../../../commons/DynamicTextboxes"
 import useIndexSettings from "../../../../../hooks/useIndexSettings"
+import { IndexSettingsActions } from "../../../../../reducers/indexSettingsReducer"
 
 const TypoTolerance = () => {
-    const { settings } = useIndexSettings()
+    const { settings, dispatch } = useIndexSettings()
 
     const [typoTolerance, setTypoTolerance] = useState(settings.typoTolerance)
 
     useEffect(() => {
         setTypoTolerance(settings.typoTolerance)
     }, [settings.typoTolerance])
+
+    const updateTypoTolerance = (newTypoTolerance: any) => {
+        setTypoTolerance(newTypoTolerance);
+        dispatch({
+            type: IndexSettingsActions.Update,
+            payload: { typoTolerance: newTypoTolerance }
+        });
+    }
     
     return <div className="flex flex-col gap-8">
         <div>
@@ -25,7 +34,7 @@ const TypoTolerance = () => {
                     className="w-full p-2 stl-select-input" 
                     value={typoTolerance.enabled ? "true" : "false"}
                     onChange={(e) => {
-                        setTypoTolerance({
+                        updateTypoTolerance({
                             ...typoTolerance,
                             enabled: e.target.value === "true"
                         })
@@ -45,7 +54,7 @@ const TypoTolerance = () => {
             <input  type="number" 
                     value={typoTolerance.minWordSizeForTypos.oneTypo}
                     onChange={(e) => {
-                        setTypoTolerance({
+                        updateTypoTolerance({
                             ...typoTolerance,
                             minWordSizeForTypos: {
                                 ...typoTolerance.minWordSizeForTypos,
@@ -65,7 +74,7 @@ const TypoTolerance = () => {
             <input  type="number" 
                     value={typoTolerance.minWordSizeForTypos.twoTypos}
                     onChange={(e) => {
-                        setTypoTolerance({
+                        updateTypoTolerance({
                             ...typoTolerance,
                             minWordSizeForTypos: {
                                 ...typoTolerance.minWordSizeForTypos,
@@ -85,6 +94,12 @@ const TypoTolerance = () => {
             <DynamicTextBoxes
                 buttonText="+ Add attribute"
                 initialTextboxValues={typoTolerance.disableOnAttributes}
+                onChange={(values) => {
+                    updateTypoTolerance({
+                        ...typoTolerance,
+                        disableOnAttributes: values
+                    })
+                }}
             />
         </div>
         <div>
@@ -97,6 +112,12 @@ const TypoTolerance = () => {
             <DynamicTextBoxes
                 buttonText="+ Add attribute"
                 initialTextboxValues={typoTolerance.disableOnWords}
+                onChange={(values) => {
+                    updateTypoTolerance({
+                        ...typoTolerance,
+                        disableOnWords: values
+                    })
+                }}
             />
         </div>
     </div>

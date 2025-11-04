@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 
 interface DynamicTextBoxesProps {
     buttonText: string;
-    initialTextboxValues: string[]
+    initialTextboxValues: string[];
+    onChange?: (values: string[]) => void;
 }
 
-const DynamicTextBoxes: React.FC<DynamicTextBoxesProps> = ({buttonText, initialTextboxValues }) => {
+const DynamicTextBoxes: React.FC<DynamicTextBoxesProps> = ({buttonText, initialTextboxValues, onChange }) => {
     initialTextboxValues = !Array.isArray(initialTextboxValues) ? [] : initialTextboxValues;
 
     const [textboxes, setTextboxes] = useState<string[]>(initialTextboxValues);
@@ -15,18 +16,22 @@ const DynamicTextBoxes: React.FC<DynamicTextBoxesProps> = ({buttonText, initialT
     }, [initialTextboxValues]); 
 
     const handleAddTextbox = () => {
-        setTextboxes([...textboxes, ""]); // Add a new empty textbox
+        const newTextboxes = [...textboxes, ""];
+        setTextboxes(newTextboxes); // Add a new empty textbox
+        onChange?.(newTextboxes);
     };
 
     const handleTextboxChange = (index: number, value: string) => {
         const updatedTextboxes = [...textboxes];
         updatedTextboxes[index] = value;
         setTextboxes(updatedTextboxes); // Update the state with the changed value
+        onChange?.(updatedTextboxes);
     };
 
     const handleDeleteTextbox = (index: number) => {
         const updatedTextboxes = textboxes.filter((_, i) => i !== index);
         setTextboxes(updatedTextboxes); // Remove the textbox at the specified index
+        onChange?.(updatedTextboxes);
     };
 
     return (

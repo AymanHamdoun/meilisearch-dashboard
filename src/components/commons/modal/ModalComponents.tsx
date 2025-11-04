@@ -139,3 +139,6 @@ export const BaseModal: React.FC<BaseModalProps> = ({
     </div>
   );
 };
+
+// Re-export button components from the buttons directory
+export { ActionButton, CancelButton, SaveButton } from '../buttons';
