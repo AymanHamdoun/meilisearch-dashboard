@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionButton } from '../../../../commons/modal/ModalComponents';
+import { ActionButton } from '../../../../commons/buttons';
 
 interface SettingsSaveBarProps {
     onPreviewChanges: () => void;

@@ -1,7 +1,8 @@
 import React from 'react';
 import { APISettings } from '../../../../../services/meilisearch/types';
 import useModalState from '../../../../../hooks/useModalState';
-import { BaseModal, ModalError, ModalSuccess, CancelButton, SaveButton } from '../../../../commons/modal/ModalComponents';
+import { BaseModal, ModalError, ModalSuccess } from '../../../../commons/modal/ModalComponents';
+import { CancelButton, SaveButton } from '../../../../commons/buttons';
 import { formatValue, getDifferences } from '../../../../../utils/objectUtils';
 
 interface SettingDiffPreviewModalProps {
