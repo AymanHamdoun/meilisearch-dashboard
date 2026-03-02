@@ -9,10 +9,16 @@ const availableFilters = {
         { value: "indexSwap", label: "Index Swap" },
         { value: "documentAdditionOrUpdate", label: "Document Addition/Update" },
         { value: "documentDeletion", label: "Document Deletion" },
+        { value: "documentDeletionByFilter", label: "Document Deletion by Filter" },
+        { value: "documentEdition", label: "Document Edition" },
         { value: "settingsUpdate", label: "Settings Update" },
         { value: "dumpCreation", label: "Dump Creation" },
+        { value: "snapshotCreation", label: "Snapshot Creation" },
         { value: "taskCancelation", label: "Task Cancelation" },
-        { value: "taskDeletion", label: "Task Deletion" }
+        { value: "taskDeletion", label: "Task Deletion" },
+        { value: "upgradeDatabase", label: "Upgrade Database" },
+        { value: "export", label: "Export" },
+        { value: "indexCompaction", label: "Index Compaction" }
     ],
     statuses: [
         { value: "enqueued", label: "Enqueued" },
@@ -27,15 +33,21 @@ interface TaskFiltersProps {
     selectedStatus: string;
     selectedType: string;
     onFilterChange: (filterType: 'statuses' | 'types', value: string) => void;
+    afterEnqueuedAt?: string;
+    beforeEnqueuedAt?: string;
+    onDateFilterChange?: (field: string, value: string) => void;
 }
 
 const TaskFilters: React.FC<TaskFiltersProps> = ({
     selectedStatus,
     selectedType,
-    onFilterChange
+    onFilterChange,
+    afterEnqueuedAt,
+    beforeEnqueuedAt,
+    onDateFilterChange
 }) => {
     return (
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
             <select
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={selectedStatus}
@@ -63,6 +75,27 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
                     </option>
                 ))}
             </select>
+
+            {onDateFilterChange && (
+                <>
+                    <input
+                        type="datetime-local"
+                        value={afterEnqueuedAt || ''}
+                        onChange={(e) => onDateFilterChange('afterEnqueuedAt', e.target.value)}
+                        className="px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        title="After enqueued at"
+                        placeholder="After date"
+                    />
+                    <input
+                        type="datetime-local"
+                        value={beforeEnqueuedAt || ''}
+                        onChange={(e) => onDateFilterChange('beforeEnqueuedAt', e.target.value)}
+                        className="px-2 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        title="Before enqueued at"
+                        placeholder="Before date"
+                    />
+                </>
+            )}
         </div>
     );
 };

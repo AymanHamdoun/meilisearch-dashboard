@@ -3,6 +3,8 @@ import React, { useEffect } from "react";
 // @ts-ignore
 import SearchWidget from './SearchWidget.tsx'
 import IndexSettingsTabs from './IndexSettingsTabs.jsx'
+import DocumentBrowser from './documents/DocumentBrowser'
+import FieldsExplorer from './FieldsExplorer'
 import { initFlowbite } from 'flowbite';
 import useIndex from "../../../../hooks/useMeiliIndex.js";
 
@@ -11,6 +13,16 @@ const tabs = [
         key: "search",
         label: "Browse",
         element: <SearchWidget />
+    },
+    {
+        key: "documents",
+        label: "Documents",
+        element: <DocumentBrowser />
+    },
+    {
+        key: "fields",
+        label: "Fields",
+        element: <FieldsExplorer />
     },
     {
         key: "settings",

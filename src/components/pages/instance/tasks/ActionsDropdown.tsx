@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import CreateSnapshotAction from './actions/CreateSnapshotAction';
 import CreateDumpAction from './actions/CreateDumpAction';
+import CancelTasksAction from './actions/CancelTasksAction';
+import DeleteTasksAction from './actions/DeleteTasksAction';
 
 // Constants
 const DROPDOWN_Z_INDEX = 10;
@@ -64,6 +66,15 @@ const ActionsDropdown: React.FC<ActionsDropdownProps> = ({ onError }) => {
                             onError={handleError}
                         />
                         <CreateDumpAction
+                            onActionComplete={handleActionComplete}
+                            onError={handleError}
+                        />
+                        <div className="border-t border-gray-200 my-1"></div>
+                        <CancelTasksAction
+                            onActionComplete={handleActionComplete}
+                            onError={handleError}
+                        />
+                        <DeleteTasksAction
                             onActionComplete={handleActionComplete}
                             onError={handleError}
                         />

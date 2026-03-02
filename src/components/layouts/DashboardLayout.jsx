@@ -3,9 +3,11 @@ import {Outlet, useNavigate} from "react-router-dom"
 import { InstanceProvider } from "../../contexts/InstanceContext"
 import { MeiliIndexProvider } from "../../contexts/MeiliIndexContext"
 import { ExperimentalFeaturesProvider } from "../../contexts/ExperimentalFeaturesContext"
+import { ToastProvider } from "../../contexts/ToastContext"
 import SideBar from "../commons/SideBar"
 import Navbar from "../commons/Navbar"
 import InstanceModal from "../commons/InstanceModal"
+import ToastContainer from "../commons/Toast"
 import useMeiliInstance from "../../hooks/useMeiliInstance.js";
 import InstanceErrorBoundary from "../commons/InstanceErrorBoundary";
 import IndexCreationModal from "../pages/instance/index-creation/IndexCreationModal";
@@ -23,21 +25,24 @@ const DashboardLayout = () => {
 
     return <InstanceProvider>
         <ExperimentalFeaturesProvider>
-            <InstanceErrorBoundary>
-                <InstanceModal/>
-                <DashboardModalContext.Provider value={{
-                    showIndexCreationModal,
-                    setShowIndexCreationModal
-                }}>
-                    <MeiliIndexProvider>
-                        <IndexCreationModal
-                            isVisible={showIndexCreationModal}
-                            onClose={() => setShowIndexCreationModal(false)}
-                        />
-                        <LayoutContent/>
-                    </MeiliIndexProvider>
-                </DashboardModalContext.Provider>
-            </InstanceErrorBoundary>
+            <ToastProvider>
+                <InstanceErrorBoundary>
+                    <InstanceModal/>
+                    <DashboardModalContext.Provider value={{
+                        showIndexCreationModal,
+                        setShowIndexCreationModal
+                    }}>
+                        <MeiliIndexProvider>
+                            <IndexCreationModal
+                                isVisible={showIndexCreationModal}
+                                onClose={() => setShowIndexCreationModal(false)}
+                            />
+                            <LayoutContent/>
+                        </MeiliIndexProvider>
+                    </DashboardModalContext.Provider>
+                    <ToastContainer />
+                </InstanceErrorBoundary>
+            </ToastProvider>
         </ExperimentalFeaturesProvider>
     </InstanceProvider>
 }

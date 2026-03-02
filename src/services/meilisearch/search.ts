@@ -1,13 +1,31 @@
-import { string } from "prop-types"
 import { QueryType } from "./types"
 import { InstanceState } from "../../contexts/InstanceContext"
 import { fetchWithTimeout } from "./fetchWithTimeout"
+
+export interface SearchParams {
+    q: string;
+    filter?: string;
+    sort?: string[];
+    facets?: string[];
+    matchingStrategy?: string;
+    attributesToSearchOn?: string[];
+    offset?: number;
+    limit?: number;
+    showRankingScoreDetails?: boolean;
+    showRankingScore?: boolean;
+    attributesToHighlight?: string[];
+    showMatchesPosition?: boolean;
+    showPerformanceDetails?: boolean;
+    hybrid?: { semanticRatio?: number; embedder?: string };
+    vector?: number[];
+}
 
 type SearchWrapperOptions = {
     instance: InstanceState,
     queryType: QueryType,
     query: string,
-    indexName: string
+    indexName: string,
+    searchParams?: Partial<SearchParams>
 }
 
 const indexSearchWrapper = (options: SearchWrapperOptions) => {
@@ -69,7 +87,6 @@ const federatedSearch = (options: MultiSearchOptions) => {
         .then(async (response) => {
             if (!response.ok) {
                 const data = await response.json();
-                // Check for index not found error
                 if (response.status === 404 && data.code === 'index_not_found') {
                     const error = new Error(data.message || 'Index not found');
                     (error as any).code = 'index_not_found';
@@ -93,28 +110,28 @@ const basicSearch = (options: SearchWrapperOptions) => {
         "Authorization": `Bearer ${options.instance.key}`
     });
 
-    const requestOptions: RequestInit = {
-        method: "GET",
-        headers: myHeaders,
-        redirect: "follow"
+    const body: SearchParams = {
+        q: options.query,
+        showRankingScoreDetails: true,
+        showRankingScore: true,
+        attributesToHighlight: ["*"],
+        showMatchesPosition: true,
+        ...options.searchParams,
     };
 
-    const queryParams = new URLSearchParams({
-        q: options.query,
-        showRankingScoreDetails: "true",
-        showRankingScore: "true",
-        attributesToHighlight: "*",
-        showMatchesPosition: "true"
-    })
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow",
+        body: JSON.stringify(body)
+    };
 
-    const url = `${options.instance.host}/indexes/${options.indexName}/search?${queryParams.toString()}`;
-
+    const url = `${options.instance.host}/indexes/${options.indexName}/search`;
 
     return fetchWithTimeout(url, requestOptions)
         .then(async (response) => {
             if (!response.ok) {
                 const data = await response.json();
-                // Check for index not found error
                 if (response.status === 404 && data.code === 'index_not_found') {
                     const error = new Error(data.message || 'Index not found');
                     (error as any).code = 'index_not_found';
@@ -145,12 +162,10 @@ const getDocByObjectID = (options: SearchWrapperOptions) => {
 
     const url = `${options.instance.host}/indexes/${options.indexName}/documents/${options.query}`;
 
-
     return fetchWithTimeout(url, requestOptions)
         .then(async (response) => {
             if (!response.ok) {
                 const data = await response.json();
-                // Check for index not found or document not found
                 if (response.status === 404) {
                     if (data.code === 'index_not_found') {
                         const error = new Error(data.message || 'Index not found');
@@ -174,7 +189,92 @@ const getDocByObjectID = (options: SearchWrapperOptions) => {
         });
 }
 
+const facetSearch = (instance: InstanceState, indexName: string, facetName: string, facetQuery?: string, filter?: string) => {
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${instance.key}`
+    });
+
+    const body: any = { facetName };
+    if (facetQuery) body.facetQuery = facetQuery;
+    if (filter) body.filter = filter;
+
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow",
+        body: JSON.stringify(body)
+    };
+
+    const url = `${instance.host}/indexes/${indexName}/facet-search`;
+
+    return fetchWithTimeout(url, requestOptions)
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error('Facet search error:', error);
+            throw error;
+        });
+}
+
+const similarDocuments = (instance: InstanceState, indexName: string, id: string | number, options?: { limit?: number; offset?: number; embedder?: string; attributesToRetrieve?: string[] }) => {
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${instance.key}`
+    });
+
+    const body: any = { id, ...options };
+
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow",
+        body: JSON.stringify(body)
+    };
+
+    const url = `${instance.host}/indexes/${indexName}/similar`;
+
+    return fetchWithTimeout(url, requestOptions)
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error('Similar documents error:', error);
+            throw error;
+        });
+}
+
+const chatCompletions = (instance: InstanceState, body: any) => {
+    let myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${instance.key}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow",
+        body: JSON.stringify(body)
+    };
+
+    const url = `${instance.host}/chat/completions`;
+
+    return fetch(url, requestOptions);
+}
+
 export {
     indexSearchWrapper,
-    federatedSearch
+    federatedSearch,
+    facetSearch,
+    similarDocuments,
+    chatCompletions
 }

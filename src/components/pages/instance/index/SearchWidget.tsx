@@ -2,13 +2,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { indexSearchWrapper } from "../../../../services/meilisearch/search"
+import { indexSearchWrapper, SearchParams } from "../../../../services/meilisearch/search"
 import useDebouncedValue from "../../../../hooks/useDebounce"
 import useMeiliIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 import { QueryType } from "../../../../services/meilisearch/types"
 import parse from 'html-react-parser';
-import { ErrorType } from "../InstanceErrorPage";
+
+import SearchFilters from "./search/SearchFilters";
+import SearchSortSelector from "./search/SearchSortSelector";
+import SearchOptions from "./search/SearchOptions";
+import FacetDisplay from "./search/FacetDisplay";
+import SearchPagination from "./search/SearchPagination";
 
 const SearchWidget = () => {
     const { meiliIndexState, refreshIndexes } = useMeiliIndex()
@@ -20,48 +25,84 @@ const SearchWidget = () => {
     const [query, setQuery] = useState("")
     const [queryType, setQueryType] = useState<QueryType>(QueryType.ByQuery)
 
-    const [response, setResponse] = useState({hits: []})
+    // Search params state
+    const [filter, setFilter] = useState("")
+    const [sort, setSort] = useState<string[]>([])
+    const [facets, setFacets] = useState<string[]>([])
+    const [matchingStrategy, setMatchingStrategy] = useState("last")
+    const [attributesToSearchOn, setAttributesToSearchOn] = useState<string[]>([])
+    const [limit, setLimit] = useState(20)
+    const [offset, setOffset] = useState(0)
+    const [showPerformanceDetails, setShowPerformanceDetails] = useState(false)
+
+    // Index settings for attribute lists
+    const [filterableAttributes, setFilterableAttributes] = useState<string[]>([])
+    const [sortableAttributes, setSortableAttributes] = useState<string[]>([])
+
+    const [response, setResponse] = useState<any>({hits: []})
+    const [showAdvanced, setShowAdvanced] = useState(false)
 
     const debouncedSearchTerm = useDebouncedValue(query, 100);
 
+    // Load index settings for filterable/sortable attributes
+    useEffect(() => {
+        if (!instanceState.isLoaded || !index) return;
+        import("../../../../services/meilisearch/settings").then(({ getIndexSettings }) => {
+            getIndexSettings({ host: instanceState.host, instanceKey: instanceState.key, indexName: index })
+                .then((settings: any) => {
+                    setFilterableAttributes(settings.filterableAttributes || [])
+                    setSortableAttributes(settings.sortableAttributes || [])
+                })
+                .catch(() => {})
+        })
+    }, [instanceState, index])
 
     useEffect(() => {
-        // Always make a request, even with empty query
+        const searchParams: Partial<SearchParams> = {};
+        if (filter) searchParams.filter = filter;
+        if (sort.length > 0) searchParams.sort = sort;
+        if (facets.length > 0) searchParams.facets = facets;
+        if (matchingStrategy !== "last") searchParams.matchingStrategy = matchingStrategy;
+        if (attributesToSearchOn.length > 0) searchParams.attributesToSearchOn = attributesToSearchOn;
+        if (limit !== 20) searchParams.limit = limit;
+        if (offset > 0) searchParams.offset = offset;
+        if (showPerformanceDetails) searchParams.showPerformanceDetails = true;
+
+        // Also request facets for filterable attributes
+        if (filterableAttributes.length > 0 && facets.length === 0) {
+            searchParams.facets = filterableAttributes;
+        }
+
         indexSearchWrapper({
             instance: instanceState,
             indexName: index,
             query: debouncedSearchTerm,
-            queryType: queryType
+            queryType: queryType,
+            searchParams
         }).then(resp => {
-            if (resp == undefined) {
-                return
-            }
+            if (resp == undefined) return
             setResponse(resp)
         }).catch(async error => {
             console.error('Search error:', error);
-
-            // Check if it's an index not found error - refresh indexes instead of showing error page
             if (error.code === 'index_not_found') {
-                console.log('Index not found, refreshing index list...');
                 await refreshIndexes();
-                // Clear the response since the index doesn't exist
                 setResponse({hits: []});
                 return;
             }
-
-            // Only navigate to error page for actual connection/auth issues
             if (error.errorType) {
-                // This is a connection/timeout/auth error from fetchWithTimeout
                 navigate('/instance/error', { state: { error } });
             }
-            // For other API errors, just log them but don't navigate away
         })
 
-    }, [debouncedSearchTerm, queryType, index])
+    }, [debouncedSearchTerm, queryType, index, filter, sort, matchingStrategy, attributesToSearchOn, limit, offset, showPerformanceDetails, facets])
 
+    // Reset offset when query changes
+    useEffect(() => {
+        setOffset(0)
+    }, [debouncedSearchTerm, filter, sort, matchingStrategy])
 
     return <div className="">
-        <div className="mb-6 flex flex-row">
+        <div className="mb-4 flex flex-row">
             <select name="search_type"
                 className="text-gray-700 text-sm stl-select-input border border-gray-400 rounded-sm rounded-r-none text-center pl-4 pr-14 appearance-none"
                 onChange={(e) => {
@@ -81,17 +122,83 @@ const SearchWidget = () => {
                 }}
             />
         </div>
+
+        {queryType === QueryType.ByQuery && (
+            <>
+                <div className="mb-4">
+                    <button
+                        onClick={() => setShowAdvanced(!showAdvanced)}
+                        className="text-sm text-gray-500 hover:text-primary flex items-center gap-1"
+                    >
+                        <svg className={`w-3 h-3 transition-transform ${showAdvanced ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        {showAdvanced ? 'Hide' : 'Show'} Search Options
+                    </button>
+                </div>
+
+                {showAdvanced && (
+                    <div className="mb-6 flex flex-col gap-4 p-4 bg-gray-50 border border-gray-200 rounded">
+                        {filterableAttributes.length > 0 && (
+                            <div>
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">Filters</h4>
+                                <SearchFilters
+                                    filterableAttributes={filterableAttributes}
+                                    onFilterChange={setFilter}
+                                    currentFilter={filter}
+                                />
+                            </div>
+                        )}
+                        {sortableAttributes.length > 0 && (
+                            <div>
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">Sort</h4>
+                                <SearchSortSelector
+                                    sortableAttributes={sortableAttributes}
+                                    sort={sort}
+                                    onSortChange={setSort}
+                                />
+                            </div>
+                        )}
+                        <SearchOptions
+                            matchingStrategy={matchingStrategy}
+                            onMatchingStrategyChange={setMatchingStrategy}
+                            attributesToSearchOn={attributesToSearchOn}
+                            onAttributesToSearchOnChange={setAttributesToSearchOn}
+                            limit={limit}
+                            onLimitChange={setLimit}
+                            showPerformanceDetails={showPerformanceDetails}
+                            onShowPerformanceDetailsChange={setShowPerformanceDetails}
+                        />
+                    </div>
+                )}
+            </>
+        )}
+
+        {/* Facet Display */}
+        <FacetDisplay
+            facetDistribution={response.facetDistribution}
+            facetStats={response.facetStats}
+        />
+
         <SearchHits response={response} />
+
+        <SearchPagination
+            offset={offset}
+            limit={limit}
+            totalHits={response.totalHits}
+            estimatedTotalHits={response.estimatedTotalHits}
+            onOffsetChange={setOffset}
+        />
     </div>
 }
 
-export const SearchHits = ({ response }) => {
+export const SearchHits = ({ response }: { response: any }) => {
     const hits = response.hits;
     const processingTime = response.processingTimeMs;
-    const totalHits = response.totalHits !== undefined ? response.totalHits : 0; 
-    const estimatedHits = response.estimatedTotalHits !== undefined ? response.estimatedTotalHits : 0; 
+    const totalHits = response.totalHits !== undefined ? response.totalHits : 0;
+    const estimatedHits = response.estimatedTotalHits !== undefined ? response.estimatedTotalHits : 0;
 
-    let hitCountMsg = totalHits;
+    let hitCountMsg: any = totalHits;
     if (totalHits === 0 && estimatedHits > 0) {
         hitCountMsg = `estimated ${estimatedHits}`
     }
@@ -102,7 +209,7 @@ export const SearchHits = ({ response }) => {
                 <span className="text-primary">{hitCountMsg} hits</span> matched in <span className="text-primary">{processingTime}ms</span>
             </div> : ""}
 
-        {hits.map((hit, i) => {
+        {hits.map((hit: any, i: number) => {
             let printableObj = hit;
             if (typeof printableObj["_formatted"] == "object") {
                 printableObj = printableObj["_formatted"]
@@ -113,13 +220,13 @@ export const SearchHits = ({ response }) => {
 
                 {Object.keys(printableObj).map((key, j) => {
                     if (key.startsWith("_")) {
-                        return
+                        return null
                     }
 
                     return <div key={j} className="search-result-hit-detail md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
                         <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-semibold">{key}</div>
                         <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500">
-                            {typeof printableObj[key] == 'string' ? parse(printableObj[key]) : printableObj[key]}
+                            {typeof printableObj[key] == 'string' ? parse(printableObj[key]) : typeof printableObj[key] === 'object' ? JSON.stringify(printableObj[key]) : String(printableObj[key])}
                         </div>
                     </div>
                 })}
@@ -138,17 +245,16 @@ export const SearchHits = ({ response }) => {
 export default SearchWidget;
 
 
-const RankingInfoBar = ({ hit }) => {
+const RankingInfoBar = ({ hit }: { hit: any }) => {
     if (typeof hit["_rankingScoreDetails"] !== 'object') {
         return <></>
     }
-
 
     return <div className="bg-gray-50 text-gray-400 mt-3 flex flex-col md:flex-row gap-3 p-3 rounded justify-evenly">
         <div>Ranking Score: {hit["_rankingScore"].toFixed(2)}</div>
         {
             hit["_rankingScoreDetails"]["words"] ?
-                <div>Typos: {hit["_rankingScoreDetails"]["words"]["matchingWords"]}</div>
+                <div>Words: {hit["_rankingScoreDetails"]["words"]["matchingWords"]}</div>
                 :
                 <></>
         }

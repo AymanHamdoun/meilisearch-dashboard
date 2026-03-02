@@ -26,8 +26,13 @@ const RankingInfo = () => {
             <code className={"bg-gray-100 text-sm p-1 rounded"}>[ "words", "typo", "proximity", "attribute", "sort",
                 "exactness" ]</code>
         </div>
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+            <p className="font-medium mb-1">Available ranking rules:</p>
+            <p><code className="bg-blue-100 px-1 rounded">words</code>, <code className="bg-blue-100 px-1 rounded">typo</code>, <code className="bg-blue-100 px-1 rounded">proximity</code>, <code className="bg-blue-100 px-1 rounded">attribute</code>, <code className="bg-blue-100 px-1 rounded">sort</code>, <code className="bg-blue-100 px-1 rounded">exactness</code></p>
+            <p className="mt-1">Custom rules: <code className="bg-blue-100 px-1 rounded">attribute_name:asc</code> or <code className="bg-blue-100 px-1 rounded">attribute_name:desc</code> for sort-based ranking.</p>
+        </div>
         <DynamicTextBoxes
-            buttonText="+ Add a Ranking Attribute"
+            buttonText="+ Add a Ranking Rule"
             initialTextboxValues={settings.rankingRules}
             onChange={handleRankingRulesChange}
         />
