@@ -1,6 +1,6 @@
 services:
   meilisearch:
-    image: getmeili/meilisearch:nightly
+    image: getmeili/meilisearch:v1.37.0
     container_name: meilisearch-instance
     ports:
       - "7700:7700"

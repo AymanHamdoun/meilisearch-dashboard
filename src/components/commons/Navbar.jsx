@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import useMeiliInstance from '../../hooks/useMeiliInstance'
 import useIndex from '../../hooks/useMeiliIndex'
 import { MeiliIndexAction } from "../../reducers/meiliIndexReducer";
-import {useLocation} from "react-router-dom";
 import { useDashboardModal } from "../layouts/DashboardLayout";
 import { PlusIcon } from "./SideBar";
 
@@ -29,7 +29,7 @@ const Navbar = () => {
                 </div>
                 <div className="flex items-center gap-3">
                     <CreateIndexButton />
-                    <UserMenu />
+                    <DashboardSettingsLink />
                 </div>
             </div>
         </div>
@@ -57,44 +57,24 @@ const CreateIndexButton = () => {
 };
 
 /**
- * UserMenu component that renders logged in user menu.
+ * DashboardSettingsLink component — gear icon linking to dashboard settings.
  * @component
- * @returns {JSX.Element} The rendered contact form.
+ * @returns {JSX.Element}
  */
-const UserMenu = () => {
-    return <div className="flex items-center ms-3">
-        <div>
-            <button type="button" className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" aria-expanded="false" data-dropdown-toggle="dropdown-user">
-                <span className="sr-only">Open user menu</span>
-                <img className="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo" />
-            </button>
-        </div>
-        <div className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600" id="dropdown-user">
-            <div className="px-4 py-3" role="none">
-                <p className="text-sm text-gray-900 dark:text-white" role="none">
-                    Neil Sims
-                </p>
-                <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
-                    neil.sims@flowbite.com
-                </p>
-            </div>
-            <ul className="py-1" role="none">
-                <li>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Dashboard</a>
-                </li>
-                <li>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Settings</a>
-                </li>
-                <li>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Earnings</a>
-                </li>
-                <li>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Sign out</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-}
+const DashboardSettingsLink = () => {
+    return (
+        <Link
+            to="/instance/dashboard-settings"
+            className="p-2 text-gray-500 hover:text-primary hover:bg-gray-50 rounded-lg transition-colors"
+            title="Dashboard Settings"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="1.25rem" height="1.25rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+        </Link>
+    );
+};
 
 /**
  * InstanceDropdown 

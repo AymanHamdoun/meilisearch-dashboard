@@ -32,6 +32,14 @@ export const FEATURE_INFO: Record<string, { description: string; docLink?: strin
     description: 'Enable experimental vector store for advanced similarity search',
     docLink: 'https://www.meilisearch.com/docs/reference/api/settings'
   },
+  customScorers: {
+    description: 'Enable custom ranking functions for fine-tuned search relevancy',
+    docLink: 'https://www.meilisearch.com/docs/reference/api/settings'
+  },
+  exportPuffinReports: {
+    description: 'Enable export of Puffin performance profiling reports',
+    docLink: 'https://www.meilisearch.com/docs/reference/api/experimental_features'
+  },
   // Legacy names that might appear
   experimentalVectorStore: {
     description: 'Enable experimental vector store for advanced similarity search',

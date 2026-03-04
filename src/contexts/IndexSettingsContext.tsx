@@ -37,7 +37,10 @@ export const _defaultState: APISettings = {
         maxTotalHits: 0
     },
     searchCutoffMs: null,
-    localizedAttributes: null
+    localizedAttributes: null,
+    embedders: null,
+    facetSearch: true,
+    prefixSearch: "indexingTime"
 }
 
 type ContextType = {

@@ -1,7 +1,25 @@
 import React, { useEffect, useState } from "react"
 import { initFlowbite } from 'flowbite';
 import { SearchableAttrs } from "./settings/SearchableAttrs";
+import { DisplayedAttrs } from "./settings/DisplayedAttrs";
+import { FilterableAttrs } from "./settings/FilterableAttrs";
+import { SortableAttrs } from "./settings/SortableAttrs";
+import { StopWords } from "./settings/StopWords";
+import { SeparatorTokens } from "./settings/SeparatorTokens";
+import { NonSeparatorTokens } from "./settings/NonSeparatorTokens";
+import { Dictionary } from "./settings/Dictionary";
 import TypoTolerance from "./settings/TypoTolerance";
+import DistinctAttribute from "./settings/DistinctAttribute";
+import ProximityPrecision from "./settings/ProximityPrecision";
+import SearchCutoffMs from "./settings/SearchCutoffMs";
+import PaginationSettings from "./settings/PaginationSettings";
+import FacetingSettings from "./settings/FacetingSettings";
+import FacetSearchSetting from "./settings/FacetSearchSetting";
+import PrefixSearchSetting from "./settings/PrefixSearchSetting";
+import Synonyms from "./settings/Synonyms";
+import LocalizedAttributes from "./settings/LocalizedAttributes";
+import EmbeddersSettings from "./settings/EmbeddersSettings";
+import ExportImportSettings from "./settings/ExportImportSettings";
 
 import { IndexSettingsProvider } from "../../../../contexts/IndexSettingsContext"
 import RankingInfo from "./settings/RankingInfo.tsx";
@@ -17,8 +35,23 @@ const tabs = [
         element: <SearchableAttrs />
     },
     {
+        key: "displayed-attrs",
+        label: "Displayed Attributes",
+        element: <DisplayedAttrs />
+    },
+    {
+        key: "filterable-attrs",
+        label: "Filterable Attributes",
+        element: <FilterableAttrs />
+    },
+    {
+        key: "sortable-attrs",
+        label: "Sortable Attributes",
+        element: <SortableAttrs />
+    },
+    {
         key: "ranking",
-        label: "Ranking and Sorting",
+        label: "Ranking Rules",
         element: <RankingInfo/>
     },
     {
@@ -29,7 +62,77 @@ const tabs = [
     {
         key: "synonyms",
         label: "Synonyms",
-        element: <div>Synonyms ... to be done</div>
+        element: <Synonyms />
+    },
+    {
+        key: "stop-words",
+        label: "Stop Words",
+        element: <StopWords />
+    },
+    {
+        key: "separator-tokens",
+        label: "Separator Tokens",
+        element: <SeparatorTokens />
+    },
+    {
+        key: "non-separator-tokens",
+        label: "Non-Separator Tokens",
+        element: <NonSeparatorTokens />
+    },
+    {
+        key: "dictionary",
+        label: "Dictionary",
+        element: <Dictionary />
+    },
+    {
+        key: "distinct-attr",
+        label: "Distinct Attribute",
+        element: <DistinctAttribute />
+    },
+    {
+        key: "proximity-precision",
+        label: "Proximity Precision",
+        element: <ProximityPrecision />
+    },
+    {
+        key: "pagination",
+        label: "Pagination",
+        element: <PaginationSettings />
+    },
+    {
+        key: "faceting",
+        label: "Faceting",
+        element: <FacetingSettings />
+    },
+    {
+        key: "facet-search",
+        label: "Facet Search",
+        element: <FacetSearchSetting />
+    },
+    {
+        key: "prefix-search",
+        label: "Prefix Search",
+        element: <PrefixSearchSetting />
+    },
+    {
+        key: "search-cutoff",
+        label: "Search Cutoff",
+        element: <SearchCutoffMs />
+    },
+    {
+        key: "localized-attrs",
+        label: "Localized Attributes",
+        element: <LocalizedAttributes />
+    },
+    {
+        key: "embedders",
+        label: "Embedders",
+        element: <EmbeddersSettings />
+    },
+    {
+        key: "export-import",
+        label: "Export / Import",
+        element: <ExportImportSettings />
     },
 ]
 

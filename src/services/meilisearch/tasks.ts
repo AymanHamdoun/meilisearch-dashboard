@@ -1,8 +1,8 @@
 import { InstanceState } from "../../contexts/InstanceContext";
-import {GetTaskResponse} from "./types";
+import {GetTaskResponse, GetBatchResponse} from "./types";
 import { fetchWithTimeout } from "./fetchWithTimeout";
 
-const _defaultResponse: GetTaskResponse = {results: [],total: 0,limit: 0,from: 0,next: 0}
+const _defaultResponse: GetTaskResponse = {results: [],total: 0,limit: 0,from: 0,next: null}
 
 export interface TaskFilterOptions {
     statuses?: string[];
@@ -11,6 +11,12 @@ export interface TaskFilterOptions {
     uids?: number[];
     from?: number;
     limit?: number;
+    afterEnqueuedAt?: string;
+    beforeEnqueuedAt?: string;
+    afterStartedAt?: string;
+    beforeStartedAt?: string;
+    afterFinishedAt?: string;
+    beforeFinishedAt?: string;
 }
 
 export const getTasks = async (instance: InstanceState, options?: TaskFilterOptions): Promise<GetTaskResponse> => {
@@ -52,6 +58,13 @@ export const getTasks = async (instance: InstanceState, options?: TaskFilterOpti
     if (options?.uids && options.uids.length > 0) {
         params.append('uids', options.uids.join(','));
     }
+
+    if (options?.afterEnqueuedAt) params.append('afterEnqueuedAt', options.afterEnqueuedAt);
+    if (options?.beforeEnqueuedAt) params.append('beforeEnqueuedAt', options.beforeEnqueuedAt);
+    if (options?.afterStartedAt) params.append('afterStartedAt', options.afterStartedAt);
+    if (options?.beforeStartedAt) params.append('beforeStartedAt', options.beforeStartedAt);
+    if (options?.afterFinishedAt) params.append('afterFinishedAt', options.afterFinishedAt);
+    if (options?.beforeFinishedAt) params.append('beforeFinishedAt', options.beforeFinishedAt);
 
     const url = `${instance.host}/tasks${params.toString() ? '?' + params.toString() : ''}`;
 
@@ -98,6 +111,134 @@ export const getTaskStats = async (instance: InstanceState): Promise<{ [key: str
         console.error('Get task stats error:', error);
         return data;
     }
+}
+
+export const cancelTasks = async (instance: InstanceState, options?: TaskFilterOptions) => {
+    const myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${instance.key}`
+    });
+
+    const params = new URLSearchParams();
+    if (options?.statuses?.length) params.append('statuses', options.statuses.join(','));
+    if (options?.types?.length) params.append('types', options.types.join(','));
+    if (options?.indexUids?.length) params.append('indexUids', options.indexUids.join(','));
+    if (options?.uids?.length) params.append('uids', options.uids.join(','));
+
+    const requestOptions: RequestInit = {
+        method: "POST",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${instance.host}/tasks/cancel${params.toString() ? '?' + params.toString() : ''}`;
+
+    return fetchWithTimeout(url, requestOptions)
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error('Cancel tasks error:', error);
+            throw error;
+        });
+}
+
+export const deleteTasks = async (instance: InstanceState, options?: TaskFilterOptions) => {
+    const myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${instance.key}`
+    });
+
+    const params = new URLSearchParams();
+    if (options?.statuses?.length) params.append('statuses', options.statuses.join(','));
+    if (options?.types?.length) params.append('types', options.types.join(','));
+    if (options?.indexUids?.length) params.append('indexUids', options.indexUids.join(','));
+    if (options?.uids?.length) params.append('uids', options.uids.join(','));
+
+    const requestOptions: RequestInit = {
+        method: "DELETE",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${instance.host}/tasks${params.toString() ? '?' + params.toString() : ''}`;
+
+    return fetchWithTimeout(url, requestOptions)
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error('Delete tasks error:', error);
+            throw error;
+        });
+}
+
+export const getTask = async (instance: InstanceState, uid: number) => {
+    const myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${instance.key}`
+    });
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${instance.host}/tasks/${uid}`;
+
+    return fetchWithTimeout(url, requestOptions)
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error('Get task error:', error);
+            throw error;
+        });
+}
+
+export const getBatches = async (instance: InstanceState, options?: { from?: number; limit?: number }): Promise<GetBatchResponse> => {
+    const myHeaders = new Headers({
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${instance.key}`
+    });
+
+    const params = new URLSearchParams();
+    if (options?.from !== undefined) params.append('from', options.from.toString());
+    if (options?.limit !== undefined) params.append('limit', options.limit.toString());
+
+    const requestOptions: RequestInit = {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+    };
+
+    const url = `${instance.host}/batches${params.toString() ? '?' + params.toString() : ''}`;
+
+    return fetchWithTimeout(url, requestOptions)
+        .then(async (response) => {
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.message || `API error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .catch((error) => {
+            console.error('Get batches error:', error);
+            throw error;
+        });
 }
 
 const getStatusTaskResponse = (instance: InstanceState, status: string) => {
