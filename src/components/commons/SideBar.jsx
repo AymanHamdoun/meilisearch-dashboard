@@ -86,6 +86,7 @@ const SideBar = () => {
             createDropdownItem("s-5", "Settings", SettingsIcon, [
                 createNavItem("s-6", "API Keys", "/instance/keys", KeyIcon),
                 createNavItem("s-7", "Experimental Features", "/instance/experimental", ExperimentalIcon),
+                createNavItem("s-8", "Dashboard", "/instance/dashboard-settings", SettingsIcon),
             ])
         );
 

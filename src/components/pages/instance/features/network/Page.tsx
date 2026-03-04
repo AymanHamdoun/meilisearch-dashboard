@@ -4,6 +4,8 @@ import { getNetwork, updateNetwork } from '../../../../../services/meilisearch/n
 import CodeMirror from "@uiw/react-codemirror";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import { json } from "@codemirror/lang-json";
+import HelpPanel from '../../../../commons/HelpPanel';
+import { useDocs } from '../../../../../contexts/DocsContext';
 
 const NetworkPage: React.FC = () => {
     const { instanceState } = useMeiliInstance();
@@ -40,6 +42,9 @@ const NetworkPage: React.FC = () => {
         }
     };
 
+    let featureDoc = undefined;
+    try { const { getFeatureDoc } = useDocs(); featureDoc = getFeatureDoc('network'); } catch {}
+
     return (
         <div className="px-4 py-5">
             <div className="mb-8">
@@ -48,6 +53,8 @@ const NetworkPage: React.FC = () => {
                     Configure network topology for horizontal database partitioning and federated search
                 </p>
             </div>
+
+            <HelpPanel featureDoc={featureDoc} />
 
             {error && (
                 <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>

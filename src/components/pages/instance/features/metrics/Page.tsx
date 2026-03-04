@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import useMeiliInstance from '../../../../../hooks/useMeiliInstance';
 import { getMetrics } from '../../../../../services/meilisearch/metrics';
+import MetricGaugeCard from '../../../../charts/MetricGaugeCard';
+import MetricBarChart from '../../../../charts/MetricBarChart';
+import MetricHistogram from '../../../../charts/MetricHistogram';
+import HelpPanel from '../../../../commons/HelpPanel';
+import { useDocs } from '../../../../../contexts/DocsContext';
 
 interface ParsedMetric {
     name: string;
@@ -51,6 +56,35 @@ const formatValue = (value: string): string => {
     return num.toLocaleString();
 };
 
+const isHistogram = (metric: ParsedMetric): boolean => {
+    return metric.type === 'histogram' && metric.values.some(v => v.labels.includes('le='));
+};
+
+const getHistogramBuckets = (metric: ParsedMetric) => {
+    return metric.values
+        .filter(v => v.labels.includes('le=') && !v.labels.includes('le="+Inf"'))
+        .map(v => {
+            const leMatch = v.labels.match(/le="([^"]+)"/);
+            return {
+                label: leMatch ? leMatch[1] : '',
+                value: parseFloat(v.value),
+            };
+        });
+};
+
+const hasMultipleLabels = (metric: ParsedMetric): boolean => {
+    return metric.values.length > 1 && metric.values.some(v => v.labels);
+};
+
+const getBarChartData = (metric: ParsedMetric) => {
+    return metric.values.map(v => ({
+        label: v.labels || metric.name,
+        value: parseFloat(v.value),
+    }));
+};
+
+type ViewMode = 'charts' | 'table';
+
 const AdvancedMetricsPage: React.FC = () => {
     const { instanceState } = useMeiliInstance();
     const [rawMetrics, setRawMetrics] = useState<string>('');
@@ -58,6 +92,7 @@ const AdvancedMetricsPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [showRaw, setShowRaw] = useState(false);
+    const [metricViewModes, setMetricViewModes] = useState<Record<string, ViewMode>>({});
 
     const fetchMetrics = () => {
         if (!instanceState.isLoaded) return;
@@ -80,6 +115,27 @@ const AdvancedMetricsPage: React.FC = () => {
         fetchMetrics();
     }, [instanceState]);
 
+    const toggleMetricView = (name: string) => {
+        setMetricViewModes(prev => ({
+            ...prev,
+            [name]: prev[name] === 'table' ? 'charts' : 'table',
+        }));
+    };
+
+    const getViewMode = (name: string): ViewMode => metricViewModes[name] || 'charts';
+
+    let featureDoc = undefined;
+    try { const { getFeatureDoc } = useDocs(); featureDoc = getFeatureDoc('metrics'); } catch {}
+
+    const gaugeMetrics = parsedMetrics.filter(m => m.type === 'gauge' && m.values.length === 1);
+    const histogramMetrics = parsedMetrics.filter(m => isHistogram(m));
+    const counterMetrics = parsedMetrics.filter(m => m.type === 'counter' && hasMultipleLabels(m));
+    const otherMetrics = parsedMetrics.filter(m =>
+        !(m.type === 'gauge' && m.values.length === 1) &&
+        !isHistogram(m) &&
+        !(m.type === 'counter' && hasMultipleLabels(m))
+    );
+
     return (
         <div className="px-4 py-5">
             <div className="mb-8 flex items-center justify-between">
@@ -92,6 +148,7 @@ const AdvancedMetricsPage: React.FC = () => {
                     </div>
                     <p className="text-gray-600">Prometheus-compatible analytics and performance metrics</p>
                 </div>
+                <HelpPanel featureDoc={featureDoc} />
                 <div className="flex gap-2">
                     <button
                         onClick={() => setShowRaw(!showRaw)}
@@ -124,61 +181,94 @@ const AdvancedMetricsPage: React.FC = () => {
                     </pre>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4">
-                    {/* Summary cards for key metrics */}
-                    {parsedMetrics.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {parsedMetrics
-                                .filter(m => m.type === 'gauge' && m.values.length === 1)
-                                .slice(0, 6)
-                                .map(metric => (
-                                    <div key={metric.name} className="bg-white rounded-lg shadow p-4">
-                                        <div className="text-sm text-gray-500 mb-1 truncate" title={metric.help}>
-                                            {metric.help}
-                                        </div>
-                                        <div className="text-2xl font-semibold text-gray-800">
-                                            {formatValue(metric.values[0].value)}
-                                        </div>
-                                        <div className="text-xs text-gray-400 font-mono mt-1">{metric.name}</div>
-                                    </div>
+                <div className="flex flex-col gap-6">
+                    {/* Gauge metrics as cards */}
+                    {gaugeMetrics.length > 0 && (
+                        <div>
+                            <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Gauges</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {gaugeMetrics.map(metric => (
+                                    <MetricGaugeCard
+                                        key={metric.name}
+                                        title={metric.help}
+                                        value={metric.values[0].value}
+                                        metricName={metric.name}
+                                    />
                                 ))}
+                            </div>
                         </div>
                     )}
 
-                    {/* All metrics table */}
-                    {parsedMetrics.map(metric => (
-                        <div key={metric.name} className="bg-white rounded-lg shadow p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <h3 className="font-medium text-gray-800 font-mono text-sm">{metric.name}</h3>
-                                <span className="px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-500">{metric.type}</span>
+                    {/* Histogram metrics as bar charts */}
+                    {histogramMetrics.length > 0 && (
+                        <div>
+                            <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Histograms</h2>
+                            <div className={`grid gap-4 ${histogramMetrics.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+                                {histogramMetrics.map(metric => (
+                                    <div key={metric.name}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs text-gray-400 font-mono">{metric.name}</span>
+                                            <button
+                                                onClick={() => toggleMetricView(metric.name)}
+                                                className="text-xs text-gray-400 hover:text-gray-600"
+                                            >
+                                                {getViewMode(metric.name) === 'charts' ? 'Table' : 'Chart'}
+                                            </button>
+                                        </div>
+                                        {getViewMode(metric.name) === 'charts' ? (
+                                            <MetricHistogram
+                                                buckets={getHistogramBuckets(metric)}
+                                                title={metric.help}
+                                            />
+                                        ) : (
+                                            <MetricTable metric={metric} />
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                            <p className="text-sm text-gray-500 mb-3">{metric.help}</p>
-                            {metric.values.length > 0 && (
-                                <div className="border border-gray-200 rounded overflow-hidden">
-                                    <table className="w-full text-sm">
-                                        <thead>
-                                            <tr className="bg-gray-50 text-left text-gray-600">
-                                                {metric.values.some(v => v.labels) && (
-                                                    <th className="py-2 px-3 font-medium">Labels</th>
-                                                )}
-                                                <th className="py-2 px-3 font-medium text-right">Value</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {metric.values.map((v, i) => (
-                                                <tr key={i} className="border-t border-gray-100">
-                                                    {metric.values.some(v => v.labels) && (
-                                                        <td className="py-2 px-3 font-mono text-xs text-gray-600">{v.labels || '-'}</td>
-                                                    )}
-                                                    <td className="py-2 px-3 text-right font-mono">{formatValue(v.value)}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
                         </div>
-                    ))}
+                    )}
+
+                    {/* Counter metrics with multiple labels as bar charts */}
+                    {counterMetrics.length > 0 && (
+                        <div>
+                            <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Counters</h2>
+                            <div className={`grid gap-4 ${counterMetrics.length === 1 ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
+                                {counterMetrics.map(metric => (
+                                    <div key={metric.name}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs text-gray-400 font-mono">{metric.name}</span>
+                                            <button
+                                                onClick={() => toggleMetricView(metric.name)}
+                                                className="text-xs text-gray-400 hover:text-gray-600"
+                                            >
+                                                {getViewMode(metric.name) === 'charts' ? 'Table' : 'Chart'}
+                                            </button>
+                                        </div>
+                                        {getViewMode(metric.name) === 'charts' ? (
+                                            <MetricBarChart
+                                                data={getBarChartData(metric)}
+                                                title={metric.help}
+                                                color="#3b82f6"
+                                            />
+                                        ) : (
+                                            <MetricTable metric={metric} />
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Other metrics as tables */}
+                    {otherMetrics.length > 0 && (
+                        <div>
+                            <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Other Metrics</h2>
+                            {otherMetrics.map(metric => (
+                                <MetricTable key={metric.name} metric={metric} />
+                            ))}
+                        </div>
+                    )}
 
                     {parsedMetrics.length === 0 && (
                         <div className="bg-white rounded-lg shadow p-6 text-center py-12">
@@ -192,5 +282,39 @@ const AdvancedMetricsPage: React.FC = () => {
         </div>
     );
 };
+
+const MetricTable: React.FC<{ metric: ParsedMetric }> = ({ metric }) => (
+    <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <div className="flex items-center gap-2 mb-2">
+            <h3 className="font-medium text-gray-800 font-mono text-sm">{metric.name}</h3>
+            <span className="px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-500">{metric.type}</span>
+        </div>
+        <p className="text-sm text-gray-500 mb-3">{metric.help}</p>
+        {metric.values.length > 0 && (
+            <div className="border border-gray-200 rounded overflow-hidden">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="bg-gray-50 text-left text-gray-600">
+                            {metric.values.some(v => v.labels) && (
+                                <th className="py-2 px-3 font-medium">Labels</th>
+                            )}
+                            <th className="py-2 px-3 font-medium text-right">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {metric.values.map((v, i) => (
+                            <tr key={i} className="border-t border-gray-100">
+                                {metric.values.some(v => v.labels) && (
+                                    <td className="py-2 px-3 font-mono text-xs text-gray-600">{v.labels || '-'}</td>
+                                )}
+                                <td className="py-2 px-3 text-right font-mono">{formatValue(v.value)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        )}
+    </div>
+);
 
 export default AdvancedMetricsPage;

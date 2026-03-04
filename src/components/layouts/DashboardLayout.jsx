@@ -3,6 +3,7 @@ import {Outlet, useNavigate} from "react-router-dom"
 import { InstanceProvider } from "../../contexts/InstanceContext"
 import { MeiliIndexProvider } from "../../contexts/MeiliIndexContext"
 import { ExperimentalFeaturesProvider } from "../../contexts/ExperimentalFeaturesContext"
+import { DocsProvider } from "../../contexts/DocsContext"
 import { ToastProvider } from "../../contexts/ToastContext"
 import SideBar from "../commons/SideBar"
 import Navbar from "../commons/Navbar"
@@ -25,6 +26,7 @@ const DashboardLayout = () => {
 
     return <InstanceProvider>
         <ExperimentalFeaturesProvider>
+            <DocsProvider>
             <ToastProvider>
                 <InstanceErrorBoundary>
                     <InstanceModal/>
@@ -43,6 +45,7 @@ const DashboardLayout = () => {
                     <ToastContainer />
                 </InstanceErrorBoundary>
             </ToastProvider>
+            </DocsProvider>
         </ExperimentalFeaturesProvider>
     </InstanceProvider>
 }

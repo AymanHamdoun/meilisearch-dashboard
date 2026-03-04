@@ -4,6 +4,8 @@ import useMeiliIndex from '../../../../../hooks/useMeiliIndex';
 import { similarDocuments } from '../../../../../services/meilisearch/search';
 import { getIndexSettings } from '../../../../../services/meilisearch/settings';
 import { ApiSettingsEmbedder } from '../../../../../services/meilisearch/types';
+import HelpPanel from '../../../../commons/HelpPanel';
+import { useDocs } from '../../../../../contexts/DocsContext';
 
 const VectorStorePage: React.FC = () => {
     const { instanceState } = useMeiliInstance();
@@ -49,6 +51,8 @@ const VectorStorePage: React.FC = () => {
     };
 
     const embedderKeys = embedders ? Object.keys(embedders) : [];
+    let featureDoc = undefined;
+    try { const { getFeatureDoc } = useDocs(); featureDoc = getFeatureDoc('vectorStore'); } catch {}
 
     return (
         <div className="px-4 py-5">
@@ -56,6 +60,8 @@ const VectorStorePage: React.FC = () => {
                 <h1 className="text-3xl font-semibold mb-2">Vector Store</h1>
                 <p className="text-gray-600">Semantic search with vector embeddings</p>
             </div>
+
+            <HelpPanel featureDoc={featureDoc} />
 
             {/* Embedder Status */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">

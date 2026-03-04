@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import useMeiliInstance from '../../../../../hooks/useMeiliInstance';
 import useMeiliIndex from '../../../../../hooks/useMeiliIndex';
 import { chatCompletions } from '../../../../../services/meilisearch/search';
+import HelpPanel from '../../../../commons/HelpPanel';
+import { useDocs } from '../../../../../contexts/DocsContext';
 
 interface ChatMessage {
     role: 'user' | 'assistant' | 'system';
@@ -19,6 +21,8 @@ const ChatCompletionsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [model, setModel] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    let featureDoc = undefined;
+    try { const { getFeatureDoc } = useDocs(); featureDoc = getFeatureDoc('chatCompletions'); } catch {}
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -104,6 +108,8 @@ const ChatCompletionsPage: React.FC = () => {
                 </div>
                 <p className="text-gray-600">AI-powered chat completions using your Meilisearch data</p>
             </div>
+
+            <HelpPanel featureDoc={featureDoc} />
 
             {/* Config */}
             <div className="flex gap-3 mb-4">
