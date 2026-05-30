@@ -1,38 +1,194 @@
 import React, { useEffect, useState } from "react";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+    useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface DynamicTextBoxesProps {
     buttonText: string;
     initialTextboxValues: string[];
     onChange?: (values: string[]) => void;
+    reorderable?: boolean;
 }
 
-const DynamicTextBoxes: React.FC<DynamicTextBoxesProps> = ({buttonText, initialTextboxValues, onChange }) => {
+interface SortableItemProps {
+    id: string;
+    value: string;
+    index: number;
+    reorderable: boolean;
+    onTextChange: (index: number, value: string) => void;
+    onDelete: (index: number) => void;
+}
+
+const SortableItem: React.FC<SortableItemProps> = ({ id, value, index, reorderable, onTextChange, onDelete }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id, disabled: !reorderable });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`flex items-center mb-3 ${isDragging ? 'z-50' : ''}`}
+        >
+            {reorderable && (
+                <div
+                    className="mr-2 text-gray-400 hover:text-gray-600 cursor-move touch-none"
+                    {...attributes}
+                    {...listeners}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 6.5C8 7.32843 7.32843 8 6.5 8C5.67157 8 5 7.32843 5 6.5C5 5.67157 5.67157 5 6.5 5C7.32843 5 8 5.67157 8 6.5Z" fill="currentColor"/>
+                        <path d="M8 12C8 12.8284 7.32843 13.5 6.5 13.5C5.67157 13.5 5 12.8284 5 12C5 11.1716 5.67157 10.5 6.5 10.5C7.32843 10.5 8 11.1716 8 12Z" fill="currentColor"/>
+                        <path d="M6.5 19C7.32843 19 8 18.3284 8 17.5C8 16.6716 7.32843 16 6.5 16C5.67157 16 5 16.6716 5 17.5C5 18.3284 5.67157 19 6.5 19Z" fill="currentColor"/>
+                        <path d="M13.5 6.5C13.5 7.32843 12.8284 8 12 8C11.1716 8 10.5 7.32843 10.5 6.5C10.5 5.67157 11.1716 5 12 5C12.8284 5 13.5 5.67157 13.5 6.5Z" fill="currentColor"/>
+                        <path d="M12 13.5C12.8284 13.5 13.5 12.8284 13.5 12C13.5 11.1716 12.8284 10.5 12 10.5C11.1716 10.5 10.5 11.1716 10.5 12C10.5 12.8284 11.1716 13.5 12 13.5Z" fill="currentColor"/>
+                        <path d="M13.5 17.5C13.5 18.3284 12.8284 19 12 19C11.1716 19 10.5 18.3284 10.5 17.5C10.5 16.6716 11.1716 16 12 16C12.8284 16 13.5 16.6716 13.5 17.5Z" fill="currentColor"/>
+                        <path d="M17.5 8C18.3284 8 19 7.32843 19 6.5C19 5.67157 18.3284 5 17.5 5C16.6716 5 16 5.67157 16 6.5C16 7.32843 16.6716 8 17.5 8Z" fill="currentColor"/>
+                        <path d="M19 12C19 12.8284 18.3284 13.5 17.5 13.5C16.6716 13.5 16 12.8284 16 12C16 11.1716 16.6716 10.5 17.5 10.5C18.3284 10.5 19 11.1716 19 12Z" fill="currentColor"/>
+                        <path d="M17.5 19C18.3284 19 19 18.3284 19 17.5C19 16.6716 18.3284 16 17.5 16C16.6716 16 16 16.6716 16 17.5C16 18.3284 16.6716 19 17.5 19Z" fill="currentColor"/>
+                    </svg>
+                </div>
+            )}
+            <input
+                type="text"
+                value={value}
+                onChange={(e) => onTextChange(index, e.target.value)}
+                className="flex-1 mr-3 border-b bg-gray-50 border-gray-200 py-1.5 px-3 focus:outline-none focus:border-b focus:border-b-primary text-gray-600"
+            />
+            <button onClick={() => onDelete(index)}
+                className="p-2 text-gray-300 hover:text-red-400 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 6h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M10 11v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M14 11v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+            </button>
+        </div>
+    );
+};
+
+const DynamicTextBoxes: React.FC<DynamicTextBoxesProps> = ({buttonText, initialTextboxValues, onChange, reorderable = false }) => {
     initialTextboxValues = !Array.isArray(initialTextboxValues) ? [] : initialTextboxValues;
 
     const [textboxes, setTextboxes] = useState<string[]>(initialTextboxValues);
+    const [items, setItems] = useState<string[]>([]);
 
     useEffect(() => {
-        setTextboxes(initialTextboxValues); 
-    }, [initialTextboxValues]); 
+        setTextboxes(initialTextboxValues);
+        setItems(initialTextboxValues.map((_, index) => `item-${index}`));
+    }, [initialTextboxValues]);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     const handleAddTextbox = () => {
         const newTextboxes = [...textboxes, ""];
-        setTextboxes(newTextboxes); // Add a new empty textbox
+        const newItems = [...items, `item-${items.length}`];
+        setTextboxes(newTextboxes);
+        setItems(newItems);
         onChange?.(newTextboxes);
     };
 
     const handleTextboxChange = (index: number, value: string) => {
         const updatedTextboxes = [...textboxes];
         updatedTextboxes[index] = value;
-        setTextboxes(updatedTextboxes); // Update the state with the changed value
+        setTextboxes(updatedTextboxes);
         onChange?.(updatedTextboxes);
     };
 
     const handleDeleteTextbox = (index: number) => {
         const updatedTextboxes = textboxes.filter((_, i) => i !== index);
-        setTextboxes(updatedTextboxes); // Remove the textbox at the specified index
+        const updatedItems = items.filter((_, i) => i !== index);
+        setTextboxes(updatedTextboxes);
+        setItems(updatedItems);
         onChange?.(updatedTextboxes);
     };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = items.indexOf(active.id as string);
+            const newIndex = items.indexOf(over.id as string);
+
+            const newItems = arrayMove(items, oldIndex, newIndex);
+            const newTextboxes = arrayMove(textboxes, oldIndex, newIndex);
+
+            setItems(newItems);
+            setTextboxes(newTextboxes);
+            onChange?.(newTextboxes);
+        }
+    };
+
+    if (reorderable) {
+        return (
+            <div className="flex flex-col gap-3">
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext
+                        items={items}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        <div>
+                            {textboxes.map((textbox, index) => (
+                                <SortableItem
+                                    key={items[index]}
+                                    id={items[index]}
+                                    value={textbox}
+                                    index={index}
+                                    reorderable={reorderable}
+                                    onTextChange={handleTextboxChange}
+                                    onDelete={handleDeleteTextbox}
+                                />
+                            ))}
+                        </div>
+                    </SortableContext>
+                </DndContext>
+
+                <button className="border border-gray-300 rounded-sm py-2 px-3 hover:bg-primary hover:text-white transition-all ease-in-out w-full" onClick={handleAddTextbox}>{buttonText}</button>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col gap-3">

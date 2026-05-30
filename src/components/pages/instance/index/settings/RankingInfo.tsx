@@ -35,6 +35,7 @@ const RankingInfo = () => {
             buttonText="+ Add a Ranking Rule"
             initialTextboxValues={settings.rankingRules}
             onChange={handleRankingRulesChange}
+            reorderable={true}
         />
     </div>
 }
