@@ -149,32 +149,34 @@ const AdvancedMetricsPage: React.FC = () => {
 
     return (
         <div className="px-4 py-5">
-            <div className="mb-8 flex items-center justify-between">
-                <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <h1 className="text-3xl font-semibold">Advanced Metrics</h1>
-                        <span className="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">
-                            Experimental
-                        </span>
+            <div className="mb-8">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-3xl font-semibold">Advanced Metrics</h1>
+                            <span className="px-3 py-1 text-sm font-medium rounded-full bg-yellow-100 text-yellow-800">
+                                Experimental
+                            </span>
+                        </div>
+                        <p className="text-gray-600">Prometheus-compatible analytics and performance metrics</p>
                     </div>
-                    <p className="text-gray-600">Prometheus-compatible analytics and performance metrics</p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowRaw(!showRaw)}
+                            className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50"
+                        >
+                            {showRaw ? 'Parsed View' : 'Raw View'}
+                        </button>
+                        <button
+                            onClick={fetchMetrics}
+                            disabled={isLoading}
+                            className="px-3 py-2 text-sm bg-primary text-white rounded hover:bg-opacity-90 disabled:opacity-50"
+                        >
+                            {isLoading ? 'Refreshing...' : 'Refresh'}
+                        </button>
+                    </div>
                 </div>
                 <HelpPanel featureDoc={featureDoc} />
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setShowRaw(!showRaw)}
-                        className="px-3 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50"
-                    >
-                        {showRaw ? 'Parsed View' : 'Raw View'}
-                    </button>
-                    <button
-                        onClick={fetchMetrics}
-                        disabled={isLoading}
-                        className="px-3 py-2 text-sm bg-primary text-white rounded hover:bg-opacity-90 disabled:opacity-50"
-                    >
-                        {isLoading ? 'Refreshing...' : 'Refresh'}
-                    </button>
-                </div>
             </div>
 
             {error && (
