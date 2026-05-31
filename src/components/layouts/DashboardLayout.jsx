@@ -1,5 +1,6 @@
 import React, {useEffect, useState, createContext, useContext} from "react";
-import {Outlet, useNavigate} from "react-router-dom"
+import {Outlet, useNavigate, useLocation} from "react-router-dom"
+import { initFlowbite } from 'flowbite'
 import { InstanceProvider } from "../../contexts/InstanceContext"
 import { MeiliIndexProvider } from "../../contexts/MeiliIndexContext"
 import { ExperimentalFeaturesProvider } from "../../contexts/ExperimentalFeaturesContext"
@@ -56,12 +57,17 @@ export default DashboardLayout;
 const LayoutContent = () => {
     const {instanceState} = useMeiliInstance()
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (instanceState.isLoaded && !instanceState.isSet) {
             navigate("/instance-form")
         }
     }, [instanceState])
+
+    useEffect(() => {
+        initFlowbite();
+    }, [location.pathname])
 
     if (!instanceState.isLoaded) {
         return <div>loading instance config</div>

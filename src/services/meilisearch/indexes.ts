@@ -461,9 +461,22 @@ const updateIndex = (instance: InstanceState, indexName: string, primaryKey: str
         });
 }
 
+const getIndex = (instance: InstanceState, indexName: string) => {
+    return fetchWithTimeout(`${instance.host}/indexes/${indexName}`, {
+        method: 'GET',
+        headers: new Headers({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${instance.key}` }),
+        redirect: 'follow',
+    })
+        .then(async (response) => {
+            if (!response.ok) { const d = await response.json(); throw new Error(d.message || `API error: ${response.status}`); }
+            return response.json();
+        });
+}
+
 export {
     listIndexes,
     getIndexStats,
+    getIndex,
     createIndex,
     deleteIndex,
     uploadDocuments,

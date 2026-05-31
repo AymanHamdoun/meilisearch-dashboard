@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import SearchWidget from './SearchWidget.tsx'
 import IndexSettingsTabs from './IndexSettingsTabs.jsx'
 import FieldsExplorer from './FieldsExplorer'
+import SearchAnalyticsDashboard from './analytics/SearchAnalyticsDashboard'
 import { initFlowbite } from 'flowbite';
 import useIndex from "../../../../hooks/useMeiliIndex.js";
 
@@ -22,6 +23,11 @@ const tabs = [
         key: "settings",
         label: "Configuration",
         element: <IndexSettingsTabs />
+    },
+    {
+        key: "analytics",
+        label: "Analytics",
+        element: <SearchAnalyticsDashboard />
     },
 ];
 

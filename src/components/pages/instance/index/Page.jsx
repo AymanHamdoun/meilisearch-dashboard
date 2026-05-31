@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import IndexManager from "./IndexManager";
 import IndexTabs from "./IndexTabs";
-import { getIndexStats } from "../../../../services/meilisearch/indexes.ts";
+import { getIndexStats, getIndex } from "../../../../services/meilisearch/indexes.ts";
 
 import useIndex from '../../../../hooks/useMeiliIndex'
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
@@ -15,46 +15,84 @@ const Page = () => {
     </div>
 }
 
-
 const IndexStats = () => {
     const { meiliIndexState, refreshIndexes } = useIndex()
-    const {instanceState} = useMeiliInstance()
+    const { instanceState } = useMeiliInstance()
 
     const [stats, setStats] = useState({})
+    const [meta, setMeta] = useState(null)
+
+    const indexName = meiliIndexState.selectedIndex
 
     useEffect(() => {
-        if (!instanceState.isLoaded || meiliIndexState.selectedIndex === "") {
-            return
-        }
-        getIndexStats(instanceState.host, instanceState.key, meiliIndexState.selectedIndex)
-            .then((stats) => {
-                setStats(stats)
+        if (!instanceState.isLoaded || !indexName) return;
+
+        Promise.all([
+            getIndexStats(instanceState.host, instanceState.key, indexName),
+            getIndex(instanceState, indexName),
+        ])
+            .then(([s, m]) => {
+                setStats(s);
+                setMeta(m);
             })
             .catch(async (error) => {
-                // If the index was not found, refresh the index list
-                // The reducer will automatically select a new index if available
                 if (error.code === 'index_not_found') {
-                    console.log(`Index '${meiliIndexState.selectedIndex}' not found, refreshing index list...`);
                     await refreshIndexes();
-                    // Clear the stats since the index doesn't exist
                     setStats({});
+                    setMeta(null);
                 } else {
-                    // For other errors, log them but don't crash
                     console.error('Error fetching index stats:', error);
                 }
-            })
-    }, [instanceState, meiliIndexState.selectedIndex])
+            });
+    }, [instanceState, indexName])
 
+    const fieldCount = stats.fieldDistribution ? Object.keys(stats.fieldDistribution).length : null;
 
-    return <div className="mb-8">
-        <h3 className="text-3xl font-semibold mb-3">Index</h3>
-        <div className="flex flex-row gap-3">
-            <div className="flex flex-row gap-3">
-                <div className="text-gray-500 font-semibold"># records</div>
-                <div className="text-gray-500 font-semibold">{stats.numberOfDocuments !== undefined ? stats.numberOfDocuments.toLocaleString() : '-'}</div>
+    const formatDate = (iso) => {
+        if (!iso) return null;
+        try {
+            return new Date(iso).toLocaleString(undefined, {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+            });
+        } catch {
+            return iso;
+        }
+    };
+
+    return (
+        <div className="mb-6">
+            <div className="flex items-center gap-3 mb-3">
+                <h3 className="text-3xl font-semibold">Index</h3>
+                {stats.isIndexing && (
+                    <span className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse inline-block" />
+                        Indexing…
+                    </span>
+                )}
+            </div>
+            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
+                <span>
+                    <span className="font-semibold text-gray-700">{stats.numberOfDocuments !== undefined ? stats.numberOfDocuments.toLocaleString() : '—'}</span>
+                    {' '}records
+                </span>
+                {fieldCount !== null && (
+                    <span>
+                        <span className="font-semibold text-gray-700">{fieldCount}</span>
+                        {' '}fields
+                    </span>
+                )}
+                {meta?.primaryKey && (
+                    <span>
+                        primary key: <span className="font-mono text-xs bg-gray-100 px-1 py-0.5 rounded text-gray-700">{meta.primaryKey}</span>
+                    </span>
+                )}
+                {meta?.updatedAt && (
+                    <span>updated {formatDate(meta.updatedAt)}</span>
+                )}
             </div>
         </div>
-    </div>
+    )
 }
 
 export default Page;
