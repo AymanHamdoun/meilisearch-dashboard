@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useMeiliInstance from '../../../../../hooks/useMeiliInstance';
 import { getMetrics } from '../../../../../services/meilisearch/metrics';
 import { getTaskTypeStats, getTaskStats, TASK_TYPES } from '../../../../../services/meilisearch/tasks';
@@ -124,7 +124,7 @@ const AdvancedMetricsPage: React.FC = () => {
 
     useEffect(() => {
         fetchMetrics();
-    }, [instanceState]);
+    }, [instanceState.isLoaded, instanceState.host, instanceState.key]);
 
     const toggleMetricView = (name: string) => {
         setMetricViewModes(prev => ({
@@ -138,14 +138,14 @@ const AdvancedMetricsPage: React.FC = () => {
     let featureDoc = undefined;
     try { const { getFeatureDoc } = useDocs(); featureDoc = getFeatureDoc('metrics'); } catch {}
 
-    const gaugeMetrics = parsedMetrics.filter(m => m.type === 'gauge' && m.values.length === 1);
-    const histogramMetrics = parsedMetrics.filter(m => isHistogram(m));
-    const counterMetrics = parsedMetrics.filter(m => m.type === 'counter' && hasMultipleLabels(m));
-    const otherMetrics = parsedMetrics.filter(m =>
+    const gaugeMetrics = useMemo(() => parsedMetrics.filter(m => m.type === 'gauge' && m.values.length === 1), [parsedMetrics]);
+    const histogramMetrics = useMemo(() => parsedMetrics.filter(m => isHistogram(m)), [parsedMetrics]);
+    const counterMetrics = useMemo(() => parsedMetrics.filter(m => m.type === 'counter' && hasMultipleLabels(m)), [parsedMetrics]);
+    const otherMetrics = useMemo(() => parsedMetrics.filter(m =>
         !(m.type === 'gauge' && m.values.length === 1) &&
         !isHistogram(m) &&
         !(m.type === 'counter' && hasMultipleLabels(m))
-    );
+    ), [parsedMetrics]);
 
     return (
         <div className="px-4 py-5">

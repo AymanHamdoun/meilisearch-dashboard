@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useReducer} from "react";
+import React, {createContext, useEffect, useMemo, useReducer} from "react";
 import PropTypes from "prop-types";
 import meiliIndexReducer, { MeiliIndexAction } from "../reducers/meiliIndexReducer";
 import {listIndexes} from "../services/meilisearch/indexes.ts"
@@ -76,10 +76,14 @@ export const MeiliIndexProvider = ({ children }) => {
         };
 
         getIndexes();
-    }, [instanceState]); // Empty dependency array ensures this runs only once on component mount
+    }, [instanceState.isLoaded, instanceState.host, instanceState.key]);
 
+    const value = useMemo(
+        () => ({ meiliIndexState, dispatch, refreshIndexes }),
+        [meiliIndexState, refreshIndexes]
+    );
 
-    return <MeiliIndexContext.Provider value={{meiliIndexState, dispatch, refreshIndexes}}>
+    return <MeiliIndexContext.Provider value={value}>
         {children}
     </MeiliIndexContext.Provider>;
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { InstanceState } from '../contexts/InstanceContext';
 import { facetSearch } from '../services/meilisearch/search';
 
@@ -10,9 +10,14 @@ interface AttrValueState {
 
 export const useAttributeValues = (instance: InstanceState, indexName: string | null) => {
     const [cache, setCache] = useState<Record<string, AttrValueState>>({});
+    // Stable ref so fetchValues never needs to depend on cache state
+    const cacheRef = useRef(cache);
+    cacheRef.current = cache;
 
     const fetchValues = useCallback(async (attrName: string) => {
-        if (cache[attrName]?.loading || (cache[attrName] && !cache[attrName].error && cache[attrName].values.length > 0)) return;
+        const current = cacheRef.current[attrName];
+        if (current?.loading || (current && !current.error && current.values.length > 0)) return;
+
         setCache(prev => ({ ...prev, [attrName]: { values: [], loading: true, error: null } }));
         try {
             const resp = await facetSearch(instance, indexName ?? '', attrName);
@@ -21,7 +26,8 @@ export const useAttributeValues = (instance: InstanceState, indexName: string | 
         } catch (e: any) {
             setCache(prev => ({ ...prev, [attrName]: { values: [], loading: false, error: e.message ?? 'Failed' } }));
         }
-    }, [instance, indexName, cache]);
+    // Stable: only recreated when instance or indexName change, not when cache updates
+    }, [instance, indexName]);
 
     return { cache, fetchValues };
 };

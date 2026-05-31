@@ -227,7 +227,7 @@ const uploadDocuments = (options: UploadDocumentsOptions) => {
     };
 
     const url = `${options.instance.host}/indexes/${options.indexName}/documents`;
-    return fetchWithTimeout(url, requestOptions)
+    return fetchWithTimeout(url, requestOptions, 120_000)
         .then(async (response) => {
             if (!response.ok) {
                 const data = await response.json();

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { getExperimentalFeatures, ExperimentalFeaturesResponse } from '../services/meilisearch/settings';
 import useMeiliInstance from '../hooks/useMeiliInstance';
 
@@ -39,19 +39,17 @@ export const ExperimentalFeaturesProvider: React.FC<ExperimentalFeaturesProvider
     } finally {
       setIsLoading(false);
     }
-  }, [instanceState]);
+  }, [instanceState.isLoaded, instanceState.host, instanceState.key]);
 
   // Fetch features on mount and when instance changes
   useEffect(() => {
     refreshFeatures();
   }, [refreshFeatures]);
 
-  const value: ExperimentalFeaturesContextType = {
-    features,
-    isLoading,
-    error,
-    refreshFeatures
-  };
+  const value = useMemo<ExperimentalFeaturesContextType>(
+    () => ({ features, isLoading, error, refreshFeatures }),
+    [features, isLoading, error, refreshFeatures]
+  );
 
   return (
     <ExperimentalFeaturesContext.Provider value={value}>
