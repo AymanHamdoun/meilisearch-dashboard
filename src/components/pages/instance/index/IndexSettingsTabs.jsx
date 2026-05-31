@@ -28,113 +28,61 @@ import SettingsSaveBar from "./settings/SettingsSaveBar";
 import SettingDiffPreviewModal from "./settings/SettingDiffPreviewModal";
 
 
-const tabs = [
+const tabGroups = [
     {
-        key: "searchable-attrs",
-        label: "Searchable Attributes",
-        element: <SearchableAttrs />
+        group: "Relevance",
+        tabs: [
+            { key: "searchable-attrs",    label: "Searchable Attributes", element: <SearchableAttrs /> },
+            { key: "ranking",             label: "Ranking Rules",          element: <RankingInfo /> },
+            { key: "typos",               label: "Typo Tolerance",         element: <TypoTolerance /> },
+            { key: "proximity-precision", label: "Proximity Precision",    element: <ProximityPrecision /> },
+            { key: "distinct-attr",       label: "Distinct Attribute",     element: <DistinctAttribute /> },
+        ],
     },
     {
-        key: "displayed-attrs",
-        label: "Displayed Attributes",
-        element: <DisplayedAttrs />
+        group: "Filtering & Faceting",
+        tabs: [
+            { key: "filterable-attrs", label: "Filterable Attributes", element: <FilterableAttrs /> },
+            { key: "faceting",         label: "Faceting",               element: <FacetingSettings /> },
+            { key: "facet-search",     label: "Facet Search",           element: <FacetSearchSetting /> },
+        ],
     },
     {
-        key: "filterable-attrs",
-        label: "Filterable Attributes",
-        element: <FilterableAttrs />
+        group: "Display",
+        tabs: [
+            { key: "displayed-attrs", label: "Displayed Attributes", element: <DisplayedAttrs /> },
+            { key: "sortable-attrs",  label: "Sortable Attributes",  element: <SortableAttrs /> },
+            { key: "pagination",      label: "Pagination",           element: <PaginationSettings /> },
+        ],
     },
     {
-        key: "sortable-attrs",
-        label: "Sortable Attributes",
-        element: <SortableAttrs />
+        group: "Language",
+        tabs: [
+            { key: "synonyms",             label: "Synonyms",              element: <Synonyms /> },
+            { key: "stop-words",           label: "Stop Words",            element: <StopWords /> },
+            { key: "separator-tokens",     label: "Separator Tokens",      element: <SeparatorTokens /> },
+            { key: "non-separator-tokens", label: "Non-Separator Tokens",  element: <NonSeparatorTokens /> },
+            { key: "dictionary",           label: "Dictionary",            element: <Dictionary /> },
+            { key: "localized-attrs",      label: "Localized Attributes",  element: <LocalizedAttributes /> },
+        ],
     },
     {
-        key: "ranking",
-        label: "Ranking Rules",
-        element: <RankingInfo/>
+        group: "Performance",
+        tabs: [
+            { key: "search-cutoff", label: "Search Cutoff", element: <SearchCutoffMs /> },
+            { key: "prefix-search", label: "Prefix Search", element: <PrefixSearchSetting /> },
+            { key: "embedders",     label: "Embedders",     element: <EmbeddersSettings /> },
+        ],
     },
     {
-        key: "typos",
-        label: "Typo Tolerance",
-        element: <TypoTolerance />
-    },
-    {
-        key: "synonyms",
-        label: "Synonyms",
-        element: <Synonyms />
-    },
-    {
-        key: "stop-words",
-        label: "Stop Words",
-        element: <StopWords />
-    },
-    {
-        key: "separator-tokens",
-        label: "Separator Tokens",
-        element: <SeparatorTokens />
-    },
-    {
-        key: "non-separator-tokens",
-        label: "Non-Separator Tokens",
-        element: <NonSeparatorTokens />
-    },
-    {
-        key: "dictionary",
-        label: "Dictionary",
-        element: <Dictionary />
-    },
-    {
-        key: "distinct-attr",
-        label: "Distinct Attribute",
-        element: <DistinctAttribute />
-    },
-    {
-        key: "proximity-precision",
-        label: "Proximity Precision",
-        element: <ProximityPrecision />
-    },
-    {
-        key: "pagination",
-        label: "Pagination",
-        element: <PaginationSettings />
-    },
-    {
-        key: "faceting",
-        label: "Faceting",
-        element: <FacetingSettings />
-    },
-    {
-        key: "facet-search",
-        label: "Facet Search",
-        element: <FacetSearchSetting />
-    },
-    {
-        key: "prefix-search",
-        label: "Prefix Search",
-        element: <PrefixSearchSetting />
-    },
-    {
-        key: "search-cutoff",
-        label: "Search Cutoff",
-        element: <SearchCutoffMs />
-    },
-    {
-        key: "localized-attrs",
-        label: "Localized Attributes",
-        element: <LocalizedAttributes />
-    },
-    {
-        key: "embedders",
-        label: "Embedders",
-        element: <EmbeddersSettings />
-    },
-    {
-        key: "export-import",
-        label: "Export / Import",
-        element: <ExportImportSettings />
+        group: "Advanced",
+        tabs: [
+            { key: "export-import", label: "Export / Import", element: <ExportImportSettings /> },
+        ],
     },
 ]
+
+const tabs = tabGroups.flatMap(g => g.tabs)
 
 const tabsID = "meili-index-settings-tabs"
 const tabsContentID = `#${tabsID}-content`
@@ -183,19 +131,28 @@ const IndexSettingsContent = () => {
                 data-tabs-active-classes="text-primary border-l-2 border-b-0 hover:text-primary border-primary bg-gray-50"
                 data-tabs-inactive-classes="text-gray-500 hover:text-gray-600 border-gray-100 hover:border-gray-300"
                 role="tablist">
-                {tabs.map((tab, i) => {
-                    return <li key={i} className="w-full" role="presentation">
-                        <button className="w-full text-left inline-block py-4 px-4 hover:text-primary hover:bg-gray-50 hover:border-l-2 hover:border-l-primary"
-                            id={`${tabsID}-${tab.key}-tab`}
-                            data-tabs-target={`#${tabsID}-${tab.key}`}
-                            type="button"
-                            role="tab"
-                            aria-controls={tab.key}
-                            aria-selected="false">
-                            {tab.label}
-                        </button>
-                    </li>
-                })}
+                {tabGroups.map((group, gi) => (
+                    <React.Fragment key={group.group}>
+                        <li className={`w-full px-4 pt-${gi === 0 ? '3' : '4'} pb-1 pointer-events-none`} aria-hidden="true">
+                            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                                {group.group}
+                            </span>
+                        </li>
+                        {group.tabs.map((tab) => (
+                            <li key={tab.key} className="w-full" role="presentation">
+                                <button className="w-full text-left inline-block py-3 px-4 pl-5 hover:text-primary hover:bg-gray-50 hover:border-l-2 hover:border-l-primary"
+                                    id={`${tabsID}-${tab.key}-tab`}
+                                    data-tabs-target={`#${tabsID}-${tab.key}`}
+                                    type="button"
+                                    role="tab"
+                                    aria-controls={tab.key}
+                                    aria-selected="false">
+                                    {tab.label}
+                                </button>
+                            </li>
+                        ))}
+                    </React.Fragment>
+                ))}
             </ul>
             <div id={tabsContentID} className="md:w-2/3">
                 {tabs.map((settingTab, i) => {

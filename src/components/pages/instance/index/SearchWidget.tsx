@@ -318,11 +318,136 @@ const ArrayValue = ({ value }: { value: any[] }) => {
     )
 }
 
+const IMAGE_EXT = /\.(jpe?g|png|gif|webp|svg|avif)(\?.*)?$/i
+const isImageUrl = (s: string) => (s.startsWith('http://') || s.startsWith('https://')) && IMAGE_EXT.test(s)
+
+const TruncatedString = ({ text }: { text: string }) => {
+    const [expanded, setExpanded] = useState(false)
+    const parsed = parse(text)
+    if (text.length <= 200) return <span>{parsed}</span>
+    return (
+        <span>
+            {expanded ? parsed : <>{parse(text.slice(0, 200))}<span className="text-gray-300">…</span></>}
+            <button
+                onClick={() => setExpanded(v => !v)}
+                className="ml-1 text-xs text-primary hover:underline"
+            >
+                {expanded ? 'less' : 'more'}
+            </button>
+        </span>
+    )
+}
+
+const CollapsedObject = ({ obj }: { obj: Record<string, any> }) => {
+    const [expanded, setExpanded] = useState(false)
+    const keys = Object.keys(obj)
+    return (
+        <span>
+            <button
+                onClick={() => setExpanded(v => !v)}
+                className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-primary border border-gray-200 rounded px-1.5 py-0.5 mr-1"
+            >
+                <svg className={`w-2.5 h-2.5 transition-transform ${expanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+                {`{${keys.length} key${keys.length !== 1 ? 's' : ''}}`}
+            </button>
+            {expanded && (
+                <span className="flex flex-col gap-0.5 mt-1">
+                    {keys.map(k => (
+                        <span key={k} className="block text-xs pl-2 border-l-2 border-gray-200">
+                            <span className="text-gray-500 font-medium">{k}:</span>{' '}
+                            <span className="text-gray-400">{typeof obj[k] === 'object' ? JSON.stringify(obj[k]) : String(obj[k])}</span>
+                        </span>
+                    ))}
+                </span>
+            )}
+        </span>
+    )
+}
+
 const renderValue = (val: any) => {
     if (Array.isArray(val)) return <ArrayValue value={val} />
-    if (typeof val === 'string') return <span>{parse(val)}</span>
-    if (typeof val === 'object' && val !== null) return <span className="text-gray-400 text-xs">{JSON.stringify(val)}</span>
+    if (typeof val === 'string') {
+        if (isImageUrl(val)) return (
+            <span className="flex items-center gap-2">
+                <img
+                    src={val}
+                    alt=""
+                    className="w-10 h-10 object-cover rounded border border-gray-100 flex-shrink-0"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+                <TruncatedString text={val} />
+            </span>
+        )
+        return <TruncatedString text={val} />
+    }
+    if (typeof val === 'object' && val !== null) return <CollapsedObject obj={val} />
     return <span>{String(val)}</span>
+}
+
+const HitCard = ({ index, hit, printableObj, primaryKey, restKeys, onEditDoc }: {
+    index: number
+    hit: any
+    printableObj: any
+    primaryKey: string | undefined
+    restKeys: string[]
+    onEditDoc?: (doc: Record<string, any>) => void
+}) => {
+    const [showScores, setShowScores] = useState(false)
+    const hasScores = typeof hit["_rankingScoreDetails"] === 'object'
+
+    return (
+        <div className="bg-white mb-6 border border-gray-200 rounded p-4 shadow-sm relative">
+            <span className="absolute top-4 left-4 text-sm rounded-3xl bg-primary-faint font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{index + 1}</span>
+
+            {onEditDoc && (
+                <button
+                    onClick={() => onEditDoc(hit)}
+                    title="Edit document"
+                    className="absolute top-3 right-3 p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-primary"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 0l.172.172a2 2 0 010 2.828L12 16H9v-3z" />
+                    </svg>
+                </button>
+            )}
+
+            {/* Primary field — promoted */}
+            {primaryKey && (
+                <div className="pl-8 pr-8 mb-3 pb-3 border-b border-gray-100">
+                    <span className="text-xs text-gray-400 mr-1">{primaryKey}</span>
+                    <span className="font-semibold text-gray-800 text-sm">{renderValue(printableObj[primaryKey])}</span>
+                </div>
+            )}
+
+            {/* Remaining fields */}
+            {restKeys.map((key) => (
+                <div key={key} className="search-result-hit-detail md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
+                    <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-semibold text-sm">{key}</div>
+                    <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500 text-sm">
+                        {renderValue(printableObj[key])}
+                    </div>
+                </div>
+            ))}
+
+            {/* Collapsible ranking scores */}
+            {hasScores && (
+                <div className="mt-3">
+                    <button
+                        onClick={() => setShowScores(v => !v)}
+                        className="text-xs text-gray-400 hover:text-primary flex items-center gap-1"
+                    >
+                        <svg className={`w-3 h-3 transition-transform ${showScores ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        Ranking scores
+                    </button>
+                    {showScores && <RankingInfoBar hit={hit} />}
+                </div>
+            )}
+        </div>
+    )
 }
 
 export const SearchHits = ({ response, onEditDoc, onAddDocs }: { response: any; onEditDoc?: (doc: Record<string, any>) => void; onAddDocs?: () => void }) => {
@@ -348,36 +473,19 @@ export const SearchHits = ({ response, onEditDoc, onAddDocs }: { response: any; 
                 printableObj = printableObj["_formatted"]
             }
 
-            return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg relative">
-                <span className="absolute top-4 left-4 text-sm rounded-3xl bg-primary-faint font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{i + 1}</span>
+            const visibleKeys = Object.keys(printableObj).filter(k => !k.startsWith("_"))
+            const primaryKey = visibleKeys[0]
+            const restKeys = visibleKeys.slice(1)
 
-                {onEditDoc && (
-                    <button
-                        onClick={() => onEditDoc(hit)}
-                        title="Edit document"
-                        className="absolute top-3 right-3 p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-primary"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 0l.172.172a2 2 0 010 2.828L12 16H9v-3z" />
-                        </svg>
-                    </button>
-                )}
-
-                {Object.keys(printableObj).map((key, j) => {
-                    if (key.startsWith("_")) {
-                        return null
-                    }
-
-                    return <div key={j} className="search-result-hit-detail md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
-                        <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-semibold">{key}</div>
-                        <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500">
-                            {renderValue(printableObj[key])}
-                        </div>
-                    </div>
-                })}
-
-                <RankingInfoBar hit={hit} />
-            </div>
+            return <HitCard
+                key={i}
+                index={i}
+                hit={hit}
+                printableObj={printableObj}
+                primaryKey={primaryKey}
+                restKeys={restKeys}
+                onEditDoc={onEditDoc}
+            />
         })}
         {hits.length === 0 && processingTime !== undefined && (
             <div className="flex flex-col items-center justify-center min-h-64 gap-4 py-16">
