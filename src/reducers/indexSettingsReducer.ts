@@ -1,5 +1,5 @@
-import {_defaultState} from "../contexts/IndexSettingsContext.jsx";
-import { APISettings } from "../services/meilisearch/types.js";
+import {_defaultState} from "../contexts/IndexSettingsContext";
+import { APISettings } from "../services/meilisearch/types";
 
 export enum IndexSettingsActions {
     Set = "set",

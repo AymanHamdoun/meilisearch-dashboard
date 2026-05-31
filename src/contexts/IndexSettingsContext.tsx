@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, {createContext, useEffect, useReducer, Dispatch, ReactNode} from "react";
+import React, {createContext, useEffect, useMemo, useReducer, Dispatch, ReactNode} from "react";
 import indexSettingsReducer, { IndexSettingsActions, ReducerAction } from "../reducers/indexSettingsReducer";
 
 import {APISettings} from "../services/meilisearch/types"
@@ -89,7 +89,7 @@ export const IndexSettingsProvider: React.FC<{ children: ReactNode }> = ({ child
             setOriginalSettings(response);
             setModifiedSettings(response);
         })
-    }, [instanceState]); // Empty dependency array ensures this runs only once on component mount
+    }, [instanceState.isLoaded, instanceState.host, instanceState.key, meiliIndexState.selectedIndex]);
 
     useEffect(() => {
         // Check if settings have changed
@@ -125,15 +125,18 @@ export const IndexSettingsProvider: React.FC<{ children: ReactNode }> = ({ child
         setModifiedSettings(settings);
     }, [settings]);
 
-    return <IndexSettingsContext.Provider value={{
+    const contextValue = useMemo(() => ({
         settings,
         originalSettings,
         modifiedSettings,
         hasChanges,
         dispatch,
         saveSettings,
-        resetSettings
-    }}>
+        resetSettings,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }), [settings, originalSettings, modifiedSettings, hasChanges]);
+
+    return <IndexSettingsContext.Provider value={contextValue}>
         {children}
     </IndexSettingsContext.Provider>;
 }

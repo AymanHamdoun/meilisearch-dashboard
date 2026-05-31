@@ -2,10 +2,11 @@
 import React, { useEffect } from "react";
 // @ts-ignore
 import SearchWidget from './SearchWidget.tsx'
-import IndexSettingsTabs from './IndexSettingsTabs.jsx'
+import IndexSettingsTabs from './IndexSettingsTabs'
 import FieldsExplorer from './FieldsExplorer'
+import SearchAnalyticsDashboard from './analytics/SearchAnalyticsDashboard'
 import { initFlowbite } from 'flowbite';
-import useIndex from "../../../../hooks/useMeiliIndex.js";
+import useIndex from "../../../../hooks/useMeiliIndex";
 
 const tabs = [
     {
@@ -22,6 +23,11 @@ const tabs = [
         key: "settings",
         label: "Configuration",
         element: <IndexSettingsTabs />
+    },
+    {
+        key: "analytics",
+        label: "Analytics",
+        element: <SearchAnalyticsDashboard />
     },
 ];
 

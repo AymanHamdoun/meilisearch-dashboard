@@ -1,4 +1,4 @@
-import {createContext, useEffect, useReducer} from "react";
+import {createContext, useEffect, useMemo, useReducer} from "react";
 import instanceReducer, {InstanceAction} from "../reducers/instanceReducer";
 
 export type InstanceState = {
@@ -29,7 +29,9 @@ export const InstanceProvider = ({ children }) => {
         dispatch({type: InstanceAction.Load, payload: {}})
     }, [])
 
-    return <InstanceContext.Provider value={{instanceState, dispatch}}>
+    const value = useMemo(() => ({ instanceState, dispatch }), [instanceState]);
+
+    return <InstanceContext.Provider value={value}>
         {children}
     </InstanceContext.Provider>;
 }

@@ -80,20 +80,32 @@ const TaskTimeSeriesChart: React.FC = () => {
     const fetchData = useCallback(async () => {
         if (!instanceState.isLoaded) return;
         setIsLoading(true);
+        setTruncated(false);
         try {
-            const resp = await getTasks(instanceState, {
-                limit: 1000,
-                afterEnqueuedAt: getRangeStart(range).toISOString(),
-            });
+            const rangeStart = getRangeStart(range).toISOString();
+            const MAX_TASKS = 5000;
+            const allTasks: any[] = [];
+            let cursor: number | undefined = undefined;
 
-            setTruncated(resp.total > 1000);
+            while (allTasks.length < MAX_TASKS) {
+                const resp = await getTasks(instanceState, {
+                    limit: 1000,
+                    afterEnqueuedAt: rangeStart,
+                    ...(cursor !== undefined ? { from: cursor } : {}),
+                });
+                allTasks.push(...resp.results);
+                if (resp.next === null || resp.next === undefined) break;
+                cursor = resp.next;
+            }
+
+            if (allTasks.length >= MAX_TASKS) setTruncated(true);
 
             const buckets = generateBuckets(range);
             const bucketMap: Record<string, Record<string, number>> = {};
             buckets.forEach(b => { bucketMap[b] = {}; });
 
             const typesFound = new Set<string>();
-            for (const task of resp.results) {
+            for (const task of allTasks) {
                 const key = bucketKey(new Date(task.enqueuedAt), range);
                 if (bucketMap[key] !== undefined) {
                     bucketMap[key][task.type] = (bucketMap[key][task.type] ?? 0) + 1;
@@ -103,7 +115,6 @@ const TaskTimeSeriesChart: React.FC = () => {
 
             const types = Array.from(typesFound).sort();
             setPresentTypes(types);
-            // preserve existing hidden selections for types that are still present
             setHiddenTypes(prev => new Set([...prev].filter(t => types.includes(t))));
             setChartData(buckets.map(b => ({ time: b, ...bucketMap[b] })));
         } catch (e) {
@@ -140,7 +151,7 @@ const TaskTimeSeriesChart: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                     {truncated && (
-                        <span className="text-xs text-amber-500">showing first 1,000 tasks in range</span>
+                        <span className="text-xs text-amber-500">5,000 task cap reached — chart may be partial</span>
                     )}
                     <div className="flex rounded border border-gray-200 overflow-hidden text-xs">
                         {(['24h', '7d', '30d'] as TimeRange[]).map(r => (
