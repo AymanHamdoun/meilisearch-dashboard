@@ -16,6 +16,8 @@ import FacetDisplay from "./search/FacetDisplay";
 import SearchPagination from "./search/SearchPagination";
 import DocumentDetailModal from "./documents/DocumentDetailModal";
 import DocUploadWizard from "./documents/DocUploadWizard";
+import QueryLogPanel from "./search/QueryLogPanel";
+import { useSearchQueryLog } from "../../../../hooks/useSearchQueryLog";
 
 const SearchWidget = () => {
     const { meiliIndexState, refreshIndexes } = useMeiliIndex()
@@ -52,6 +54,9 @@ const SearchWidget = () => {
     // Facet filter selections
     const [selectedFacets, setSelectedFacets] = useState<Record<string, string[]>>({})
 
+    // Query log
+    const { entries: queryLog, record: recordQuery, clear: clearQueryLog } = useSearchQueryLog()
+
     const handleFacetSelect = useCallback((facetName: string, value: string) => {
         setSelectedFacets(prev => {
             const current = prev[facetName] ?? []
@@ -78,6 +83,11 @@ const SearchWidget = () => {
         setEditDoc(null)
     }, [])
 
+    const handleReplay = useCallback((entry: { query: string; filter: string }) => {
+        setQuery(entry.query)
+        setFilter(entry.filter)
+    }, [])
+
     // Build filter string from selected facets + manual filter
     const buildFacetFilter = useCallback((facetSel: Record<string, string[]>): string => {
         const parts = Object.entries(facetSel)
@@ -90,7 +100,7 @@ const SearchWidget = () => {
         return parts.join(' AND ')
     }, [])
 
-    const debouncedSearchTerm = useDebouncedValue(query, 100);
+    const debouncedSearchTerm = useDebouncedValue(query.trim(), 100);
 
     // Load index settings for filterable/sortable attributes
     useEffect(() => {
@@ -132,6 +142,14 @@ const SearchWidget = () => {
         }).then(resp => {
             if (resp == undefined) return
             setResponse(resp)
+            recordQuery({
+                query: debouncedSearchTerm,
+                filter: combinedFilter,
+                sort: sort.join(', '),
+                resultCount: resp.estimatedTotalHits ?? resp.totalHits ?? resp.hits?.length ?? 0,
+                processingTimeMs: resp.processingTimeMs ?? 0,
+                timestamp: Date.now(),
+            })
         }).catch(async error => {
             console.error('Search error:', error);
             if (error.code === 'index_not_found') {
@@ -167,10 +185,8 @@ const SearchWidget = () => {
             <input type="text"
                 className="bg-white border rounded p-3 border-gray-400 block w-full rounded-l-none border-l-0"
                 placeholder="What are you looking for ?" required
-                onChange={(e) => {
-                    let newQuery = e.target.value
-                    setQuery(newQuery.trim())
-                }}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
             />
         </div>
 
@@ -275,6 +291,12 @@ const SearchWidget = () => {
                 />
             </div>
         </div>
+
+        <QueryLogPanel
+            entries={queryLog}
+            onReplay={handleReplay}
+            onClear={clearQueryLog}
+        />
 
         <DocumentDetailModal
             isVisible={editModalOpen}
