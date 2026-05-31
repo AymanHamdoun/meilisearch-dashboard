@@ -68,8 +68,8 @@ const LayoutContent = () => {
     }, [instanceState]);
 
     useEffect(() => {
-        initFlowbite();
-    }, [location.pathname]);
+        if (instanceState.isLoaded) initFlowbite();
+    }, [location.pathname, instanceState.isLoaded]);
 
     if (!instanceState.isLoaded) {
         return <div>loading instance config</div>;

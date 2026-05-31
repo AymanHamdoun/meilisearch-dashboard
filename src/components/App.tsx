@@ -1,8 +1,7 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 
 import DashboardLayout from './layouts/DashboardLayout';
-import BasicLayout from './layouts/AuthLayout';
 
 import OverviewPage from './pages/instance/OverviewPage.tsx';
 import IndexPage from './pages/instance/index/Page';
@@ -11,7 +10,6 @@ import TasksPage from './pages/instance/tasks/Page.tsx';
 import InstanceErrorPage from './pages/instance/InstanceErrorPage.tsx';
 import APIKeysPage from './pages/instance/keys/Page.tsx';
 import ExperimentalFeaturesPage from './pages/instance/experimental/Page.tsx';
-import LoginPage from './pages/login/Page';
 import InstanceFormPage from './pages/instance-form/Page.tsx';
 import ChatCompletionsPage from './pages/instance/features/chat/Page.tsx';
 import VectorStorePage from './pages/instance/features/vector/Page.tsx';
@@ -24,11 +22,8 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<BasicLayout />}>
-          <Route index element={<LoginPage />} />
-          <Route path="login" element={<LoginPage />} />
-          <Route path="instance-form" element={<InstanceFormPage />} />
-        </Route>
+        <Route path="/" element={<Navigate to="/instance/" replace />} />
+        <Route path="/instance-form" element={<InstanceFormPage />} />
 
         <Route path="/instance/" element={<DashboardLayout />}>
           <Route index element={<OverviewPage />} />
