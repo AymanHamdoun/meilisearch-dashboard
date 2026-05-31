@@ -279,7 +279,7 @@ const SearchWidget = () => {
 
         <div className="flex gap-4">
             {(response.facetDistribution && Object.keys(response.facetDistribution).length > 0) && (
-                <div className="w-1/3 shrink-0">
+                <div className="w-1/4 shrink-0">
                     <FacetDisplay
                         facetDistribution={response.facetDistribution}
                         facetStats={response.facetStats}
