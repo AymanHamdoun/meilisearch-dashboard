@@ -59,8 +59,8 @@ const SearchWidget = () => {
     // Facet filter selections
     const [selectedFacets, setSelectedFacets] = useState<Record<string, string[]>>({})
 
-    // Query log
-    const { entries: queryLog, record: recordQuery, clear: clearQueryLog } = useSearchQueryLog()
+    // Query log (persisted per index)
+    const { entries: queryLog, record: recordQuery, clear: clearQueryLog } = useSearchQueryLog(index ?? '')
 
     const handleFacetSelect = useCallback((facetName: string, value: string) => {
         setSelectedFacets(prev => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import ExportSection from './ExportSection';
 import ImportSection from './ImportSection';
+import IndexSchemaComparison from './IndexSchemaComparison';
 
 const DashboardSettingsPage: React.FC = () => {
     return (
@@ -12,10 +13,12 @@ const DashboardSettingsPage: React.FC = () => {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <ExportSection />
                 <ImportSection />
             </div>
+
+            <IndexSchemaComparison />
         </div>
     );
 };
