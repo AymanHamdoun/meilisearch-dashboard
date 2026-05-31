@@ -15,6 +15,7 @@ import SearchOptions from "./search/SearchOptions";
 import FacetDisplay from "./search/FacetDisplay";
 import SearchPagination from "./search/SearchPagination";
 import DocumentDetailModal from "./documents/DocumentDetailModal";
+import DocIndexingModal from "./documents/DocIndexingModal";
 
 const SearchWidget = () => {
     const { meiliIndexState, refreshIndexes } = useMeiliIndex()
@@ -46,6 +47,26 @@ const SearchWidget = () => {
     // Edit modal state
     const [editDoc, setEditDoc] = useState<Record<string, any> | null>(null)
     const [editModalOpen, setEditModalOpen] = useState(false)
+    const [addDocsOpen, setAddDocsOpen] = useState(false)
+
+    // Facet filter selections
+    const [selectedFacets, setSelectedFacets] = useState<Record<string, string[]>>({})
+
+    const handleFacetSelect = useCallback((facetName: string, value: string) => {
+        setSelectedFacets(prev => {
+            const current = prev[facetName] ?? []
+            const next = current.includes(value)
+                ? current.filter(v => v !== value)
+                : [...current, value]
+            return { ...prev, [facetName]: next }
+        })
+        setOffset(0)
+    }, [])
+
+    const clearFacets = useCallback(() => {
+        setSelectedFacets({})
+        setOffset(0)
+    }, [])
 
     const handleEditDoc = useCallback((doc: Record<string, any>) => {
         setEditDoc(doc)
@@ -55,6 +76,18 @@ const SearchWidget = () => {
     const handleEditClose = useCallback(() => {
         setEditModalOpen(false)
         setEditDoc(null)
+    }, [])
+
+    // Build filter string from selected facets + manual filter
+    const buildFacetFilter = useCallback((facetSel: Record<string, string[]>): string => {
+        const parts = Object.entries(facetSel)
+            .filter(([, vals]) => vals.length > 0)
+            .map(([attr, vals]) =>
+                vals.length === 1
+                    ? `${attr} = "${vals[0]}"`
+                    : `${attr} IN [${vals.map(v => `"${v}"`).join(', ')}]`
+            )
+        return parts.join(' AND ')
     }, [])
 
     const debouncedSearchTerm = useDebouncedValue(query, 100);
@@ -74,7 +107,9 @@ const SearchWidget = () => {
 
     useEffect(() => {
         const searchParams: Partial<SearchParams> = {};
-        if (filter) searchParams.filter = filter;
+        const facetFilter = buildFacetFilter(selectedFacets)
+        const combinedFilter = [filter, facetFilter].filter(Boolean).join(' AND ')
+        if (combinedFilter) searchParams.filter = combinedFilter;
         if (sort.length > 0) searchParams.sort = sort;
         if (facets.length > 0) searchParams.facets = facets;
         if (matchingStrategy !== "last") searchParams.matchingStrategy = matchingStrategy;
@@ -109,12 +144,13 @@ const SearchWidget = () => {
             }
         })
 
-    }, [debouncedSearchTerm, queryType, index, filter, sort, matchingStrategy, attributesToSearchOn, limit, offset, showPerformanceDetails, facets])
+    }, [debouncedSearchTerm, queryType, index, filter, selectedFacets, sort, matchingStrategy, attributesToSearchOn, limit, offset, showPerformanceDetails, facets])
 
-    // Reset offset when query changes
+    // Reset offset + facets when index or query changes
     useEffect(() => {
         setOffset(0)
-    }, [debouncedSearchTerm, filter, sort, matchingStrategy])
+        setSelectedFacets({})
+    }, [index, debouncedSearchTerm, filter, sort, matchingStrategy])
 
     return <div className="">
         <div className="mb-4 flex flex-row">
@@ -189,17 +225,47 @@ const SearchWidget = () => {
             </>
         )}
 
+        {/* Active facet filter chips */}
+        {Object.values(selectedFacets).some(v => v.length > 0) && (
+            <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                <span className="text-xs text-gray-400">Filtered by:</span>
+                {Object.entries(selectedFacets).flatMap(([attr, vals]) =>
+                    vals.map(val => (
+                        <button
+                            key={`${attr}:${val}`}
+                            onClick={() => handleFacetSelect(attr, val)}
+                            className="flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full border border-primary/20 hover:bg-primary/20"
+                        >
+                            <span>{attr}: {val}</span>
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    ))
+                )}
+                <button onClick={clearFacets} className="text-xs text-gray-400 hover:text-gray-600 underline ml-1">
+                    Clear all
+                </button>
+            </div>
+        )}
+
         <div className="flex gap-4">
             {(response.facetDistribution && Object.keys(response.facetDistribution).length > 0) && (
                 <div className="w-1/3 shrink-0">
                     <FacetDisplay
                         facetDistribution={response.facetDistribution}
                         facetStats={response.facetStats}
+                        selectedFacets={selectedFacets}
+                        onFacetSelect={handleFacetSelect}
                     />
                 </div>
             )}
             <div className="flex-1 min-w-0">
-                <SearchHits response={response} onEditDoc={handleEditDoc} />
+                <SearchHits
+                    response={response}
+                    onEditDoc={handleEditDoc}
+                    onAddDocs={() => setAddDocsOpen(true)}
+                />
                 <SearchPagination
                     offset={offset}
                     limit={limit}
@@ -214,6 +280,11 @@ const SearchWidget = () => {
             isVisible={editModalOpen}
             onClose={handleEditClose}
             document={editDoc}
+            indexName={index ?? ""}
+        />
+        <DocIndexingModal
+            isVisible={addDocsOpen}
+            onClose={() => setAddDocsOpen(false)}
             indexName={index ?? ""}
         />
     </div>
@@ -254,7 +325,7 @@ const renderValue = (val: any) => {
     return <span>{String(val)}</span>
 }
 
-export const SearchHits = ({ response, onEditDoc }: { response: any; onEditDoc?: (doc: Record<string, any>) => void }) => {
+export const SearchHits = ({ response, onEditDoc, onAddDocs }: { response: any; onEditDoc?: (doc: Record<string, any>) => void; onAddDocs?: () => void }) => {
     const hits = response.hits;
     const processingTime = response.processingTimeMs;
     const totalHits = response.totalHits !== undefined ? response.totalHits : 0;
@@ -308,11 +379,25 @@ export const SearchHits = ({ response, onEditDoc }: { response: any; onEditDoc?:
                 <RankingInfoBar hit={hit} />
             </div>
         })}
-        {hits.length === 0 && processingTime !== undefined ?
-            <div className="flex items-center justify-center min-h-96 text-gray-500">
-                No documents found
+        {hits.length === 0 && processingTime !== undefined && (
+            <div className="flex flex-col items-center justify-center min-h-64 gap-4 py-16">
+                <svg className="w-12 h-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div className="text-center">
+                    <p className="text-gray-500 font-medium">No documents found</p>
+                    <p className="text-sm text-gray-400 mt-1">Try a different query, or add records to this index</p>
+                </div>
+                {onAddDocs && (
+                    <button
+                        onClick={onAddDocs}
+                        className="px-4 py-2 text-sm bg-primary text-white rounded hover:bg-opacity-90 transition-colors"
+                    >
+                        + Add documents
+                    </button>
+                )}
             </div>
-            : <></>}
+        )}
     </div>
 }
 
