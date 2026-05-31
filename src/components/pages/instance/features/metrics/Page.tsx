@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import useMeiliInstance from '../../../../../hooks/useMeiliInstance';
 import { getMetrics } from '../../../../../services/meilisearch/metrics';
+import { getTaskTypeStats, getTaskStats, TASK_TYPES } from '../../../../../services/meilisearch/tasks';
 import MetricGaugeCard from '../../../../charts/MetricGaugeCard';
 import MetricBarChart from '../../../../charts/MetricBarChart';
 import MetricHistogram from '../../../../charts/MetricHistogram';
+import TaskTypeChart from '../../../../charts/TaskTypeChart';
+import TaskTimeSeriesChart from '../../../../charts/TaskTimeSeriesChart';
 import HelpPanel from '../../../../commons/HelpPanel';
 import { useDocs } from '../../../../../contexts/DocsContext';
 
@@ -93,20 +96,28 @@ const AdvancedMetricsPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [showRaw, setShowRaw] = useState(false);
     const [metricViewModes, setMetricViewModes] = useState<Record<string, ViewMode>>({});
+    const [taskTypeStats, setTaskTypeStats] = useState<Record<string, number> | null>(null);
+    const [taskStatusStats, setTaskStatusStats] = useState<Record<string, number> | null>(null);
 
     const fetchMetrics = () => {
         if (!instanceState.isLoaded) return;
         setIsLoading(true);
         setError(null);
 
-        getMetrics(instanceState)
-            .then((data) => {
-                setRawMetrics(data);
-                setParsedMetrics(parsePrometheusMetrics(data));
-                setIsLoading(false);
-            })
-            .catch((err) => {
-                setError(err.message || 'Failed to load metrics');
+        Promise.allSettled([
+            getMetrics(instanceState),
+            getTaskTypeStats(instanceState),
+            getTaskStats(instanceState),
+        ])
+            .then(([metricsResult, typeResult, statusResult]) => {
+                if (metricsResult.status === 'fulfilled') {
+                    setRawMetrics(metricsResult.value);
+                    setParsedMetrics(parsePrometheusMetrics(metricsResult.value));
+                } else {
+                    setError(metricsResult.reason?.message || 'Failed to load Prometheus metrics');
+                }
+                if (typeResult.status === 'fulfilled') setTaskTypeStats(typeResult.value);
+                if (statusResult.status === 'fulfilled') setTaskStatusStats(statusResult.value);
                 setIsLoading(false);
             });
     };
@@ -182,6 +193,66 @@ const AdvancedMetricsPage: React.FC = () => {
                 </div>
             ) : (
                 <div className="flex flex-col gap-6">
+                    {/* Task Activity — always shown, no experimental feature required */}
+                    <div>
+                        <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Task Activity</h2>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            {/* Write / status highlight gauges */}
+                            <div className="flex flex-col gap-4">
+                                <div className="bg-white rounded-lg shadow p-4">
+                                    <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Document Writes</div>
+                                    <div className="text-3xl font-bold text-primary">
+                                        {taskTypeStats
+                                            ? (taskTypeStats['documentAdditionOrUpdate'] ?? 0).toLocaleString()
+                                            : '—'}
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">documentAdditionOrUpdate tasks (cumulative)</div>
+                                </div>
+                                <div className="bg-white rounded-lg shadow p-4">
+                                    <div className="text-xs text-gray-400 uppercase tracking-wide mb-2">By Status</div>
+                                    {taskStatusStats ? (
+                                        <div className="flex flex-col gap-1.5">
+                                            {Object.entries(taskStatusStats).filter(([, v]) => v > 0).map(([status, count]) => {
+                                                const colors: Record<string, string> = {
+                                                    succeeded: 'bg-green-500', failed: 'bg-red-500',
+                                                    enqueued: 'bg-amber-400', processing: 'bg-blue-500', canceled: 'bg-gray-400',
+                                                };
+                                                const total = Object.values(taskStatusStats).reduce((a, b) => a + b, 0) || 1;
+                                                return (
+                                                    <div key={status} className="flex items-center gap-2 text-xs">
+                                                        <span className="w-20 text-gray-500 capitalize">{status}</span>
+                                                        <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                                                            <div
+                                                                className={`h-full rounded-full ${colors[status] ?? 'bg-gray-400'}`}
+                                                                style={{ width: `${(count / total) * 100}%` }}
+                                                            />
+                                                        </div>
+                                                        <span className="w-16 text-right text-gray-500">{count.toLocaleString()}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <span className="text-gray-400 text-sm">Loading…</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Task type breakdown bar chart */}
+                            <div className="lg:col-span-2 bg-white rounded-lg shadow p-4">
+                                <div className="text-xs text-gray-400 uppercase tracking-wide mb-3">Breakdown by Type</div>
+                                {taskTypeStats ? (
+                                    <TaskTypeChart stats={taskTypeStats} />
+                                ) : (
+                                    <div className="flex items-center justify-center h-32 text-gray-400 text-sm">Loading…</div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Tasks over time line chart */}
+                        <TaskTimeSeriesChart />
+                    </div>
+
                     {/* Gauge metrics as cards */}
                     {gaugeMetrics.length > 0 && (
                         <div>

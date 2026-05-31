@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { indexSearchWrapper, SearchParams } from "../../../../services/meilisearch/search"
@@ -14,6 +14,7 @@ import SearchSortSelector from "./search/SearchSortSelector";
 import SearchOptions from "./search/SearchOptions";
 import FacetDisplay from "./search/FacetDisplay";
 import SearchPagination from "./search/SearchPagination";
+import DocumentDetailModal from "./documents/DocumentDetailModal";
 
 const SearchWidget = () => {
     const { meiliIndexState, refreshIndexes } = useMeiliIndex()
@@ -41,6 +42,20 @@ const SearchWidget = () => {
 
     const [response, setResponse] = useState<any>({hits: []})
     const [showAdvanced, setShowAdvanced] = useState(false)
+
+    // Edit modal state
+    const [editDoc, setEditDoc] = useState<Record<string, any> | null>(null)
+    const [editModalOpen, setEditModalOpen] = useState(false)
+
+    const handleEditDoc = useCallback((doc: Record<string, any>) => {
+        setEditDoc(doc)
+        setEditModalOpen(true)
+    }, [])
+
+    const handleEditClose = useCallback(() => {
+        setEditModalOpen(false)
+        setEditDoc(null)
+    }, [])
 
     const debouncedSearchTerm = useDebouncedValue(query, 100);
 
@@ -174,25 +189,72 @@ const SearchWidget = () => {
             </>
         )}
 
-        {/* Facet Display */}
-        <FacetDisplay
-            facetDistribution={response.facetDistribution}
-            facetStats={response.facetStats}
-        />
+        <div className="flex gap-4">
+            {(response.facetDistribution && Object.keys(response.facetDistribution).length > 0) && (
+                <div className="w-1/3 shrink-0">
+                    <FacetDisplay
+                        facetDistribution={response.facetDistribution}
+                        facetStats={response.facetStats}
+                    />
+                </div>
+            )}
+            <div className="flex-1 min-w-0">
+                <SearchHits response={response} onEditDoc={handleEditDoc} />
+                <SearchPagination
+                    offset={offset}
+                    limit={limit}
+                    totalHits={response.totalHits}
+                    estimatedTotalHits={response.estimatedTotalHits}
+                    onOffsetChange={setOffset}
+                />
+            </div>
+        </div>
 
-        <SearchHits response={response} />
-
-        <SearchPagination
-            offset={offset}
-            limit={limit}
-            totalHits={response.totalHits}
-            estimatedTotalHits={response.estimatedTotalHits}
-            onOffsetChange={setOffset}
+        <DocumentDetailModal
+            isVisible={editModalOpen}
+            onClose={handleEditClose}
+            document={editDoc}
+            indexName={index ?? ""}
         />
     </div>
 }
 
-export const SearchHits = ({ response }: { response: any }) => {
+const ArrayValue = ({ value }: { value: any[] }) => {
+    const [expanded, setExpanded] = useState(false)
+    return (
+        <span>
+            <button
+                onClick={() => setExpanded(v => !v)}
+                className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-primary border border-gray-200 rounded px-1 py-0.5 mr-1"
+            >
+                <svg className={`w-2.5 h-2.5 transition-transform ${expanded ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+                {value.length}
+            </button>
+            {expanded ? (
+                <span className="flex flex-col gap-0.5 mt-1">
+                    {value.map((item, idx) => (
+                        <span key={idx} className="block text-gray-500 pl-2 border-l-2 border-gray-200">
+                            {typeof item === 'object' ? JSON.stringify(item) : String(item)}
+                        </span>
+                    ))}
+                </span>
+            ) : (
+                <span className="text-gray-400 text-xs">[{value.map(v => typeof v === 'object' ? '{…}' : String(v)).join(', ')}]</span>
+            )}
+        </span>
+    )
+}
+
+const renderValue = (val: any) => {
+    if (Array.isArray(val)) return <ArrayValue value={val} />
+    if (typeof val === 'string') return <span>{parse(val)}</span>
+    if (typeof val === 'object' && val !== null) return <span className="text-gray-400 text-xs">{JSON.stringify(val)}</span>
+    return <span>{String(val)}</span>
+}
+
+export const SearchHits = ({ response, onEditDoc }: { response: any; onEditDoc?: (doc: Record<string, any>) => void }) => {
     const hits = response.hits;
     const processingTime = response.processingTimeMs;
     const totalHits = response.totalHits !== undefined ? response.totalHits : 0;
@@ -218,6 +280,18 @@ export const SearchHits = ({ response }: { response: any }) => {
             return <div key={i} className="bg-white mb-10 border border-gray-200 rounded p-4 shadow-lg relative">
                 <span className="absolute top-4 left-4 text-sm rounded-3xl bg-primary-faint font-semibold px-1.5 py-0 border border-gray-300 text-gray-400">{i + 1}</span>
 
+                {onEditDoc && (
+                    <button
+                        onClick={() => onEditDoc(hit)}
+                        title="Edit document"
+                        className="absolute top-3 right-3 p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-primary"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 0l.172.172a2 2 0 010 2.828L12 16H9v-3z" />
+                        </svg>
+                    </button>
+                )}
+
                 {Object.keys(printableObj).map((key, j) => {
                     if (key.startsWith("_")) {
                         return null
@@ -226,7 +300,7 @@ export const SearchHits = ({ response }: { response: any }) => {
                     return <div key={j} className="search-result-hit-detail md:flex sm:flex md:flex-row sm:flex-col p-1 w-full">
                         <div className="md:w-1/3 md:text-right md:pr-2 sm:w-full sm:pr-0 font-semibold">{key}</div>
                         <div className="md:w-2/3 md:text-left md:pl-2 sm:w-full sm:pl-0 text-gray-500">
-                            {typeof printableObj[key] == 'string' ? parse(printableObj[key]) : typeof printableObj[key] === 'object' ? JSON.stringify(printableObj[key]) : String(printableObj[key])}
+                            {renderValue(printableObj[key])}
                         </div>
                     </div>
                 })}

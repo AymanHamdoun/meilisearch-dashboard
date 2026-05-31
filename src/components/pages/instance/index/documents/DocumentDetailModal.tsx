@@ -23,21 +23,18 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
     onDocumentUpdated
 }) => {
     const { instanceState } = useMeiliInstance();
-    const [isEditing, setIsEditing] = useState(false);
     const [code, setCode] = useState("");
     const { isLoading, error, success, resetState, handleAsyncOperation } = useModalState();
 
     useEffect(() => {
         if (document) {
             setCode(JSON.stringify(document, null, 2));
-            setIsEditing(false);
         }
     }, [document]);
 
     const handleClose = () => {
         if (!isLoading) {
             resetState();
-            setIsEditing(false);
             onClose();
         }
     };
@@ -65,19 +62,11 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
         <BaseModal
             isVisible={isVisible}
             onClose={handleClose}
-            title={isEditing ? "Edit Document" : "Document Details"}
+            title="Edit Document"
             isLoading={isLoading}
             width="lg"
         >
             <div className="flex flex-col gap-3">
-                <div className="flex justify-end">
-                    <button
-                        onClick={() => setIsEditing(!isEditing)}
-                        className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
-                    >
-                        {isEditing ? "View Mode" : "Edit Mode"}
-                    </button>
-                </div>
                 <CodeMirror
                     value={code}
                     extensions={[json()]}
@@ -86,31 +75,29 @@ const DocumentDetailModal: React.FC<DocumentDetailModalProps> = ({
                         highlightActiveLine: true,
                     }}
                     onChange={(newCode) => setCode(newCode)}
+                    maxHeight="65vh"
                     style={{
                         fontSize: "14px",
                         border: "1px solid #ccc",
                         borderRadius: "5px",
                         overflow: "hidden",
-                        maxHeight: "400px",
                     }}
                     theme={vscodeDark}
-                    editable={isEditing}
+                    editable={true}
                 />
 
                 <ModalError error={error} />
                 <ModalSuccess success={success} message="Document updated successfully!" />
 
-                {isEditing && (
-                    <ModalButton
-                        onClick={handleSave}
-                        disabled={!code.trim()}
-                        isLoading={isLoading}
-                        success={success}
-                        loadingText="Saving..."
-                    >
-                        Save Changes
-                    </ModalButton>
-                )}
+                <ModalButton
+                    onClick={handleSave}
+                    disabled={!code.trim()}
+                    isLoading={isLoading}
+                    success={success}
+                    loadingText="Saving..."
+                >
+                    Save Changes
+                </ModalButton>
             </div>
         </BaseModal>
     );

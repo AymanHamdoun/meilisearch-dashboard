@@ -241,6 +241,38 @@ export const getBatches = async (instance: InstanceState, options?: { from?: num
         });
 }
 
+export const TASK_TYPES = [
+    'documentAdditionOrUpdate',
+    'documentDeletion',
+    'documentDeletionByFilter',
+    'settingsUpdate',
+    'indexCreation',
+    'indexUpdate',
+    'indexDeletion',
+    'indexSwap',
+    'taskCancelation',
+    'taskDeletion',
+    'dumpCreation',
+    'snapshotCreation',
+] as const;
+
+export type TaskType = typeof TASK_TYPES[number];
+
+export const getTaskTypeStats = async (instance: InstanceState): Promise<Record<TaskType, number>> => {
+    const results = await Promise.all(
+        TASK_TYPES.map(type =>
+            fetchWithTimeout(`${instance.host}/tasks?types=${type}&limit=1`, {
+                method: 'GET',
+                headers: new Headers({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${instance.key}` }),
+                redirect: 'follow',
+            })
+            .then(async res => { const j = await res.json(); return (j.total ?? 0) as number; })
+            .catch(() => 0)
+        )
+    );
+    return Object.fromEntries(TASK_TYPES.map((t, i) => [t, results[i]])) as Record<TaskType, number>;
+};
+
 const getStatusTaskResponse = (instance: InstanceState, status: string) => {
     let myHeaders = new Headers({
         "Content-Type": "application/json",
