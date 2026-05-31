@@ -1,11 +1,6 @@
 import React from "react";
-import LoginForm from "./Form.jsx";
+import LoginForm from "./Form";
 
-/**
- * Login page component that renders the LoginForm.
- * @component
- * @returns {JSX.Element} The rendered login page.
- */
 const Page = () => {
     return (
         <div id="pageHome" className="w-full flex flex-col items-center">

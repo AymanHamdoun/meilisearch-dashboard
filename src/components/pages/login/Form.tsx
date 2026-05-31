@@ -1,68 +1,42 @@
-import React, {useState} from "react";
-import {authenticate} from "../../../services/auth.js";
-import {AuthAction} from "../../../reducers/authReducer.js";
-import {useNavigate} from "react-router-dom";
-import {useAuth} from '../../../hooks/useAuth.js'
+import React, { useState } from "react";
+import { authenticate } from "../../../services/auth";
+import { AuthAction } from "../../../reducers/authReducer";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from '../../../hooks/useAuth';
 
-/**
- * @typedef {Object} LoginFormData
- * @property {string} email - The email address of the user.
- * @property {string} password - The user's password.
- */
+interface LoginFormData {
+    email: string;
+    password: string;
+}
 
-/**
- * ContactForm component that handles user input and form submission.
- * @component
- * @returns {JSX.Element} The rendered contact form.
- */
 const LoginForm = () => {
-    /**
-     * The form loading state.
-     * @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]}
-     */
     const [isLoading, setIsLoading] = useState(false);
+    const { dispatch } = useAuth();
+    const navigate = useNavigate();
 
-    const {dispatch} = useAuth();
-
-    const navigate = useNavigate()
-
-    /**
-     * The form data state.
-     * @type {[LoginFormData, React.Dispatch<React.SetStateAction<LoginFormData>>]}
-     */
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<LoginFormData>({
         email: '',
         password: '',
-    })
+    });
 
-    /**
-     * Handles input change events and updates the form data.
-     * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - The change event.
-     */
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value
-        }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    /**
-     * Handles form submission and sends the contact form message.
-     * @param {React.FormEvent<HTMLFormElement>} e - The form submission event.
-     */
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
 
         try {
             const response = await authenticate(formData);
             if (!response.success) {
-                document.getElementById("errorMessage").innerText = response.message;
+                const el = document.getElementById("errorMessage");
+                if (el) el.innerText = response.message ?? "Login failed";
                 return;
             }
-            dispatch({type: AuthAction.Login, payload: response.data});
-            navigate("/instance/")
+            dispatch({ type: AuthAction.Login, payload: response.data });
+            navigate("/instance/");
         } catch (error) {
             console.error('Error sending message:', error);
         } finally {
@@ -79,7 +53,7 @@ const LoginForm = () => {
                     id="email"
                     name="email"
                     placeholder="john.smith@gmail.com"
-                    required={true}
+                    required
                     className="p-2 rounded border border-gray-200 w-full focus:border-primary focus:outline-none"
                     onChange={handleChange}
                     value={formData.email}
@@ -92,7 +66,7 @@ const LoginForm = () => {
                     id="password"
                     name="password"
                     placeholder="••••••••"
-                    required={true}
+                    required
                     autoComplete="on"
                     className="p-2 rounded border border-gray-200 w-full focus:border-primary focus:outline-none"
                     onChange={handleChange}
@@ -109,7 +83,7 @@ const LoginForm = () => {
                 <span id="errorMessage" className="text-red-500 text-center text-sm"></span>
             </div>
         </form>
-    )
+    );
 }
 
 export default LoginForm;

@@ -1,28 +1,28 @@
 import React, { useEffect, useState } from "react";
-
 import IndexManager from "./IndexManager";
 import IndexTabs from "./IndexTabs";
-import { getIndexStats, getIndex } from "../../../../services/meilisearch/indexes.ts";
-
-import useIndex from '../../../../hooks/useMeiliIndex'
+import { getIndexStats, getIndex } from "../../../../services/meilisearch/indexes";
+import useIndex from '../../../../hooks/useMeiliIndex';
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
 
 const Page = () => {
-    return <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
-        <IndexStats />
-        <IndexManager/>
-        <IndexTabs/>
-    </div>
+    return (
+        <div className="p-4 rounded-lg dark:border-gray-700 mt-2">
+            <IndexStats />
+            <IndexManager/>
+            <IndexTabs/>
+        </div>
+    );
 }
 
 const IndexStats = () => {
-    const { meiliIndexState, refreshIndexes } = useIndex()
-    const { instanceState } = useMeiliInstance()
+    const { meiliIndexState, refreshIndexes } = useIndex();
+    const { instanceState } = useMeiliInstance();
 
-    const [stats, setStats] = useState({})
-    const [meta, setMeta] = useState(null)
+    const [stats, setStats] = useState<any>({});
+    const [meta, setMeta] = useState<any>(null);
 
-    const indexName = meiliIndexState.selectedIndex
+    const indexName = meiliIndexState.selectedIndex;
 
     useEffect(() => {
         if (!instanceState.isLoaded || !indexName) return;
@@ -35,7 +35,7 @@ const IndexStats = () => {
                 setStats(s);
                 setMeta(m);
             })
-            .catch(async (error) => {
+            .catch(async (error: any) => {
                 if (error.code === 'index_not_found') {
                     await refreshIndexes();
                     setStats({});
@@ -44,11 +44,11 @@ const IndexStats = () => {
                     console.error('Error fetching index stats:', error);
                 }
             });
-    }, [instanceState, indexName])
+    }, [instanceState, indexName]);
 
     const fieldCount = stats.fieldDistribution ? Object.keys(stats.fieldDistribution).length : null;
 
-    const formatDate = (iso) => {
+    const formatDate = (iso: string) => {
         if (!iso) return null;
         try {
             return new Date(iso).toLocaleString(undefined, {
@@ -92,7 +92,7 @@ const IndexStats = () => {
                 )}
             </div>
         </div>
-    )
+    );
 }
 
 export default Page;

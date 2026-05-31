@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import { initFlowbite } from 'flowbite';
 import { SearchableAttrs } from "./settings/SearchableAttrs";
 import { DisplayedAttrs } from "./settings/DisplayedAttrs";
@@ -20,15 +20,24 @@ import Synonyms from "./settings/Synonyms";
 import LocalizedAttributes from "./settings/LocalizedAttributes";
 import EmbeddersSettings from "./settings/EmbeddersSettings";
 import ExportImportSettings from "./settings/ExportImportSettings";
-
-import { IndexSettingsProvider } from "../../../../contexts/IndexSettingsContext"
-import RankingInfo from "./settings/RankingInfo.tsx";
+import { IndexSettingsProvider } from "../../../../contexts/IndexSettingsContext";
+import RankingInfo from "./settings/RankingInfo";
 import useIndexSettings from "../../../../hooks/useIndexSettings";
 import SettingsSaveBar from "./settings/SettingsSaveBar";
 import SettingDiffPreviewModal from "./settings/SettingDiffPreviewModal";
 
+interface TabDef {
+    key: string;
+    label: string;
+    element: JSX.Element;
+}
 
-const tabGroups = [
+interface TabGroup {
+    group: string;
+    tabs: TabDef[];
+}
+
+const tabGroups: TabGroup[] = [
     {
         group: "Relevance",
         tabs: [
@@ -80,12 +89,12 @@ const tabGroups = [
             { key: "export-import", label: "Export / Import", element: <ExportImportSettings /> },
         ],
     },
-]
+];
 
-const tabs = tabGroups.flatMap(g => g.tabs)
+const tabs = tabGroups.flatMap(g => g.tabs);
 
-const tabsID = "meili-index-settings-tabs"
-const tabsContentID = `#${tabsID}-content`
+const tabsID = "meili-index-settings-tabs";
+const tabsContentID = `#${tabsID}-content`;
 
 const IndexSettingsContent = () => {
     const { hasChanges, saveSettings, resetSettings, originalSettings, modifiedSettings } = useIndexSettings();
@@ -105,74 +114,76 @@ const IndexSettingsContent = () => {
             setShowPreviewModal(false);
         } catch (error) {
             console.error('Failed to save settings:', error);
-            throw error; // Re-throw to let modal handle the error
+            throw error;
         }
     };
 
-    return <div className="flex flex-col gap-4">
-        {hasChanges && (
-            <SettingsSaveBar
-                onPreviewChanges={() => setShowPreviewModal(true)}
-                onReset={resetSettings}
-                saveSuccess={saveSuccess}
+    return (
+        <div className="flex flex-col gap-4">
+            {hasChanges && (
+                <SettingsSaveBar
+                    onPreviewChanges={() => setShowPreviewModal(true)}
+                    onReset={resetSettings}
+                    saveSuccess={saveSuccess}
+                />
+            )}
+            <SettingDiffPreviewModal
+                isVisible={showPreviewModal}
+                onClose={() => setShowPreviewModal(false)}
+                onConfirm={handleSave}
+                originalSettings={originalSettings}
+                modifiedSettings={modifiedSettings}
             />
-        )}
-        <SettingDiffPreviewModal
-            isVisible={showPreviewModal}
-            onClose={() => setShowPreviewModal(false)}
-            onConfirm={handleSave}
-            originalSettings={originalSettings}
-            modifiedSettings={modifiedSettings}
-        />
-        <div className="md:flex bg-white rounded-md border-2 border-gray-100 shadow-sm w-full">
-            <ul className="flex-column text-sm font-medium text-gray-500 dark:text-gray-400 md:w-1/3 sm:w-full border-r border-r-gray-100"
-                id={tabsID}
-                data-tabs-toggle={tabsContentID}
-                data-tabs-active-classes="text-primary border-l-2 border-b-0 hover:text-primary border-primary bg-gray-50"
-                data-tabs-inactive-classes="text-gray-500 hover:text-gray-600 border-gray-100 hover:border-gray-300"
-                role="tablist">
-                {tabGroups.map((group, gi) => (
-                    <React.Fragment key={group.group}>
-                        <li className={`w-full px-4 pt-${gi === 0 ? '3' : '4'} pb-1 pointer-events-none`} aria-hidden="true">
-                            <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                                {group.group}
-                            </span>
-                        </li>
-                        {group.tabs.map((tab) => (
-                            <li key={tab.key} className="w-full" role="presentation">
-                                <button className="w-full text-left inline-block py-3 px-4 pl-5 hover:text-primary hover:bg-gray-50 hover:border-l-2 hover:border-l-primary"
-                                    id={`${tabsID}-${tab.key}-tab`}
-                                    data-tabs-target={`#${tabsID}-${tab.key}`}
-                                    type="button"
-                                    role="tab"
-                                    aria-controls={tab.key}
-                                    aria-selected="false">
-                                    {tab.label}
-                                </button>
+            <div className="md:flex bg-white rounded-md border-2 border-gray-100 shadow-sm w-full">
+                <ul className="flex-column text-sm font-medium text-gray-500 dark:text-gray-400 md:w-1/3 sm:w-full border-r border-r-gray-100"
+                    id={tabsID}
+                    data-tabs-toggle={tabsContentID}
+                    data-tabs-active-classes="text-primary border-l-2 border-b-0 hover:text-primary border-primary bg-gray-50"
+                    data-tabs-inactive-classes="text-gray-500 hover:text-gray-600 border-gray-100 hover:border-gray-300"
+                    role="tablist">
+                    {tabGroups.map((group, gi) => (
+                        <React.Fragment key={group.group}>
+                            <li className={`w-full px-4 pt-${gi === 0 ? '3' : '4'} pb-1 pointer-events-none`} aria-hidden="true">
+                                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                                    {group.group}
+                                </span>
                             </li>
-                        ))}
-                    </React.Fragment>
-                ))}
-            </ul>
-            <div id={tabsContentID} className="md:w-2/3">
-                {tabs.map((settingTab, i) => {
-                    return <div className="p-4 w-full h-full"
-                        key={i}
-                        id={`${tabsID}-${settingTab.key}`}
-                        role="tabpanel"
-                        aria-labelledby={settingTab.key}>
-                        {React.cloneElement(settingTab.element, {key: i})}
-                    </div>
-                })}
+                            {group.tabs.map((tab) => (
+                                <li key={tab.key} className="w-full" role="presentation">
+                                    <button className="w-full text-left inline-block py-3 px-4 pl-5 hover:text-primary hover:bg-gray-50 hover:border-l-2 hover:border-l-primary"
+                                        id={`${tabsID}-${tab.key}-tab`}
+                                        data-tabs-target={`#${tabsID}-${tab.key}`}
+                                        type="button"
+                                        role="tab"
+                                        aria-controls={tab.key}
+                                        aria-selected="false">
+                                        {tab.label}
+                                    </button>
+                                </li>
+                            ))}
+                        </React.Fragment>
+                    ))}
+                </ul>
+                <div id={tabsContentID} className="md:w-2/3">
+                    {tabs.map((settingTab, i) => (
+                        <div className="p-4 w-full h-full"
+                            key={i}
+                            id={`${tabsID}-${settingTab.key}`}
+                            role="tabpanel"
+                            aria-labelledby={settingTab.key}>
+                            {React.cloneElement(settingTab.element, { key: i })}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
-    </div>
+    );
 };
 
-const IndexSettingsTabs = () => {
-    return <IndexSettingsProvider>
+const IndexSettingsTabs = () => (
+    <IndexSettingsProvider>
         <IndexSettingsContent />
     </IndexSettingsProvider>
-}
+);
 
 export default IndexSettingsTabs;
