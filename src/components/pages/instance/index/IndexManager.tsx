@@ -5,7 +5,7 @@ import { deleteIndex, deleteAllDocuments } from "../../../../services/meilisearc
 import useIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance"
 import { InstanceState } from "../../../../contexts/InstanceContext"
-import DocIndexingModal from "./documents/DocIndexingModal"
+import DocUploadWizard from "./documents/DocUploadWizard"
 import SwapIndexesModal from "./SwapIndexesModal"
 import UpdateIndexModal from "./UpdateIndexModal"
 
@@ -53,7 +53,7 @@ const ManageIndexDropdown = () => {
             confirmButtonText="Clear"
             confirmButtonColor="red"
         />
-        <DocIndexingModal
+        <DocUploadWizard
             isVisible={isDocIndexingModalVisible}
             onClose={() => setIsDocIndexingModalVisible(false)}
             indexName={indexName || ''}

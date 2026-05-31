@@ -15,7 +15,7 @@ import SearchOptions from "./search/SearchOptions";
 import FacetDisplay from "./search/FacetDisplay";
 import SearchPagination from "./search/SearchPagination";
 import DocumentDetailModal from "./documents/DocumentDetailModal";
-import DocIndexingModal from "./documents/DocIndexingModal";
+import DocUploadWizard from "./documents/DocUploadWizard";
 
 const SearchWidget = () => {
     const { meiliIndexState, refreshIndexes } = useMeiliIndex()
@@ -282,7 +282,7 @@ const SearchWidget = () => {
             document={editDoc}
             indexName={index ?? ""}
         />
-        <DocIndexingModal
+        <DocUploadWizard
             isVisible={addDocsOpen}
             onClose={() => setAddDocsOpen(false)}
             indexName={index ?? ""}
