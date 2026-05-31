@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { indexSearchWrapper, SearchParams } from "../../../../services/meilisearch/search"
+import { indexSearchWrapper, similarDocuments, SearchParams } from "../../../../services/meilisearch/search"
 import useDebouncedValue from "../../../../hooks/useDebounce"
 import useMeiliIndex from "../../../../hooks/useMeiliIndex"
 import useMeiliInstance from "../../../../hooks/useMeiliInstance";
@@ -39,9 +39,14 @@ const SearchWidget = () => {
     const [offset, setOffset] = useState(0)
     const [showPerformanceDetails, setShowPerformanceDetails] = useState(false)
 
-    // Index settings for attribute lists
+    // Index settings for attribute lists + embedders
     const [filterableAttributes, setFilterableAttributes] = useState<string[]>([])
     const [sortableAttributes, setSortableAttributes] = useState<string[]>([])
+    const [embedderNames, setEmbedderNames] = useState<string[]>([])
+
+    // Hybrid search state (null = disabled)
+    const [hybridSemanticRatio, setHybridSemanticRatio] = useState<number | null>(null)
+    const [hybridEmbedder, setHybridEmbedder] = useState<string>('')
 
     const [response, setResponse] = useState<any>({hits: []})
     const [showAdvanced, setShowAdvanced] = useState(false)
@@ -110,6 +115,7 @@ const SearchWidget = () => {
                 .then((settings: any) => {
                     setFilterableAttributes(settings.filterableAttributes || [])
                     setSortableAttributes(settings.sortableAttributes || [])
+                    setEmbedderNames(Object.keys(settings.embedders ?? {}))
                 })
                 .catch(() => {})
         })
@@ -127,6 +133,7 @@ const SearchWidget = () => {
         if (limit !== 20) searchParams.limit = limit;
         if (offset > 0) searchParams.offset = offset;
         if (showPerformanceDetails) searchParams.showPerformanceDetails = true;
+        if (hybridSemanticRatio !== null) searchParams.hybrid = { semanticRatio: hybridSemanticRatio, embedder: hybridEmbedder || embedderNames[0] };
 
         // Also request facets for filterable attributes
         if (filterableAttributes.length > 0 && facets.length === 0) {
@@ -162,7 +169,7 @@ const SearchWidget = () => {
             }
         })
 
-    }, [debouncedSearchTerm, queryType, index, filter, selectedFacets, sort, matchingStrategy, attributesToSearchOn, limit, offset, showPerformanceDetails, facets])
+    }, [debouncedSearchTerm, queryType, index, filter, selectedFacets, sort, matchingStrategy, attributesToSearchOn, limit, offset, showPerformanceDetails, facets, hybridSemanticRatio, hybridEmbedder, embedderNames])
 
     // Reset offset + facets when index or query changes
     useEffect(() => {
@@ -235,6 +242,11 @@ const SearchWidget = () => {
                             onLimitChange={setLimit}
                             showPerformanceDetails={showPerformanceDetails}
                             onShowPerformanceDetailsChange={setShowPerformanceDetails}
+                            embedderNames={embedderNames}
+                            hybridSemanticRatio={hybridSemanticRatio}
+                            hybridEmbedder={hybridEmbedder}
+                            onHybridSemanticRatioChange={setHybridSemanticRatio}
+                            onHybridEmbedderChange={setHybridEmbedder}
                         />
                     </div>
                 )}
@@ -281,6 +293,9 @@ const SearchWidget = () => {
                     response={response}
                     onEditDoc={handleEditDoc}
                     onAddDocs={() => setAddDocsOpen(true)}
+                    instance={instanceState}
+                    indexName={index ?? ''}
+                    embedderNames={embedderNames}
                 />
                 <SearchPagination
                     offset={offset}
@@ -408,16 +423,42 @@ const renderValue = (val: any) => {
     return <span>{String(val)}</span>
 }
 
-const HitCard = ({ index, hit, printableObj, primaryKey, restKeys, onEditDoc }: {
+const HitCard = ({ index, hit, printableObj, primaryKey, restKeys, onEditDoc, instance, indexName, embedderNames }: {
     index: number
     hit: any
     printableObj: any
     primaryKey: string | undefined
     restKeys: string[]
     onEditDoc?: (doc: Record<string, any>) => void
+    instance?: any
+    indexName?: string
+    embedderNames?: string[]
 }) => {
     const [showScores, setShowScores] = useState(false)
+    const [showSimilar, setShowSimilar] = useState(false)
+    const [similarHits, setSimilarHits] = useState<any[]>([])
+    const [similarLoading, setSimilarLoading] = useState(false)
+    const [similarError, setSimilarError] = useState<string | null>(null)
+
     const hasScores = typeof hit["_rankingScoreDetails"] === 'object'
+    const docId = primaryKey ? hit[primaryKey] : null
+    const canFindSimilar = instance && indexName && embedderNames && embedderNames.length > 0 && docId != null
+
+    const handleFindSimilar = async () => {
+        if (showSimilar) { setShowSimilar(false); return; }
+        setShowSimilar(true)
+        if (similarHits.length > 0) return
+        setSimilarLoading(true)
+        setSimilarError(null)
+        try {
+            const resp = await similarDocuments(instance, indexName!, docId, { limit: 5, embedder: embedderNames![0] })
+            setSimilarHits(resp?.hits ?? [])
+        } catch (e: any) {
+            setSimilarError(e.message ?? 'Failed to load similar documents')
+        } finally {
+            setSimilarLoading(false)
+        }
+    }
 
     return (
         <div className="bg-white mb-6 border border-gray-200 rounded p-4 shadow-sm relative">
@@ -453,26 +494,68 @@ const HitCard = ({ index, hit, printableObj, primaryKey, restKeys, onEditDoc }: 
                 </div>
             ))}
 
-            {/* Collapsible ranking scores */}
-            {hasScores && (
-                <div className="mt-3">
-                    <button
-                        onClick={() => setShowScores(v => !v)}
-                        className="text-xs text-gray-400 hover:text-primary flex items-center gap-1"
-                    >
-                        <svg className={`w-3 h-3 transition-transform ${showScores ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                        Ranking scores
-                    </button>
-                    {showScores && <RankingInfoBar hit={hit} />}
+            {/* Bottom bar: ranking scores + find similar */}
+            {(hasScores || canFindSimilar) && (
+                <div className="mt-3 flex items-center gap-4 flex-wrap">
+                    {hasScores && (
+                        <button
+                            onClick={() => setShowScores(v => !v)}
+                            className="text-xs text-gray-400 hover:text-primary flex items-center gap-1"
+                        >
+                            <svg className={`w-3 h-3 transition-transform ${showScores ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                            Ranking scores
+                        </button>
+                    )}
+                    {canFindSimilar && (
+                        <button
+                            onClick={handleFindSimilar}
+                            className={`text-xs flex items-center gap-1 transition-colors ${showSimilar ? 'text-violet-600' : 'text-gray-400 hover:text-violet-600'}`}
+                        >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                            </svg>
+                            {showSimilar ? 'Hide similar' : 'Find similar'}
+                        </button>
+                    )}
+                </div>
+            )}
+            {showScores && <RankingInfoBar hit={hit} />}
+
+            {/* Find Similar panel */}
+            {showSimilar && (
+                <div className="mt-3 border-t border-gray-100 pt-3">
+                    {similarLoading && <p className="text-xs text-gray-400 animate-pulse">Loading similar documents…</p>}
+                    {similarError && <p className="text-xs text-red-500">{similarError}</p>}
+                    {!similarLoading && !similarError && similarHits.length === 0 && (
+                        <p className="text-xs text-gray-400 italic">No similar documents found.</p>
+                    )}
+                    {similarHits.length > 0 && (
+                        <div className="flex flex-col gap-1.5">
+                            <p className="text-xs text-gray-400 font-medium mb-1">Similar documents (via {embedderNames![0]})</p>
+                            {similarHits.map((s, si) => {
+                                const sKeys = Object.keys(s).filter(k => !k.startsWith('_')).slice(0, 4)
+                                return (
+                                    <div key={si} className="bg-gray-50 border border-gray-100 rounded px-3 py-2 text-xs">
+                                        {sKeys.map(k => (
+                                            <div key={k} className="flex gap-2">
+                                                <span className="text-gray-400 shrink-0 w-20 truncate">{k}</span>
+                                                <span className="text-gray-600 truncate">{String(s[k] ?? '')}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
     )
 }
 
-export const SearchHits = ({ response, onEditDoc, onAddDocs }: { response: any; onEditDoc?: (doc: Record<string, any>) => void; onAddDocs?: () => void }) => {
+export const SearchHits = ({ response, onEditDoc, onAddDocs, instance, indexName, embedderNames }: { response: any; onEditDoc?: (doc: Record<string, any>) => void; onAddDocs?: () => void; instance?: any; indexName?: string; embedderNames?: string[] }) => {
     const hits = response.hits;
     const processingTime = response.processingTimeMs;
     const totalHits = response.totalHits !== undefined ? response.totalHits : 0;
@@ -507,6 +590,9 @@ export const SearchHits = ({ response, onEditDoc, onAddDocs }: { response: any; 
                 primaryKey={primaryKey}
                 restKeys={restKeys}
                 onEditDoc={onEditDoc}
+                instance={instance}
+                indexName={indexName}
+                embedderNames={embedderNames}
             />
         })}
         {hits.length === 0 && processingTime !== undefined && (
